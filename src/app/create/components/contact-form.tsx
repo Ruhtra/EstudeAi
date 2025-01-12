@@ -24,19 +24,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { contactFormAction } from './actions'
+import { newContactFormAction } from './actions'
 import { contactFormSchema } from './schema'
 import { Check } from 'lucide-react'
+import { useServerAction } from 'zsa-react'
 
 type FormValues = z.infer<typeof contactFormSchema>
 
 export function ContactForm({ className }: React.ComponentProps<typeof Card>) {
-  const [isPending, startTransition] = useTransition()
-  const [formState, setFormState] = React.useState({
-    success: false,
-    errors: null as Record<string, string | undefined> | null,
-  })
-
+  const { isPending, execute, data, error, isSuccess } = useServerAction(newContactFormAction) 
   const form = useForm<FormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -47,35 +43,19 @@ export function ContactForm({ className }: React.ComponentProps<typeof Card>) {
   })
 
   const onSubmit = (data: FormValues) => {
-    startTransition(async () => {
+    const fetch = async () => {
       const formData = new FormData()
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value)
       })
       
-      const result = await contactFormAction(null, formData)
-      
-      if (result.success) {
-        setFormState({ success: true, errors: null })
-        form.reset()
-      } else {
-        setFormState({ success: false, errors: result.errors ? { ...result.errors } : null })
-      }
-    })
-  }
 
-  React.useEffect(() => {
-    if (formState.errors) {
-      Object.entries(formState.errors).forEach(([key, value]) => {
-        if (value) {
-          form.setError(key as keyof FormValues, {
-            type: 'manual',
-            message: value,
-          })
-        }
-      })
+      await execute(data)
+      if (isSuccess) form.reset()
     }
-  }, [formState.errors, form])
+
+    fetch()
+  }
 
   return (
     <Card className={className}>
@@ -88,7 +68,7 @@ export function ContactForm({ className }: React.ComponentProps<typeof Card>) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-6">
-            {formState.success && (
+            {isSuccess && (
               <p className="text-muted-foreground flex items-center gap-2 text-sm">
                 <Check className="h-4 w-4" />
                 Your message has been sent. Thank you.
