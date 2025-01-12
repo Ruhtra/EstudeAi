@@ -3,7 +3,6 @@
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { userSchema, UserFormData } from "./lib/schema";
-import { createServerAction } from "zsa"
 
 const prisma = new PrismaClient();
 
@@ -17,37 +16,24 @@ export async function getUser(id: string) {
   });
 }
 
-export async function checkEmailExists(email: string): Promise<boolean> {
-  const user = await prisma.user.findUnique({
-    where: { email },
+export async function createUser(data: UserFormData) {
+  const validatedData = userSchema.parse(data);
+  const user = await prisma.user.create({
+    data: {
+      email: validatedData.email,
+      name: validatedData.name,
+      id: crypto.randomUUID(),
+      birthDate: new Date(validatedData.birthDate),
+      passwordHash: validatedData.password ?? "", // Note: In a real app, you should hash this password
+      isSubscribed: false,
+      createdAt: new Date(),
+      role: "admin",
+    },
   });
-
-  return !!user
+  await revalidatePath("/users");
+  return user;
 }
 
-
-
-export const createUser = createServerAction()
-  .input(userSchema, {
-    type: 'json'
-  })
-  .handler(async ({ input }) => {  
-
-    const user = await prisma.user.create({
-      data: {
-        email: input.email,
-        name: input.name,
-        id: crypto.randomUUID(),
-        birthDate: new Date(input.birthDate),
-        passwordHash: input.password ?? "", // Note: In a real app, you should hash this password
-        isSubscribed: false,
-        createdAt: new Date(),
-        role: "admin",
-      },
-    });
-    revalidatePath("/users");
-    return user;
-  });
 export async function updateUser(id: string, data: UserFormData) {
   const validatedData = userSchema.parse(data);
   const updateData: any = {

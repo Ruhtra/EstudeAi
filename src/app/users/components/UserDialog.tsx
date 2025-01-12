@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition, useActionState, useId, use } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useServerAction } from "zsa-react"
 import {
   Form,
   FormControl,
@@ -32,8 +31,10 @@ interface UserDialogProps {
 
 export default function UserDialog({ userId, trigger }: UserDialogProps) {
   const [open, setOpen] = useState(false);
-  const { isPending, execute, data, error } = useServerAction(createUser)
-  let [isLoadingUser, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingUser, setIsLoadingUser] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
@@ -46,39 +47,52 @@ export default function UserDialog({ userId, trigger }: UserDialogProps) {
     },
   });
 
-
   useEffect(() => {
     const fetchUser = async () => {
-      if (userId && open) startTransition(async () => {
-        const user = await getUser(userId);
-        form.reset({
-          birthDate: user?.birthDate.toISOString().split("T")[0],
-          email: user?.email,
-          id: user?.id,
-          name: user?.name,
-          password: "", // Não preenche a senha para edição
-        });
-      });
+      if (userId && open) {
+        setIsLoadingUser(true);
+        try {
+          const user = await getUser(userId);
+          console.log(user?.birthDate);
+          
+          if (user) {
+            form.reset({
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              birthDate: new Date(user.birthDate).toISOString().split("T")[0],
+              password: "", // Não preenche a senha para edição
+            });
+          }
+        } catch (error) {
+          console.error("Failed to fetch user:", error);
+        } finally {
+          setIsLoadingUser(false);
+        }
+      }
     };
 
     fetchUser();
   }, [userId, open, form]);
 
-
   const onSubmit = async (data: UserFormData) => {
-    const [datas, erro] = await execute(data)
-
-    
-    console.log('aaaaqui');
-    console.log(datas);
-    console.log(erro);
-    if (erro) {
-      return 
-    }
-    
-    
-    form.reset();
-    setOpen(false);
+    setIsLoading(true);
+    startTransition(async () => {
+      try {
+        if (userId) {
+          await updateUser(userId, data);
+        } else {
+          await createUser(data);
+        }
+        setOpen(false);
+        form.reset();
+        router.refresh();
+      } catch (error) {
+        console.error("Failed to save user:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    });
   };
 
   return (
@@ -120,7 +134,7 @@ export default function UserDialog({ userId, trigger }: UserDialogProps) {
                     <FormMessage />
                   </FormItem>
                 )}
-                />
+              />
               <FormField
                 control={form.control}
                 name="birthDate"
@@ -149,8 +163,8 @@ export default function UserDialog({ userId, trigger }: UserDialogProps) {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoadingUser || isPending}>
-                { isPending ? "Saving..." : "Save"}
+              <Button type="submit" disabled={isLoading || isLoadingUser || isPending}>
+                {isLoading || isPending ? "Saving..." : "Save"}
               </Button>
             </form>
           </Form>
