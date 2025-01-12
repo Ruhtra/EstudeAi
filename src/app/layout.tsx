@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { queryClient } from "@/lib/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({
             </li>
           </ul>
           {children}
+          <Toaster />
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </body>
