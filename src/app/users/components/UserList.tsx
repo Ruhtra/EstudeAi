@@ -8,7 +8,6 @@ export default function UserList() {
   // Carregar usuários diretamente com `use`
   const users = use(getUsers());
 
-
   return (
     <div className="mt-8">
       <h2 className="text-xl font-semibold mb-4">User List</h2>

@@ -1,9 +1,11 @@
-import { ContactForm } from './components/contact-form'
-
-export default function Page() {
+import { Suspense } from "react";
+import { List } from "./components/List";
+export default function Pageh() {
   return (
-    <div className="flex min-h-svh items-center justify-center">
-      <ContactForm />
+    <div>
+      <Suspense fallback={<div>Loading...</div>}>
+        <List />;
+      </Suspense>
     </div>
-  )
+  );
 }

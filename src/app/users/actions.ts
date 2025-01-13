@@ -1,24 +1,32 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { userSchema, UserFormData } from "./lib/schema";
+import { prismaClient } from "../../../prisma/connect";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export async function getUsers() {
-  return await prisma.user.findMany();
+  const exams = prismaClient.exam.findMany({
+    include: {
+      Question: true,
+    },
+  });
+
+  console.log(exams);
+
+  return await prismaClient.user.findMany();
 }
 
 export async function getUser(id: string) {
-  return await prisma.user.findUnique({
+  return await prismaClient.user.findUnique({
     where: { id },
   });
 }
 
 export async function createUser(data: UserFormData) {
   const validatedData = userSchema.parse(data);
-  const user = await prisma.user.create({
+  const user = await prismaClient.user.create({
     data: {
       email: validatedData.email,
       name: validatedData.name,
@@ -46,7 +54,7 @@ export async function updateUser(id: string, data: UserFormData) {
     updateData.passwordHash = validatedData.password; // Note: In a real app, you should hash this password
   }
 
-  const user = await prisma.user.update({
+  const user = await prismaClient.user.update({
     where: { id },
     data: updateData,
   });
@@ -55,9 +63,9 @@ export async function updateUser(id: string, data: UserFormData) {
 }
 
 export async function deleteUser(id: string) {
-  await prisma.user.delete({
-    where: {id}
+  await prismaClient.user.delete({
+    where: { id },
   });
-  
+
   await revalidatePath("/users"); // Espera a revalidação ser concluída
-} 
+}

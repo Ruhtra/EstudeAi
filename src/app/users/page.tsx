@@ -9,10 +9,10 @@ export default function UsersPage() {
       <h1 className="text-2xl font-bold mb-4">Users</h1>
       <UserDialog trigger={<Button>Add User</Button>} />
       <div>
-      <Suspense fallback={<div>Loading user list...</div>}>
-        <UserList />
-      </Suspense>
-    </div>
+        <Suspense fallback={<div>Loading user list...</div>}>
+          <UserList />
+        </Suspense>
+      </div>
     </div>
   );
 }

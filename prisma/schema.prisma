@@ -77,6 +77,16 @@ model User {
   role           role
 }
 
+model ContactTest {
+  id        String   @id
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("contact_test")
+}
+
 enum role {
   admin
   sup
