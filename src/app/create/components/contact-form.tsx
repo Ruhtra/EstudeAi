@@ -35,10 +35,20 @@ type FormValues = z.infer<typeof contactFormSchema>;
 
 export function ContactForm({ className }: React.ComponentProps<typeof Card>) {
   const [open, setOpen] = useState(false);
-  const { isPending, execute, data, error, isSuccess, reset } =
-    useServerAction(newContactFormAction);
+  const {
+    isPending: isPendingAction,
+    execute,
+    data,
+    error,
+    isSuccess,
+    reset,
+  } = useServerAction(newContactFormAction);
   const form = useForm<FormValues>({
-    resolver: zodResolver(contactFormSchema),
+    resolver: zodResolver(
+      contactFormSchema,
+      { async: true },
+      { mode: "async" }
+    ),
     defaultValues: {
       name: "",
       email: "",
@@ -64,6 +74,8 @@ export function ContactForm({ className }: React.ComponentProps<typeof Card>) {
 
     fetch();
   };
+
+  const isPending = isPendingAction || form.formState.isSubmitting;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
