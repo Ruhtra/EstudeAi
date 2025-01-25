@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { UserRole } from "@prisma/client";
-import getUsers, { type UserDTO } from "./_actions/user";
+import { getUsers, UserDTO, deleteUser } from "./_actions/user";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CreateUserDialog } from "./_components/CreateUserDialog";
 
@@ -52,6 +52,7 @@ export default function UsersPage() {
     setUsers(
       (prevUsers) => prevUsers?.filter((user) => user.id !== id) || null
     );
+    deleteUser(id);
   };
 
   const LoadingSkeleton = () => (

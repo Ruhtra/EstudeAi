@@ -94,18 +94,40 @@ model User {
   accounts      Account[]
   role          UserRole  @default(student)
 
-  cpf   String @unique
-  phone String @unique
+  phone String  @unique
+  //admin
+  cpf   String? @unique
+  //student
+  state String?
+  city  String?
 
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
+
+  // admin   Admin?  @relation 
+  // student   Student?  @relation 
+
   // sessions      Session[]
   // Optional for WebAuthn support
   // Authenticator Authenticator[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// model Admin {
+//   id   String @id @default(cuid())
+//   name String
+
+//   user   User   @relation(fields: [userId], references: [id]) // Relacionamento obrigatório com User
+//   userId String @unique // Cada Admin está associado a um User único
+// }
+// model Student {
+//   id   String @id @default(cuid())
+//   first String
+
+//   user   User   @relation(fields: [userId], references: [id]) // Relacionamento obrigatório com User
+//   userId String @unique // Cada Admin está associado a um User único
+// }
 
 model Account {
   userId            String

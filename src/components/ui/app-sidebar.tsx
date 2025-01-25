@@ -81,12 +81,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <img
                     src="/images/LOGOMARCA.jpg"
                     className="h-full w-full object-contain bg-secondary"
-                    alt="Mauhel IFRN Logo"
+                    alt="EstudeiAi Logo"
                   />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate text-base font-semibold">
-                    Mauhel IFRN
+                    EstudeAi App
                   </span>
                   <span className="text-muted-foreground truncate text-xs">
                     Sistema de Gestão

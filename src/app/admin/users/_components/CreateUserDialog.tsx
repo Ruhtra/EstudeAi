@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -31,6 +31,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formSchema } from "../_actions/user.schema";
+import { UserRole } from "@prisma/client";
+import { createUser } from "../_actions/user";
 
 const estadosBrasileiros = [
   "Acre",
@@ -62,50 +65,27 @@ const estadosBrasileiros = [
   "Tocantins",
 ];
 
-const baseSchema = z.object({
-  email: z.string().email("Email inválido"),
-  phone: z.string().min(14, "Telefone inválido"),
-});
-
-const collaboratorTeacherSchema = baseSchema.extend({
-  fullName: z.string().min(2, "Nome completo é obrigatório"),
-  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido"),
-  photo: z
-    .instanceof(File)
-    .refine((file) => file.size <= 5000000, `Tamanho máximo do arquivo é 5MB.`),
-});
-
-const subscriberSchema = baseSchema.extend({
-  firstName: z.string().min(2, "Nome é obrigatório"),
-  lastName: z.string().min(2, "Sobrenome é obrigatório"),
-  state: z.string().min(2, "Estado é obrigatório"),
-  city: z.string().min(2, "Cidade é obrigatória"),
-  photo: z.instanceof(File).optional(),
-});
-
-const formSchema = z.discriminatedUnion("userType", [
-  collaboratorTeacherSchema.extend({ userType: z.literal("collaborator") }),
-  collaboratorTeacherSchema.extend({ userType: z.literal("teacher") }),
-  subscriberSchema.extend({ userType: z.literal("subscriber") }),
-]);
-
 export type FormValues = z.infer<typeof formSchema>;
 
 interface AddUserDialogProps {}
 
 export function CreateUserDialog({}: AddUserDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [userType, setUserType] = useState<
-    "collaborator" | "teacher" | "subscriber"
-  >("subscriber");
+  const [userType, setUserType] = useState<UserRole>(UserRole.student);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      userType: "subscriber",
+      role: UserRole.student,
       email: "",
       phone: "",
+      city: "",
+      firstName: "",
+      lastName: "",
+      // photo: "",
+      state: "",
     },
   });
 
@@ -130,9 +110,17 @@ export function CreateUserDialog({}: AddUserDialogProps) {
   }, [form]);
 
   function onSubmit(values: FormValues) {
-    setIsOpen(false);
-    form.reset();
-    setPreviewUrl(null);
+    startTransition(() => {
+      createUser(values)
+        .then(() => {
+          setIsOpen(false);
+          form.reset();
+          setPreviewUrl(null);
+        })
+        .catch(() => {
+          console.log("algo deu de errado");
+        });
+    });
   }
 
   return (
@@ -168,15 +156,15 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                                 alt="Preview"
                               />
                               <AvatarFallback>
-                                {userType === "subscriber"
+                                {userType === UserRole.student
                                   ? "S"
-                                  : userType === "teacher"
+                                  : userType === UserRole.teacher
                                   ? "T"
                                   : "C"}
                               </AvatarFallback>
                             </Avatar>
                             <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
+                              <DropdownMenuTrigger asChild disabled={isPending}>
                                 <Button
                                   variant="secondary"
                                   size="icon"
@@ -210,6 +198,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                               accept="image/*"
                               onChange={handleFileChange}
                               className="hidden"
+                              disabled={isPending}
                             />
                           </div>
                         </FormControl>
@@ -218,30 +207,26 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                     )}
                   />
                   <FormLabel className="text-center">
-                    {userType === "subscriber" ? "Foto (opcional)" : "Foto"}
+                    {userType === UserRole.student ? "Foto (opcional)" : "Foto"}
                   </FormLabel>
                 </div>
                 <div className="w-full md:w-2/3">
                   <Tabs
                     value={userType}
-                    onValueChange={(value) => {
-                      setUserType(
-                        value as "collaborator" | "teacher" | "subscriber"
-                      );
+                    onValueChange={(value: string) => {
+                      setUserType(UserRole[value as keyof typeof UserRole]);
                       form.setValue(
-                        "userType",
-                        value as "collaborator" | "teacher" | "subscriber"
+                        "role",
+                        UserRole[value as keyof Omit<typeof UserRole, "sup">]
                       );
                     }}
                   >
                     <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="collaborator">
-                        Colaborador
-                      </TabsTrigger>
+                      <TabsTrigger value="admin">Colaborador</TabsTrigger>
                       <TabsTrigger value="teacher">Professor</TabsTrigger>
-                      <TabsTrigger value="subscriber">Assinante</TabsTrigger>
+                      <TabsTrigger value="student">Assinante</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="collaborator">
+                    <TabsContent value="admin">
                       <div className="space-y-4">
                         <FormField
                           control={form.control}
@@ -250,7 +235,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                             <FormItem>
                               <FormLabel>Nome Completo</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input disabled={isPending} {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -264,6 +249,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                               <FormLabel>CPF</FormLabel>
                               <FormControl>
                                 <Input
+                                  disabled={isPending}
                                   // mask="xxx.xxx.xxx-xx"
                                   placeholder="000.000.000-00"
                                   {...field}
@@ -284,7 +270,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                             <FormItem>
                               <FormLabel>Nome Completo</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input disabled={isPending} {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -298,6 +284,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                               <FormLabel>CPF</FormLabel>
                               <FormControl>
                                 <Input
+                                  disabled={isPending}
                                   // mask="xxx.xxx.xxx-xx"
                                   placeholder="000.000.000-00"
                                   {...field}
@@ -309,7 +296,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                         />
                       </div>
                     </TabsContent>
-                    <TabsContent value="subscriber">
+                    <TabsContent value="student">
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <FormField
@@ -319,7 +306,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                               <FormItem>
                                 <FormLabel>Nome</FormLabel>
                                 <FormControl>
-                                  <Input {...field} />
+                                  <Input disabled={isPending} {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -332,7 +319,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                               <FormItem>
                                 <FormLabel>Sobrenome</FormLabel>
                                 <FormControl>
-                                  <Input {...field} />
+                                  <Input disabled={isPending} {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -347,6 +334,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                               <FormItem className="flex flex-col justify-between">
                                 <FormLabel>Estado</FormLabel>
                                 <Combobox
+                                  disabled={isPending}
                                   options={estadosBrasileiros}
                                   value={field.value}
                                   onSetValue={field.onChange}
@@ -365,7 +353,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                               <FormItem>
                                 <FormLabel>Cidade</FormLabel>
                                 <FormControl>
-                                  <Input {...field} />
+                                  <Input disabled={isPending} {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -384,7 +372,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" {...field} />
+                      <Input disabled={isPending} type="email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -398,6 +386,7 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                     <FormLabel>Telefone</FormLabel>
                     <FormControl>
                       <Input
+                        disabled={isPending}
                         {...field}
                         // mask="(xx) x xxxx-xxxx"
                         placeholder="(00) 0 0000-0000"
@@ -407,8 +396,8 @@ export function CreateUserDialog({}: AddUserDialogProps) {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Adicionar Usuário
+              <Button disabled={isPending} type="submit" className="w-full">
+                {isPending ? "Criando Usuário" : "Adicionar Usuário"}
               </Button>
             </div>
           </form>
