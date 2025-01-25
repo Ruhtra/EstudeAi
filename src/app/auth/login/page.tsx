@@ -41,6 +41,9 @@ export default function LoginPage() {
     startTransition(async () => {
       login(values)
         .then((data) => {
+          setError(null);
+          setSuccess(null);
+
           if (data.error) {
             form.reset();
             setError(data?.error);
