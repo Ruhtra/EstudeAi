@@ -4,12 +4,28 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import { NavTrigger } from "@/components/ui/nav/nav-trigger";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCurrentRole } from "@/hooks/use-curret-role";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function LayoutAdmin({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const role = useCurrentRole();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (role !== "admin") {
+      router.push("/error");
+    }
+  }, [role, router]);
+
+  if (role !== "admin") {
+    return null;
+  }
+
   return (
     <SidebarProvider>
       <div className="flex h-[100svh] w-full overflow-hidden">

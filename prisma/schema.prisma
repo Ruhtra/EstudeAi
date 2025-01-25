@@ -86,13 +86,16 @@ enum UserRole {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
+  name          String
   email         String    @unique
   emailVerified DateTime?
   image         String?
   passwordHash  String? // Adicionando o campo passwordHash
   accounts      Account[]
   role          UserRole  @default(student)
+
+  cpf   String @unique
+  phone String @unique
 
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
