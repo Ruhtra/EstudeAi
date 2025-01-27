@@ -6,7 +6,6 @@ import { db } from "./lib/db";
 import { getUserById } from "./lib/user";
 import "next-auth/jwt";
 import { UserRole } from "@prisma/client";
-import getAccountByUserId from "./data/account";
 
 // Types.d.ts declare
 declare module "next-auth" {

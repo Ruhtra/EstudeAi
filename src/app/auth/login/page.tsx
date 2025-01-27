@@ -18,8 +18,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "@/actions/login";
 import type { z } from "zod";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { DEFAULT_LOGIN_REDIRECT } from "../../../../routes";
 
 export default function LoginPage() {
+  const route = useRouter();
+  const { update } = useSession();
   const [isPending, startTransition] = useTransition();
   const [success, setSuccess] = useState<string | null | undefined>(null);
   const [error, setError] = useState<string | null | undefined>(null);
@@ -40,7 +45,7 @@ export default function LoginPage() {
     setError(null);
     startTransition(async () => {
       login(values)
-        .then((data) => {
+        .then(async (data) => {
           setError(null);
           setSuccess(null);
 
@@ -52,6 +57,10 @@ export default function LoginPage() {
             form.reset();
             setSuccess(data?.success);
           }
+
+          await update();
+
+          route.push(DEFAULT_LOGIN_REDIRECT);
         })
         .catch(() => {
           setError("Something went wrong. Please try again.");

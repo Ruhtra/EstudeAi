@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { signIn, unstable_update } from "@/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "../../routes";
 import { AuthError } from "next-auth";
 import { getUserByEmail } from "@/lib/user";
@@ -22,9 +22,11 @@ export async function login(values: z.infer<typeof LoginSchema>) {
     await signIn("credentials", {
       email,
       password,
-      redirect: true,
+
+      redirect: false,
       redirectTo: DEFAULT_LOGIN_REDIRECT,
     });
+
     return { success: "Login Successfull, redirecting..." };
   } catch (error) {
     if (error instanceof AuthError) {
