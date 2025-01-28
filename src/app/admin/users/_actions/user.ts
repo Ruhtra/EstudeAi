@@ -45,6 +45,13 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
   const existingUser = await getUserByEmail(user.email);
   if (existingUser) return { error: "Email already exist!" };
 
+  const existingPhone = await db.user.findUnique({
+    where: {
+      phone: user.phone,
+    },
+  });
+  if (existingPhone) return { error: "Phone already exist!" };
+
   if (user.role === UserRole.student) {
     await db.user.create({
       data: {
@@ -58,6 +65,12 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
       },
     });
   } else {
+    const existingCpf = await db.user.findUnique({
+      where: {
+        cpf: user.cpf,
+      },
+    });
+    if (existingCpf) return { error: "Cpf already exist!" };
     await db.user.create({
       data: {
         name: user.fullName,
@@ -68,6 +81,8 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
       },
     });
   }
+
+  revalidatePath("/admin/users");
 
   return { success: "User create!" };
 };
@@ -87,5 +102,6 @@ export const deleteUser = async (userId: string) => {
     },
   });
 
+  revalidatePath("/admin/users");
   return { success: "User deleted" };
 };

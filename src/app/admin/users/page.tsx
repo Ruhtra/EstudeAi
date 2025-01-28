@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { use, useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserCard } from "./_components/UserCard";
@@ -25,21 +25,24 @@ import { UserRole } from "@prisma/client";
 import { getUsers, UserDTO, deleteUser } from "./_actions/user";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CreateUserDialog } from "./_components/CreateUserDialog";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryCLient";
 
 export default function UsersPage() {
-  const [isPending, startTransition] = useTransition();
-  const [users, setUsers] = useState<UserDTO[] | undefined | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const { isPending, data } = useQuery({
+    queryKey: ["users"],
+    queryFn: async (): Promise<UserDTO[]> => {
+      const response = await fetch("/api/users");
+      return await response.json();
+    },
+  });
 
-  useEffect(() => {
-    startTransition(async () => {
-      const fetchedUsers = await getUsers();
-      setUsers(fetchedUsers);
-    });
-  }, []);
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
 
   const filteredUsers =
-    users?.filter((user) =>
+    data?.filter((user) =>
       user.name?.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
@@ -49,10 +52,15 @@ export default function UsersPage() {
   };
 
   const handleDelete = (id: string) => {
-    setUsers(
-      (prevUsers) => prevUsers?.filter((user) => user.id !== id) || null
-    );
-    deleteUser(id);
+    // setUsers(
+    //   (prevUsers) => prevUsers?.filter((user) => user.id !== id) || null
+    // );
+    deleteUser(id).then(() => {
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
+      // router.refresh();
+    });
   };
 
   const LoadingSkeleton = () => (
@@ -135,7 +143,7 @@ export default function UsersPage() {
         <CreateUserDialog />
       </div>
 
-      {users === null || isPending ? (
+      {data === null || isPending ? (
         <LoadingSkeleton />
       ) : (
         <>

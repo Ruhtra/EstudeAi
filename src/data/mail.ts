@@ -1,9 +1,10 @@
+"use server";
 import { Resend } from "resend";
 // import { EmailTemplate } from "./email-template";
 
 const resend = new Resend(process.env.RESENT_API_KEY);
 
-const FROM = "Acme <onboarding@resend.dev>";
+const FROM = "EstudeAi <no-reply@ruhtra.work>";
 
 export const sendTwoFactorTokenEmail = async (email: string, token: string) => {
   const { data, error } = await resend.emails.send({
@@ -16,7 +17,7 @@ export const sendTwoFactorTokenEmail = async (email: string, token: string) => {
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const confirmLink = `http://localhost:3000/auth/new-verification?token=${token}`;
+  const confirmLink = `${process.env.DNS_FRONT}/auth/new-verification?token=${token}`;
 
   const { data, error } = await resend.emails.send({
     from: FROM,
@@ -25,10 +26,12 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     html: `<p>Click <a href="${confirmLink}">here</a> to confirm email</p>`,
     // react: await EmailTemplate({ firstName: "John" }),
   });
+
+  console.log(error);
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
-  const resetLink = `http://localhost:3000/auth/new-password?token=${token}`;
+  const resetLink = `${process.env.DNS_FRONT}/auth/new-password?token=${token}`;
 
   const { data, error } = await resend.emails.send({
     from: FROM,

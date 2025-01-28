@@ -34,6 +34,8 @@ import {
 import { formSchema } from "../_actions/user.schema";
 import { UserRole } from "@prisma/client";
 import { createUser } from "../_actions/user";
+import { toast } from "sonner";
+import { queryClient } from "@/lib/queryCLient";
 
 const estadosBrasileiros = [
   "Acre",
@@ -66,6 +68,8 @@ const estadosBrasileiros = [
 ];
 
 export type FormValues = z.infer<typeof formSchema>;
+// Tipagem genérica para os valores padrão
+type DefaultFormValues = Partial<FormValues>;
 
 interface AddUserDialogProps {}
 
@@ -75,18 +79,22 @@ export function CreateUserDialog({}: AddUserDialogProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const defaultvalues: Record<string, string> = {
+    role: UserRole.student,
+    email: "",
+    phone: "",
+    city: "",
+    firstName: "",
+    lastName: "",
+    fullName: "",
+    cpf: "",
+    // photo: "",
+    state: "",
+  };
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      role: UserRole.student,
-      email: "",
-      phone: "",
-      city: "",
-      firstName: "",
-      lastName: "",
-      // photo: "",
-      state: "",
-    },
+    defaultValues: defaultvalues,
   });
 
   const handleFileChange = useCallback(
@@ -112,13 +120,21 @@ export function CreateUserDialog({}: AddUserDialogProps) {
   function onSubmit(values: FormValues) {
     startTransition(() => {
       createUser(values)
-        .then(() => {
-          setIsOpen(false);
-          form.reset();
-          setPreviewUrl(null);
+        .then((data) => {
+          if (data.error) toast(data.error);
+          if (data.success) {
+            setIsOpen(false);
+            form.reset();
+
+            toast("Usuário craido com sucesso");
+            setPreviewUrl(null);
+            queryClient.invalidateQueries({
+              queryKey: ["users"],
+            });
+          }
         })
         .catch(() => {
-          console.log("algo deu de errado");
+          toast("Algo deu de errado, informe o suporte!");
         });
     });
   }
