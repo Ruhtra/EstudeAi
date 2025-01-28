@@ -59,6 +59,7 @@ export const { auth, handlers, signIn, signOut, unstable_update } = NextAuth({
 
       return true;
     },
+
     async session({ token, session }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
@@ -88,6 +89,18 @@ export const { auth, handlers, signIn, signOut, unstable_update } = NextAuth({
       return token;
     },
   },
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Garante que cookies sejam seguros em produção
+        sameSite: "none", // Permite que cookies sejam enviados para APIs em domínios diferentes
+        path: "/",
+      },
+    },
+  },
+  secret: process.env.AUTH_SECRET,
   session: {
     strategy: "jwt",
   },
