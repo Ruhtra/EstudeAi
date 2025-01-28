@@ -33,7 +33,13 @@ export default {
           // );
 
           // if (!passwordMatch) return null;
-          return user;
+          return {
+            // role: user.role,
+            email: user.email,
+            id: user.id,
+            image: user.image,
+            name: user.name,
+          };
         }
 
         return null;

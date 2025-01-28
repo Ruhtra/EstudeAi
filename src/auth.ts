@@ -5,28 +5,6 @@ import authConfig from "./auth.config";
 import { db } from "./lib/db";
 import { getUserById } from "./lib/user";
 import "next-auth/jwt";
-import { UserRole } from "@prisma/client";
-
-// Types.d.ts declare
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      role: UserRole;
-    } & DefaultSession["user"];
-  }
-}
-
-declare module "next-auth/jwt" {
-  /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
-  interface JWT {
-    /** OpenID ID Token */
-    role?: UserRole;
-    email: string;
-  }
-}
-
 export const { auth, handlers, signIn, signOut, unstable_update } = NextAuth({
   pages: {
     signIn: "/auth/login",
@@ -91,11 +69,11 @@ export const { auth, handlers, signIn, signOut, unstable_update } = NextAuth({
   },
   cookies: {
     sessionToken: {
-      name: "next-auth.session-token",
+      name: "__Secure-authjs.session-token",
       options: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Garante que cookies sejam seguros em produção
-        sameSite: "none", // Permite que cookies sejam enviados para APIs em domínios diferentes
+        secure: true, // TO-DO: Garante que cookies sejam seguros em produção
+        sameSite: "none",
         path: "/",
       },
     },

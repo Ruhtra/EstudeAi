@@ -1,5 +1,5 @@
 import { getToken } from "next-auth/jwt";
-import NextAuth from "next-auth";
+import NextAuth, { DefaultSession, Session } from "next-auth";
 import authConfig from "./auth.config";
 
 import {
@@ -12,8 +12,15 @@ import {
 
 const { auth } = NextAuth(authConfig);
 
-export default auth(async (req) => {
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+export default auth(async (req, ctx) => {
+  const token = await getToken({
+    req,
+    secret: process.env.AUTH_SECRET,
+    // raw: true,
+    secureCookie: true,
+    cookieName: "__Secure-authjs.session-token",
+  });
+
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
@@ -29,11 +36,8 @@ export default auth(async (req) => {
     return;
   }
 
-  console.log(token);
-
   if (!isLoggedIn && !isPublicRoute)
     return Response.redirect(new URL("/auth/login", nextUrl));
-  console.log(adminRoutes);
 
   if (isAdminRoute && token?.role != "admin")
     return Response.redirect(new URL("/404", nextUrl));

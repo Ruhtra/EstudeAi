@@ -87,6 +87,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-10 items-center justify-center overflow-hidden rounded-lg">
                   <Image
+                    // width={undefined}
+                    fill={true}
                     src="/images/LOGOMARCA.jpg"
                     className="h-full w-full object-contain bg-secondary"
                     alt="EstudeiAi Logo"
