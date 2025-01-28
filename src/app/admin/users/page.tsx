@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState, useTransition } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserCard } from "./_components/UserCard";
@@ -22,12 +22,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { UserRole } from "@prisma/client";
-import { getUsers, UserDTO, deleteUser } from "./_actions/user";
+import { UserDTO, deleteUser } from "./_actions/user";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CreateUserDialog } from "./_components/CreateUserDialog";
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryCLient";
+import Image from "next/image";
 
 export default function UsersPage() {
   const { isPending, data } = useQuery({
@@ -39,8 +39,6 @@ export default function UsersPage() {
   });
 
   const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
-
   const filteredUsers =
     data?.filter((user) =>
       user.name?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -179,7 +177,7 @@ export default function UsersPage() {
                     <TableRow key={user.id}>
                       <TableCell>
                         {user.image ? (
-                          <img
+                          <Image
                             src={user.image || "/placeholder.svg"}
                             alt={`Foto de ${user.name}`}
                             className="w-10 h-10 rounded-full object-cover"

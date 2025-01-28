@@ -1,4 +1,4 @@
-import NextAuth, { AuthError, DefaultSession, User } from "next-auth";
+import NextAuth, { DefaultSession } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 
 import authConfig from "./auth.config";
@@ -52,7 +52,7 @@ export const { auth, handlers, signIn, signOut, unstable_update } = NextAuth({
       //if this throw for execute, validate why user can be null
       if (!user.id) throw new Error("Usuário não contém id");
 
-      const existingUser = await getUserById(user.id);
+      // const existingUser = await getUserById(user.id);
 
       //Prevent sign in without email verification
       // if (!existingUser?.emailVerified) return false;

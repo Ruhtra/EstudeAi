@@ -17,16 +17,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/logout";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import Image from "next/image";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const user = useCurrentUser();
 
-  const data: { user: any; navMain: NavMainProps[] } = {
+  const data: {
     user: {
-      name: user?.name,
-      email: user?.email,
-      avatar: user?.image,
+      name: string;
+      email: string;
+      avatar: string;
+    };
+    navMain: NavMainProps[];
+  } = {
+    user: {
+      name: user?.name || "",
+      email: user?.email || "",
+      avatar: user?.image || "",
     },
     navMain: [
       {
@@ -78,7 +86,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-10 items-center justify-center overflow-hidden rounded-lg">
-                  <img
+                  <Image
                     src="/images/LOGOMARCA.jpg"
                     className="h-full w-full object-contain bg-secondary"
                     alt="EstudeiAi Logo"

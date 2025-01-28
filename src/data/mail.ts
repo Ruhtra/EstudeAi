@@ -7,7 +7,7 @@ const resend = new Resend(process.env.RESENT_API_KEY);
 const FROM = "EstudeAi <no-reply@ruhtra.work>";
 
 export const sendTwoFactorTokenEmail = async (email: string, token: string) => {
-  const { data, error } = await resend.emails.send({
+  await resend.emails.send({
     from: FROM,
     to: [email],
     subject: "Confirm your email",
@@ -19,21 +19,19 @@ export const sendTwoFactorTokenEmail = async (email: string, token: string) => {
 export const sendVerificationEmail = async (email: string, token: string) => {
   const confirmLink = `${process.env.DNS_FRONT}/auth/new-verification?token=${token}`;
 
-  const { data, error } = await resend.emails.send({
+  await resend.emails.send({
     from: FROM,
     to: [email],
     subject: "Confirm your email",
     html: `<p>Click <a href="${confirmLink}">here</a> to confirm email</p>`,
     // react: await EmailTemplate({ firstName: "John" }),
   });
-
-  console.log(error);
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
   const resetLink = `${process.env.DNS_FRONT}/auth/new-password?token=${token}`;
 
-  const { data, error } = await resend.emails.send({
+  await resend.emails.send({
     from: FROM,
     to: [email],
     subject: "Confirm your email",

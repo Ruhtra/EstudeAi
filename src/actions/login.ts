@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn, unstable_update } from "@/auth";
+import { signIn } from "@/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "../../routes";
 import { AuthError } from "next-auth";
 import { getUserByEmail } from "@/lib/user";
@@ -11,7 +11,7 @@ export async function login(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) return { error: "Invalid fields!" };
-  const { email, password, code } = validatedFields.data;
+  const { email, password } = validatedFields.data;
 
   const existingUser = await getUserByEmail(email);
 

@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserDTO } from "../_actions/user";
+import Image from "next/image";
 
 interface UserCardProps {
   user: UserDTO;
@@ -26,7 +27,7 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
       <CardHeader className="p-4 flex flex-row items-center justify-between">
         <div className="flex items-center space-x-4">
           {user.image ? (
-            <img
+            <Image
               src={user.image}
               alt={`Foto de ${user.name}`}
               className="w-12 h-12 rounded-full object-cover"

@@ -13,7 +13,7 @@ export default function Home() {
     if (role == "student") return router.push("/student/");
 
     notFound();
-  }, [router]);
+  }, [router, role]);
 
   return null;
 }

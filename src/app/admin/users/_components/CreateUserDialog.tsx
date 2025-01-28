@@ -69,11 +69,11 @@ const estadosBrasileiros = [
 
 export type FormValues = z.infer<typeof formSchema>;
 // Tipagem genérica para os valores padrão
-type DefaultFormValues = Partial<FormValues>;
+// type DefaultFormValues = Partial<FormValues>;
 
-interface AddUserDialogProps {}
+// interface AddUserDialogProps {}
 
-export function CreateUserDialog({}: AddUserDialogProps) {
+export function CreateUserDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [userType, setUserType] = useState<UserRole>(UserRole.student);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
