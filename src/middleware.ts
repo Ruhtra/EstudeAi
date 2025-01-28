@@ -1,5 +1,5 @@
 import { getToken } from "next-auth/jwt";
-import NextAuth, { DefaultSession, Session } from "next-auth";
+import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 
 import {
@@ -12,7 +12,7 @@ import {
 
 const { auth } = NextAuth(authConfig);
 
-export default auth(async (req, ctx) => {
+export default auth(async (req) => {
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET,
