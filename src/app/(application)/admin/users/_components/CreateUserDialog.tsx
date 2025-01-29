@@ -342,6 +342,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                                 <FormControl>
                                   <Input
                                     disabled={isPending}
+                                    mask="xxx.xxx.xxx-xx"
                                     placeholder="000.000.000-00"
                                     {...field}
                                   />
@@ -376,6 +377,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                                 <FormControl>
                                   <Input
                                     disabled={isPending}
+                                    mask="xxx.xxx.xxx-xx"
                                     placeholder="000.000.000-00"
                                     {...field}
                                   />
@@ -479,6 +481,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                           disabled={isPending}
                           {...field}
                           placeholder="(00) 0 0000-0000"
+                          mask="(xx) x xxxx-xxxx"
                         />
                       </FormControl>
                       <FormMessage />
