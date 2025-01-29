@@ -46,9 +46,17 @@ export const ResetSchema = z.object({
   email: z.string().email(),
 });
 
-export const NewPasswordSchema = z.object({
-  password: z.string(),
-});
+export const NewPasswordSchema = z
+  .object({
+    password: z.string().min(8, {
+      message: "A senha deve ter pelo menos 8 caracteres",
+    }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
 
 export const LoginSchema = z.object({
   email: z.string().email(),

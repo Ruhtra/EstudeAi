@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { UserDTO } from "@/app/admin/users/_actions/user";
+import type { UserDTO } from "@/app/(application)/admin/users/_actions/user";
 
 async function fetchUser(id: string): Promise<UserDTO> {
   const response = await fetch(`/api/users/${id}`);

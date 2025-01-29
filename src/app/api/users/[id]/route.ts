@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import type { UserDTO } from "@/app/admin/users/_actions/user";
+import type { UserDTO } from "@/app/(application)/admin/users/_actions/user";
 
 export async function GET(
   request: NextRequest,

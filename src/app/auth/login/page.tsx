@@ -78,7 +78,7 @@ export default function LoginPage() {
         <div className="bg-login-card overflow-hidden rounded-lg shadow-xl backdrop-blur-md">
           <div className="p-4 sm:p-8">
             <h2 className="mb-4 sm:mb-6 text-center text-2xl sm:text-3xl font-bold">
-              Bem-vindo ao Mauhel
+              Bem-vindo ao EstudeAi
             </h2>
             <Form {...form}>
               <form
@@ -175,10 +175,13 @@ export default function LoginPage() {
           </div>
           <div className="bg-muted/50 px-4 sm:px-8 py-4 sm:py-6 text-center backdrop-blur-sm">
             <p className="text-muted-foreground text-xs sm:text-sm">
-              Não tem uma conta?{" "}
-              <a href="#" className="text-primary font-medium hover:underline">
+              Não tem uma conta?
+              <Link
+                href={"/auth/register"}
+                className="text-primary font-medium hover:underline"
+              >
                 Cadastre-se
-              </a>
+              </Link>
             </p>
           </div>
         </div>
