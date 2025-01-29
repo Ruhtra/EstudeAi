@@ -21,6 +21,11 @@ export interface UserDTO {
   // Adicione outros campos necessários aqui
 }
 
+// Função utilitária para remover caracteres especiais
+const sanitizeInput = (input: string) => {
+  return input.replace(/[^a-zA-Z0-9]/g, ""); // Mantém apenas letras e números
+};
+
 export const getUsers = async (): Promise<UserDTO[] | undefined> => {
   const users = await db.user.findMany();
 
@@ -61,7 +66,7 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
       data: {
         name: user.firstName + " " + user.lastName,
         email: user.email,
-        phone: user.phone,
+        phone: sanitizeInput(user.phone),
         role: user.role,
         city: user.city,
         state: user.state,
@@ -79,8 +84,8 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
       data: {
         name: user.fullName,
         email: user.email,
-        phone: user.phone,
-        cpf: user.cpf,
+        phone: sanitizeInput(user.phone),
+        cpf: sanitizeInput(user.cpf),
         role: user.role,
         // image: user.image,
       },
@@ -122,7 +127,7 @@ export const updateuser = async (
       data: {
         name: user.firstName + " " + user.lastName,
         email: user.email,
-        phone: user.phone,
+        phone: sanitizeInput(user.phone),
         role: user.role,
         city: user.city,
         state: user.state,
@@ -141,8 +146,8 @@ export const updateuser = async (
       data: {
         name: user.fullName,
         email: user.email,
-        phone: user.phone,
-        cpf: user.cpf,
+        phone: sanitizeInput(user.phone),
+        cpf: sanitizeInput(user.cpf),
         role: user.role,
         // image: user.image,
       },
