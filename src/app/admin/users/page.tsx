@@ -16,48 +16,39 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import { UserRole } from "@prisma/client";
-import { UserDTO, deleteUser } from "./_actions/user";
+import { type UserDTO, deleteUser } from "./_actions/user";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CreateUserDialog } from "./_components/CreateUserDialog";
 import { useQuery } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryCLient";
 import Image from "next/image";
+import { queryClient } from "@/lib/queryCLient";
 
 export default function UsersPage() {
-  const { isPending, data } = useQuery({
+  const { isPending, data } = useQuery<UserDTO[]>({
     queryKey: ["users"],
-    queryFn: async (): Promise<UserDTO[]> => {
+    queryFn: async () => {
       const response = await fetch("/api/users");
       return await response.json();
     },
   });
 
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredUsers =
-    data?.filter((user) =>
-      user.name?.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
 
-  const handleEdit = (id: string) => {
-    // Implementar a funcionalidade de edição
-    console.log(`Editar usuário ${id}`);
-  };
+  const filteredUsers = data
+    ? data.filter((user) =>
+        user.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   const handleDelete = (id: string) => {
-    // setUsers(
-    //   (prevUsers) => prevUsers?.filter((user) => user.id !== id) || null
-    // );
     deleteUser(id).then(() => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
       });
-      // router.refresh();
     });
   };
 
@@ -138,22 +129,21 @@ export default function UsersPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full sm:max-w-xs"
         />
-        <CreateUserDialog />
+        <CreateUserDialog>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" /> Adicionar Usuário
+          </Button>
+        </CreateUserDialog>
       </div>
 
-      {data === null || isPending ? (
+      {isPending ? (
         <LoadingSkeleton />
       ) : (
         <>
           {/* Mobile and Tablet View */}
           <div className="md:hidden">
             {filteredUsers.map((user) => (
-              <UserCard
-                key={user.id}
-                user={user}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
+              <UserCard key={user.id} user={user} onDelete={handleDelete} />
             ))}
           </div>
 
@@ -181,6 +171,8 @@ export default function UsersPage() {
                             src={user.image || "/placeholder.svg"}
                             alt={`Foto de ${user.name}`}
                             className="w-10 h-10 rounded-full object-cover"
+                            width={40}
+                            height={40}
                           />
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
@@ -198,21 +190,21 @@ export default function UsersPage() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Abrir menu</span>
+                            <Button variant="ghost" size="icon">
                               <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Abrir menu</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                            <CreateUserDialog idUser={user.id}>
+                              <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                Editar
+                              </DropdownMenuItem>
+                            </CreateUserDialog>
                             <DropdownMenuItem
-                              onClick={() => handleEdit(user.id)}
-                            >
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(user.id)}
+                              onSelect={() => handleDelete(user.id)}
                               className="text-red-600"
                             >
                               Excluir

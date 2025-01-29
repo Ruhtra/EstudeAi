@@ -56,11 +56,9 @@ export default function LoginPage() {
           if (data.success) {
             form.reset();
             setSuccess(data?.success);
+            await update();
+            route.push(DEFAULT_LOGIN_REDIRECT);
           }
-
-          await update();
-
-          route.push(DEFAULT_LOGIN_REDIRECT);
         })
         .catch(() => {
           setError("Something went wrong. Please try again.");

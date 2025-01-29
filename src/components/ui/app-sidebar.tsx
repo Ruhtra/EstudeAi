@@ -86,13 +86,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-10 items-center justify-center overflow-hidden rounded-lg">
-                  <Image
-                    // width={undefined}
-                    fill={true}
-                    src="/images/LOGOMARCA.jpg"
-                    className="h-full w-full object-contain bg-secondary"
-                    alt="EstudeiAi Logo"
-                  />
+                  <div className="relative w-full h-full">
+                    <Image
+                      src="/images/LOGOMARCA.jpg"
+                      alt="EstudeiAi Logo"
+                      layout="fill"
+                      objectFit="contain"
+                      className="bg-secondary"
+                    />
+                  </div>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate text-base font-semibold">

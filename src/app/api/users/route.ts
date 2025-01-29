@@ -14,6 +14,8 @@ export async function GET() {
       phone: user.phone,
       image: user.image,
       role: user.role,
+      city: user.city,
+      state: user.state,
       // Mapeie outros campos necessários aqui
     }));
 

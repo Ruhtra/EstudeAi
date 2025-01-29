@@ -16,6 +16,8 @@ export interface UserDTO {
   phone: string;
   role: UserRole;
   image: string | null;
+  city: string | null;
+  state: string | null;
   // Adicione outros campos necessários aqui
 }
 
@@ -30,6 +32,8 @@ export const getUsers = async (): Promise<UserDTO[] | undefined> => {
     phone: user.phone,
     image: user.image,
     role: user.role,
+    city: user.city,
+    state: user.state,
     // Mapeie outros campos necessários aqui
   }));
 
@@ -76,6 +80,7 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
         name: user.fullName,
         email: user.email,
         phone: user.phone,
+        cpf: user.cpf,
         role: user.role,
         // image: user.image,
       },
@@ -85,6 +90,68 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
   revalidatePath("/admin/users");
 
   return { success: "User create!" };
+};
+
+export const updateuser = async (
+  idUser: string,
+  data: z.infer<typeof formSchema>
+) => {
+  const parseUser = formSchema.safeParse(data);
+
+  if (!parseUser.success) return { error: "Invalid data" };
+  const user = parseUser.data;
+
+  const existingUser = await db.user.findUnique({ where: { id: idUser } });
+  if (!existingUser) return { error: "User not found!" };
+
+  const emailConflict = await db.user.findUnique({
+    where: { email: user.email },
+  });
+  if (emailConflict && emailConflict.id !== idUser)
+    return { error: "Email already exist!" };
+
+  const phoneConflict = await db.user.findUnique({
+    where: { phone: user.phone },
+  });
+  if (phoneConflict && phoneConflict.id !== idUser)
+    return { error: "Phone already exist!" };
+
+  if (user.role === UserRole.student) {
+    await db.user.update({
+      where: { id: idUser },
+      data: {
+        name: user.firstName + " " + user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        city: user.city,
+        state: user.state,
+        // image: user.image,
+      },
+    });
+  } else {
+    const cpfConflict = await db.user.findUnique({
+      where: { cpf: user.cpf },
+    });
+    if (cpfConflict && cpfConflict.id !== idUser)
+      return { error: "Cpf already exist!" };
+
+    await db.user.update({
+      where: { id: idUser },
+      data: {
+        name: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        cpf: user.cpf,
+        role: user.role,
+        // image: user.image,
+      },
+    });
+  }
+
+  revalidatePath("/admin/users");
+
+  return { success: "User updated!" };
 };
 
 export const deleteUser = async (userId: string) => {

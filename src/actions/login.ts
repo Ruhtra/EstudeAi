@@ -13,6 +13,7 @@ export async function login(values: z.infer<typeof LoginSchema>) {
   if (!validatedFields.success) return { error: "Invalid fields!" };
   const { email, password } = validatedFields.data;
 
+  //TO-DO: remove remail daqui
   const existingUser = await getUserByEmail(email);
 
   if (!existingUser || !existingUser.email || !existingUser.passwordHash)
