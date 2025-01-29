@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { sendVerificationEmail } from "@/data/mail";
 import React from "react";
 import { CreateUserDialog } from "../users/_components/CreateUserDialog";
 
@@ -16,13 +15,13 @@ export default function DashboardPage() {
 
       <Button
         onClick={() => {
-          sendVerificationEmail("kawanarthurskate@gmail.com", "123")
-            .then(() => {
-              console.log("ok");
-            })
-            .catch((err) => {
-              console.log(err);
-            });
+          // sendVerificationEmail("kawanarthurskate@gmail.com", "123")
+          //   .then(() => {
+          //     console.log("ok");
+          //   })
+          //   .catch((err) => {
+          //     console.log(err);
+          //   });
         }}
       >
         click to send email

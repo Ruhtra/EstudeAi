@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,57 +12,43 @@ import {
   FormLabel,
   FormControl,
 } from "@/components/ui/form";
-import { LoginSchema } from "@/schemas/LoginSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { login } from "@/actions/login";
+import { resetPassword } from "@/actions/resetPassword";
 import type { z } from "zod";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { DEFAULT_LOGIN_REDIRECT } from "../../../../routes";
 import Link from "next/link";
+import { ResetSchema } from "@/schemas/LoginSchema";
 
-export default function LoginPage() {
-  const route = useRouter();
-  const { update } = useSession();
+export default function ResetPasswordPage() {
   const [isPending, startTransition] = useTransition();
-  const [success, setSuccess] = useState<string | null | undefined>(null);
-  const [error, setError] = useState<string | null | undefined>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const [showPassword, setShowPassword] = useState(false);
-
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof ResetSchema>>({
+    resolver: zodResolver(ResetSchema),
     defaultValues: {
       email: "",
-      password: "",
-      code: "",
     },
   });
 
-  async function submitForm(values: z.infer<typeof LoginSchema>) {
+  async function submitForm(values: z.infer<typeof ResetSchema>) {
     setSuccess(null);
     setError(null);
     startTransition(async () => {
-      login(values)
-        .then(async (data) => {
-          setError(null);
-          setSuccess(null);
-
+      resetPassword(values)
+        .then((data) => {
           if (data.error) {
             form.reset();
-            setError(data?.error);
+            setError(data.error);
           }
           if (data.success) {
             form.reset();
-            setSuccess(data?.success);
-            await update();
-            route.push(DEFAULT_LOGIN_REDIRECT);
+            setSuccess(data.success);
           }
         })
         .catch(() => {
-          setError("Something went wrong. Please try again.");
+          setError("Algo deu errado. Por favor, tente novamente.");
         });
     });
   }
@@ -78,8 +64,12 @@ export default function LoginPage() {
         <div className="bg-login-card overflow-hidden rounded-lg shadow-xl backdrop-blur-md">
           <div className="p-4 sm:p-8">
             <h2 className="mb-4 sm:mb-6 text-center text-2xl sm:text-3xl font-bold">
-              Bem-vindo ao Mauhel
+              Redefinir Senha
             </h2>
+            <p className="mb-6 text-center text-sm sm:text-base text-muted-foreground">
+              Insira seu e-mail e enviaremos instruções para redefinir sua
+              senha.
+            </p>
             <Form {...form}>
               <form
                 className="space-y-4 sm:space-y-6"
@@ -106,41 +96,6 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm sm:text-base">
-                        Senha
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            {...field}
-                            type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            required
-                            className="text-sm sm:text-base"
-                            disabled={isPending}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-500 hover:text-gray-700"
-                            disabled={isPending}
-                          >
-                            {showPassword ? (
-                              <EyeOff size={18} />
-                            ) : (
-                              <Eye size={18} />
-                            )}
-                          </button>
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
                 {success && (
                   <Alert variant="success" className="mb-4">
                     <CheckCircle className="h-4 w-4" />
@@ -160,26 +115,19 @@ export default function LoginPage() {
                   className="w-full text-sm sm:text-base"
                   disabled={isPending}
                 >
-                  {isPending ? "Entrando..." : "Entrar"}
+                  {isPending ? "Enviando..." : "Enviar e-mail de redefinição"}
                 </Button>
               </form>
             </Form>
-            <div className="mt-4 sm:mt-6 text-center">
-              <Link
-                href={"/auth/reset-password"}
-                className="text-primary text-xs sm:text-sm hover:underline"
-              >
-                Esqueceu sua senha?
-              </Link>
-            </div>
           </div>
           <div className="bg-muted/50 px-4 sm:px-8 py-4 sm:py-6 text-center backdrop-blur-sm">
-            <p className="text-muted-foreground text-xs sm:text-sm">
-              Não tem uma conta?{" "}
-              <a href="#" className="text-primary font-medium hover:underline">
-                Cadastre-se
-              </a>
-            </p>
+            <Link
+              href="/auth/login"
+              className="text-primary text-xs sm:text-sm hover:underline inline-flex items-center"
+            >
+              <ArrowLeft size={16} className="mr-2" />
+              Voltar para o login
+            </Link>
           </div>
         </div>
       </motion.div>
