@@ -92,7 +92,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       alt="EstudeiAi Logo"
                       layout="fill"
                       objectFit="contain"
-                      className="bg-secondary"
                     />
                   </div>
                 </div>
