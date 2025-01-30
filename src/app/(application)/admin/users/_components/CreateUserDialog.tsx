@@ -1,11 +1,5 @@
 "use client";
-import {
-  useState,
-  useCallback,
-  useTransition,
-  useEffect,
-  type ReactNode,
-} from "react";
+import { useState, useTransition, useEffect, type ReactNode } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type * as z from "zod";
@@ -29,14 +23,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Combobox } from "@/components/ui/combobox";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formSchema } from "../_actions/user.schema";
 import { UserRole } from "@prisma/client";

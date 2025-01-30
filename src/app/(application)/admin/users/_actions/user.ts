@@ -7,6 +7,7 @@ import { z } from "zod";
 import { getUserByEmail } from "@/lib/user";
 import { formSchema } from "./user.schema";
 import { revalidatePath } from "next/cache";
+import { supabase } from "@/lib/supabase";
 
 export interface UserDTO {
   id: string;
@@ -121,6 +122,36 @@ export const updateuser = async (
   if (phoneConflict && phoneConflict.id !== idUser)
     return { error: "Phone already exist!" };
 
+  //TO-DO: Implementar update/include/delete in bucket
+
+  let img: string | undefined;
+
+  if (user.photo) {
+    try {
+      // TO-DO: Fazer tratamento do nome para a inclusão da imagem
+      const res = await supabase.storage
+        .from("profileImages")
+        .upload("aaaaaaaa", user.photo, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (res.error) throw res.error;
+
+      //TO-DO: Puxar link do .env e não deixar HARDCODE
+      img = `https://vdeckufzmvmcfnfcyugz.supabase.co/storage/v1/object/public/${res.data.fullPath}`;
+    } catch (error) {
+      console.error(error);
+
+      img = undefined;
+      //TO-DO: Implementar lógica para deletar do banco caos existaa alguma imagem
+
+      return { error: "Não foi possivel fazer upload de image" };
+    }
+  } else {
+    return { error: "user do not has photo" };
+  }
+
   if (user.role === UserRole.student) {
     await db.user.update({
       where: { id: idUser },
@@ -131,7 +162,7 @@ export const updateuser = async (
         role: user.role,
         city: user.city,
         state: user.state,
-        // image: user.image,
+        image: img,
       },
     });
   } else {
@@ -149,7 +180,7 @@ export const updateuser = async (
         phone: sanitizeInput(user.phone),
         cpf: sanitizeInput(user.cpf),
         role: user.role,
-        // image: user.image,
+        image: img,
       },
     });
   }

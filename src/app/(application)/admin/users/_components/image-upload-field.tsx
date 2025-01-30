@@ -6,12 +6,11 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, X } from "lucide-react";
+import { Camera } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -22,6 +21,8 @@ import {
 import { UserRole } from "@prisma/client";
 
 interface ImageUploadFieldProps {
+  //TO-DO: Rmover esse eslint e tipar corretamente
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<any>;
   name: string;
   initialImageUrl?: string;
@@ -77,7 +78,7 @@ export function ImageUploadField({
     <FormField
       control={form.control}
       name={name}
-      render={({ field }) => (
+      render={() => (
         <FormItem>
           <FormControl>
             <div className="relative">
