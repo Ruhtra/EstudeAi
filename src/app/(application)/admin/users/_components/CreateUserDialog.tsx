@@ -1,15 +1,9 @@
-"use client";
-import {
-  useState,
-  useCallback,
-  useTransition,
-  useEffect,
-  type ReactNode,
-} from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import type * as z from "zod";
-import { Button } from "@/components/ui/button";
+"use client"
+import { useState, useCallback, useTransition, useEffect, type ReactNode } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import type * as z from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -17,32 +11,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Combobox } from "@/components/ui/combobox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { formSchema } from "../_actions/user.schema";
-import { UserRole } from "@prisma/client";
-import { createUser, updateuser, UserDTO } from "../_actions/user";
-import { toast } from "sonner";
-import { queryClient } from "@/lib/queryCLient";
-import { useQuery } from "@tanstack/react-query";
+} from "@/components/ui/dialog"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Combobox } from "@/components/ui/combobox"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Camera } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Skeleton } from "@/components/ui/skeleton"
+import { formSchema } from "../_actions/user.schema"
+import { UserRole } from "@prisma/client"
+import { createUser, updateuser, type UserDTO } from "../_actions/user"
+import { toast } from "sonner"
+import { queryClient } from "@/lib/queryCLient"
+import { useQuery } from "@tanstack/react-query"
 
 const estadosBrasileiros = [
   "Acre",
@@ -72,20 +55,20 @@ const estadosBrasileiros = [
   "São Paulo",
   "Sergipe",
   "Tocantins",
-];
+]
 
-export type FormValues = z.infer<typeof formSchema>;
+export type FormValues = z.infer<typeof formSchema>
 
 interface AddUserDialogProps {
-  idUser?: string;
-  children: ReactNode;
+  idUser?: string
+  children: ReactNode
 }
 
 export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [userType, setUserType] = useState<UserRole>(UserRole.student);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = useState(false)
+  const [userType, setUserType] = useState<UserRole>(UserRole.student)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
   const {
     data: userData,
     isLoading,
@@ -94,7 +77,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
     queryKey: ["user", idUser],
     queryFn: () => fetchUser(idUser),
     enabled: false,
-  });
+  })
 
   const defaultValues: Record<string, string> = {
     role: userData?.role || UserRole.student,
@@ -106,122 +89,127 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
     fullName: userData?.name || "",
     cpf: userData?.cpf || "",
     state: userData?.state || "",
-  };
+  }
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
-  });
+  })
 
   useEffect(() => {
     if (userData) {
       Object.entries(userData).forEach(([key, value]) => {
-        form.setValue(key as keyof FormValues, value);
-      });
+        form.setValue(key as keyof FormValues, value)
+      })
 
-      form.setValue(
-        "role",
-        (userData.role.toLowerCase() as "admin" | "teacher" | "student") ??
-          "student"
-      );
-      form.setValue("email", userData.email ?? "");
-      form.setValue("phone", userData.phone ?? "");
-      form.setValue("city", userData.city ?? "");
-      form.setValue("firstName", userData.name.split(" ")[0] ?? "");
-      form.setValue("lastName", userData.name.split(" ")[1] ?? "");
-      form.setValue("fullName", userData.name ?? "");
-      form.setValue("cpf", userData.cpf ?? "");
-      form.setValue("state", userData.state ?? "");
+      form.setValue("role", (userData.role.toLowerCase() as "admin" | "teacher" | "student") ?? "student")
+      form.setValue("email", userData.email ?? "")
+      form.setValue("phone", userData.phone ?? "")
+      form.setValue("city", userData.city ?? "")
+      form.setValue("firstName", userData.name.split(" ")[0] ?? "")
+      form.setValue("lastName", userData.name.split(" ")[1] ?? "")
+      form.setValue("fullName", userData.name ?? "")
+      form.setValue("cpf", userData.cpf ?? "")
+      form.setValue("state", userData.state ?? "")
 
-      setUserType(userData.role);
-      setPreviewUrl(userData.image || null);
+      setUserType(userData.role)
+      setPreviewUrl(userData.image || null)
     }
-  }, [userData, form]);
+  }, [userData, form])
 
   const handleFileChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
+      const file = event.target.files?.[0]
       if (file) {
-        const reader = new FileReader();
+        const reader = new FileReader()
         reader.onloadend = () => {
-          setPreviewUrl(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-        form.setValue("photo", file);
+          setPreviewUrl(reader.result as string)
+        }
+        reader.readAsDataURL(file)
+        form.setValue("photo", file)
       }
     },
-    [form]
-  );
+    [form],
+  )
 
   const removePhoto = useCallback(() => {
-    setPreviewUrl(null);
-    form.setValue("photo", undefined);
-  }, [form]);
+    setPreviewUrl(null)
+    form.setValue("photo", undefined)
+  }, [form])
 
   function onSubmit(values: FormValues) {
     startTransition(() => {
       if (idUser) {
         updateuser(idUser, values)
           .then((data) => {
-            if (data.error) toast(data.error);
+            if (data.error) toast(data.error)
             if (data.success) {
-              setIsOpen(false);
-              form.reset();
-              toast("Usuário atualizado com sucesso");
-              setPreviewUrl(null);
+              setIsOpen(false)
+              form.reset()
+              toast("Usuário atualizado com sucesso")
+              setPreviewUrl(null)
               queryClient.invalidateQueries({
                 queryKey: ["users"],
-              });
+              })
             }
           })
           .catch(() => {
-            toast("Algo deu errado, informe o suporte!");
-          });
+            toast("Algo deu errado, informe o suporte!")
+          })
       } else {
         createUser(values)
           .then((data) => {
-            if (data.error) toast(data.error);
+            if (data.error) toast(data.error)
             if (data.success) {
-              setIsOpen(false);
-              form.reset();
-              toast("Usuário criado com sucesso");
-              setPreviewUrl(null);
+              setIsOpen(false)
+              form.reset()
+              toast("Usuário criado com sucesso")
+              setPreviewUrl(null)
               queryClient.invalidateQueries({
                 queryKey: ["users"],
-              });
+              })
             }
           })
           .catch(() => {
-            toast("Algo deu errado, informe o suporte!");
-          });
+            toast("Algo deu errado, informe o suporte!")
+          })
       }
-    });
+    })
   }
 
   return (
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        setIsOpen(open);
+        setIsOpen(open)
         if (open && idUser) {
-          refetch();
+          refetch()
         }
       }}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {idUser ? "Editar Usuário" : "Adicionar Novo Usuário"}
-          </DialogTitle>
-          <DialogDescription>
-            Preencha as informações do usuário abaixo.
-          </DialogDescription>
+          <DialogTitle>{idUser ? "Editar Usuário" : "Adicionar Novo Usuário"}</DialogTitle>
+          <DialogDescription>Preencha as informações do usuário abaixo.</DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <p>Carregando dados do usuário...</p>
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:space-x-6">
+              <div className="w-full md:w-1/3 flex flex-col items-center space-y-4 mb-6 md:mb-0">
+                <Skeleton className="w-32 h-32 rounded-full" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+              <div className="w-full md:w-2/3">
+                <Skeleton className="h-10 w-full mb-4" />
+                <Skeleton className="h-10 w-full mb-4" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
           </div>
         ) : (
           <Form {...form}>
@@ -237,48 +225,23 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                           <FormControl>
                             <div className="relative">
                               <Avatar className="w-32 h-32">
-                                <AvatarImage
-                                  src={previewUrl || undefined}
-                                  className="object-cover"
-                                  alt="Preview"
-                                />
+                                <AvatarImage src={previewUrl || undefined} className="object-cover" alt="Preview" />
                                 <AvatarFallback>
-                                  {userType === UserRole.student
-                                    ? "S"
-                                    : userType === UserRole.teacher
-                                    ? "T"
-                                    : "C"}
+                                  {userType === UserRole.student ? "S" : userType === UserRole.teacher ? "T" : "C"}
                                 </AvatarFallback>
                               </Avatar>
                               <DropdownMenu>
-                                <DropdownMenuTrigger
-                                  asChild
-                                  disabled={isPending}
-                                >
-                                  <Button
-                                    variant="secondary"
-                                    size="icon"
-                                    className="absolute bottom-0 right-0"
-                                  >
+                                <DropdownMenuTrigger asChild disabled={isPending}>
+                                  <Button variant="secondary" size="icon" className="absolute bottom-0 right-0">
                                     <Camera className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
-                                  <DropdownMenuItem
-                                    onSelect={() =>
-                                      document
-                                        .getElementById("photo-upload")
-                                        ?.click()
-                                    }
-                                  >
-                                    {previewUrl
-                                      ? "Alterar foto"
-                                      : "Adicionar foto"}
+                                  <DropdownMenuItem onSelect={() => document.getElementById("photo-upload")?.click()}>
+                                    {previewUrl ? "Alterar foto" : "Adicionar foto"}
                                   </DropdownMenuItem>
                                   {previewUrl && (
-                                    <DropdownMenuItem onSelect={removePhoto}>
-                                      Remover foto
-                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onSelect={removePhoto}>Remover foto</DropdownMenuItem>
                                   )}
                                 </DropdownMenuContent>
                               </DropdownMenu>
@@ -297,20 +260,15 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                       )}
                     />
                     <FormLabel className="text-center">
-                      {userType === UserRole.student
-                        ? "Foto (opcional)"
-                        : "Foto"}
+                      {userType === UserRole.student ? "Foto (opcional)" : "Foto"}
                     </FormLabel>
                   </div>
                   <div className="w-full md:w-2/3">
                     <Tabs
                       value={userType}
                       onValueChange={(value: string) => {
-                        setUserType(UserRole[value as keyof typeof UserRole]);
-                        form.setValue(
-                          "role",
-                          UserRole[value as keyof Omit<typeof UserRole, "sup">]
-                        );
+                        setUserType(UserRole[value as keyof typeof UserRole])
+                        form.setValue("role", UserRole[value as keyof Omit<typeof UserRole, "sup">])
                       }}
                     >
                       <TabsList className="grid w-full grid-cols-3">
@@ -477,29 +435,20 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                     <FormItem>
                       <FormLabel>Telefone</FormLabel>
                       <FormControl>
-                        <Input
-                          disabled={isPending}
-                          {...field}
-                          placeholder="(00) 0 0000-0000"
-                          mask="(xx) x xxxx-xxxx"
-                        />
+                        <Input disabled={isPending} {...field} placeholder="(00) 0 0000-0000" mask="(xx) x xxxx-xxxx" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button
-                  disabled={isPending || isLoading}
-                  type="submit"
-                  className="w-full"
-                >
+                <Button disabled={isPending || isLoading} type="submit" className="w-full">
                   {isPending
                     ? idUser
                       ? "Atualizando Usuário"
                       : "Criando Usuário"
                     : idUser
-                    ? "Atualizar Usuário"
-                    : "Adicionar Usuário"}
+                      ? "Atualizar Usuário"
+                      : "Adicionar Usuário"}
                 </Button>
               </div>
             </form>
@@ -507,16 +456,17 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
         )}
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 async function fetchUser(id: string | undefined): Promise<UserDTO | null> {
   if (id) {
-    const response = await fetch(`/api/users/${id}`);
+    const response = await fetch(`/api/users/${id}`)
     if (!response.ok) {
-      throw new Error("Failed to fetch user");
+      throw new Error("Failed to fetch user")
     }
-    return response.json();
+    return response.json()
   }
-  return null;
+  return null
 }
+
