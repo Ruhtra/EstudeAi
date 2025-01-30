@@ -12,7 +12,7 @@ export default function RegisterPage() {
           mais tarde.
         </p>
         <div className="mt-4">
-          <Link href="/">
+          <Link href="/auht/login">
             <Button>Voltar</Button>
           </Link>
         </div>

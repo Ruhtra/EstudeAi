@@ -9,6 +9,7 @@ import {
   authRoutes,
   publicRoutes,
 } from "@/../routes";
+import { UserRole } from "@prisma/client";
 
 const { auth } = NextAuth(authConfig);
 
@@ -21,6 +22,8 @@ export default auth(async (req) => {
     cookieName: "__Secure-authjs.session-token",
   });
 
+  const role = token?.role as UserRole
+
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
@@ -31,7 +34,7 @@ export default auth(async (req) => {
   if (isApiAuthRoute) return;
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT[role], nextUrl));
     }
     return;
   }

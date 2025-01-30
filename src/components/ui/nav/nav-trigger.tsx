@@ -47,7 +47,7 @@ export function NavTrigger() {
         <Breadcrumb className="hidden md:flex items-center">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin">Home</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/dashboard">Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             {pathnames.map((name, index) => {
