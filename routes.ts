@@ -1,6 +1,6 @@
 import { UserRole } from "@prisma/client";
 
-export const publicRoutes = ["/auth/new-verification", "/erro"];
+export const publicRoutes = ['/', "/auth/new-verification", "/erro"];
 
 export const authRoutes = [
   "/auth/login",
