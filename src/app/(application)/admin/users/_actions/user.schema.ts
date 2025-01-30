@@ -15,8 +15,8 @@ const collaboratorTeacherSchema = baseSchema.extend({
 });
 
 const subscriberSchema = baseSchema.extend({
-  firstName: z.string().min(2, "Nome é obrigatório"),
-  lastName: z.string().min(2, "Sobrenome é obrigatório"),
+  firstName: z.string().min(2, "Nome é obrigatório").regex(/^\S+$/, "O nome não pode conter espaços"),
+  lastName: z.string().min(2, "Sobrenome é obrigatório").regex(/^\S+$/, "O nome não pode conter espaços"),
   state: z.string().min(2, "Estado é obrigatório"),
   city: z.string().min(2, "Cidade é obrigatória"),
   photo: z.instanceof(File).optional(),
