@@ -18,6 +18,8 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    console.log(user.image);
+
     const userDTO: UserDTO = {
       id: user.id,
       name: user.name,
