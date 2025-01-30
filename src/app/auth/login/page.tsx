@@ -22,6 +22,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { DEFAULT_LOGIN_REDIRECT } from "../../../../routes";
 import Link from "next/link";
+import { UserRole } from "@prisma/client";
 
 export default function LoginPage() {
   const route = useRouter();
@@ -57,8 +58,9 @@ export default function LoginPage() {
           if (data.success) {
             form.reset();
             setSuccess(data?.success);
-            await update();
-            route.push(DEFAULT_LOGIN_REDIRECT);
+            const session = await update();
+            const role: UserRole = session?.user.role;
+            route.push(DEFAULT_LOGIN_REDIRECT[role]);
           }
         })
         .catch(() => {

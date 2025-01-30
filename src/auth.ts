@@ -3,7 +3,6 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 
 import authConfig from "./auth.config";
 import { db } from "./lib/db";
-import { getUserById } from "./lib/user";
 import "next-auth/jwt";
 export const { auth, handlers, signIn, signOut, unstable_update } = NextAuth({
   pages: {
@@ -22,51 +21,7 @@ export const { auth, handlers, signIn, signOut, unstable_update } = NextAuth({
       });
     },
   },
-  callbacks: {
-    async signIn({ user, account }) {
-      if (account?.type !== "credentials") return true;
 
-      //I Write this throw for supress error in user
-      //if this throw for execute, validate why user can be null
-      if (!user.id) throw new Error("Usuário não contém id");
-
-      // const existingUser = await getUserById(user.id);
-
-      //Prevent sign in without email verification
-      // if (!existingUser?.emailVerified) return false;
-
-      return true;
-    },
-
-    async session({ token, session }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
-      }
-      if (token.role && session.user) {
-        session.user.role = token.role;
-      }
-      if (session.user) {
-        session.user.name = token.name;
-        session.user.image = token.picture;
-        session.user.email = token.email;
-      }
-
-      return session;
-    },
-    async jwt({ token }) {
-      if (!token.sub) return token;
-
-      const user = await getUserById(token.sub);
-      if (!user) return token;
-
-      token.name = user.name;
-      token.picture = user.image;
-      token.email = user.email;
-      token.role = user.role;
-
-      return token;
-    },
-  },
   cookies: {
     sessionToken: {
       name: "__Secure-authjs.session-token",

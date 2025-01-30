@@ -1,4 +1,4 @@
-import { getToken } from "next-auth/jwt";
+// import { getToken } from "next-auth/jwt";
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 
@@ -14,15 +14,15 @@ import { UserRole } from "@prisma/client";
 const { auth } = NextAuth(authConfig);
 
 export default auth(async (req) => {
-  const token = await getToken({
-    req,
-    secret: process.env.AUTH_SECRET,
-    // raw: true,
-    secureCookie: true,
-    cookieName: "__Secure-authjs.session-token",
-  });
+  // const token = await getToken({
+  //   req,
+  //   secret: process.env.AUTH_SECRET,
+  //   // raw: true,
+  //   secureCookie: true,
+  //   cookieName: "__Secure-authjs.session-token",
+  // });
 
-  const role = token?.role as UserRole
+  const role = req.auth?.user.role as UserRole;
 
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
@@ -42,7 +42,7 @@ export default auth(async (req) => {
   if (!isLoggedIn && !isPublicRoute)
     return Response.redirect(new URL("/auth/login", nextUrl));
 
-  if (isAdminRoute && token?.role != "admin")
+  if (isAdminRoute && role != "admin")
     return Response.redirect(new URL("/404", nextUrl));
   return;
 });
