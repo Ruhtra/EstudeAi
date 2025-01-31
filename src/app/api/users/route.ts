@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { UserDTO } from "@/app/(application)/admin/users/_actions/user";
+import { currentUser } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const users = await db.user.findMany();
+    const user = await currentUser();
 
-    const userDTOs: UserDTO[] = users.map((user) => ({
+    const users = await db.user.findMany();
+    const usersFiltered = users.filter((u) => u.id !== user.id);
+
+    const userDTOs: UserDTO[] = usersFiltered.map((user) => ({
       id: user.id,
       name: user.name,
       email: user.email,

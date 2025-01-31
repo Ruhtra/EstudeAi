@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ChevronsUpDown,
-  LogOut,
-  User,
-  Moon,
-  Sun,
-  Settings,
-} from "lucide-react";
+import { ChevronsUpDown, LogOut, User, Moon, Sun } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -25,6 +18,19 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useTheme } from "next-themes";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export interface NavUserProps {
   user: {
@@ -32,12 +38,23 @@ export interface NavUserProps {
     email: string;
     avatar: string;
   };
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export function NavUser({ user, logout }: NavUserProps) {
   const { isMobile } = useSidebar();
   const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+
+  const handleLogout = () => {
+    setIsAlertOpen(true);
+  };
+
+  const confirmLogout = async () => {
+    await logout();
+    setIsAlertOpen(false);
+  };
 
   return (
     <SidebarMenu>
@@ -46,7 +63,11 @@ export function NavUser({ user, logout }: NavUserProps) {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className={`data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground ${
+                pathname === "/admin/profile"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : ""
+              }`}
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
@@ -88,14 +109,16 @@ export function NavUser({ user, logout }: NavUserProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <span className="text-sm">Perfil</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
+            <Link href={"/admin/profile"}>
+              <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                <span className="text-sm">Perfil</span>
+              </DropdownMenuItem>
+            </Link>
+            {/* <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
               <span className="text-sm">Configurações</span>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuItem
               onSelect={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
@@ -109,13 +132,31 @@ export function NavUser({ user, logout }: NavUserProps) {
               </span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={logout}>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={handleLogout}
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span className="text-sm">Sair</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Saída</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza de que deseja sair? Sua sessão será encerrada e você
+              precisará fazer login novamente para acessar sua conta.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmLogout}>Sair</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarMenu>
   );
 }
