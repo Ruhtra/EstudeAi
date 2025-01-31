@@ -7,7 +7,12 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    domains: ["vdeckufzmvmcfnfcyugz.supabase.co"], // Adicione o domínio Supabase aqui
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "vdeckufzmvmcfnfcyugz.supabase.co",
+      },
+    ],
   },
 };
 

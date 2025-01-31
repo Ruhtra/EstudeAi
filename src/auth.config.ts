@@ -37,7 +37,7 @@ export default {
             role: user.role,
             email: user.email,
             id: user.id,
-            image: user.image,
+            image: user.imageurl,
             name: user.name,
           };
         }
@@ -75,7 +75,7 @@ export default {
       }
       if (session.user) {
         session.user.name = token.name;
-        session.user.image = token.picture;
+        session.user.imageurl = token.picture;
         session.user.email = token.email;
       }
 
