@@ -28,11 +28,11 @@ export function UserCard({ user, onDelete }: UserCardProps) {
       <Card className="mb-4 shadow-sm cursor-pointer">
         <CardHeader className="p-4 flex flex-row items-center justify-between">
           <div className="flex items-center space-x-4">
-            {user.image ? (
+            {user.imageUrl ? (
               <Image
                 width={48}
                 height={48}
-                src={user.image || "/placeholder.svg"}
+                src={user.imageUrl || "/placeholder.svg"}
                 alt={`Foto de ${user.name}`}
                 className="w-12 h-12 rounded-full object-cover"
               />

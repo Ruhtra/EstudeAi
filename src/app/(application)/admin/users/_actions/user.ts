@@ -8,6 +8,7 @@ import { getUserByEmail } from "@/lib/user";
 import { formSchema } from "./user.schema";
 import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
+import cuid from "cuid";
 
 export interface UserDTO {
   id: string;
@@ -16,7 +17,7 @@ export interface UserDTO {
   cpf: string | null;
   phone: string;
   role: UserRole;
-  image: string | null;
+  imageUrl: string | null;
   city: string | null;
   state: string | null;
   // Adicione outros campos necessários aqui
@@ -36,10 +37,11 @@ export const getUsers = async (): Promise<UserDTO[] | undefined> => {
     email: user.email,
     cpf: user.cpf,
     phone: user.phone,
-    image: user.image,
+    imageUrl: user.imageurl,
     role: user.role,
     city: user.city,
     state: user.state,
+
     // Mapeie outros campos necessários aqui
   }));
 
@@ -62,16 +64,43 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
   });
   if (existingPhone) return { error: "Phone already exist!" };
 
+  const id = cuid();
+  console.log(id);
+
+  let imgUrl;
+  let imageName;
+  if (user.photo) {
+    try {
+      imageName = `${id}.${user.photo.name.split(".").pop()}`; // Tratamento do nome da imagem
+
+      const res = await supabase.storage
+        .from("profileImages")
+        .upload(imageName, user.photo, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (res.error) throw res.error;
+
+      imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/${res.data.fullPath}`; // Usando variável de ambiente
+    } catch (error) {
+      console.error(error);
+      return { error: "Não foi possível fazer upload de imagem" };
+    }
+  }
+
   if (user.role === UserRole.student) {
     await db.user.create({
       data: {
+        id,
         name: user.firstName + " " + user.lastName,
         email: user.email,
         phone: sanitizeInput(user.phone),
         role: user.role,
         city: user.city,
         state: user.state,
-        // image: user.image,
+        imageName: imageName ? imageName : null,
+        imageurl: imgUrl ? imgUrl : null,
       },
     });
   } else {
@@ -83,12 +112,14 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
     if (existingCpf) return { error: "Cpf already exist!" };
     await db.user.create({
       data: {
+        id,
         name: user.fullName,
         email: user.email,
         phone: sanitizeInput(user.phone),
         cpf: sanitizeInput(user.cpf),
         role: user.role,
-        // image: user.image,
+        imageName: imageName ? imageName : null,
+        imageurl: imgUrl ? imgUrl : null,
       },
     });
   }
@@ -122,35 +153,48 @@ export const updateuser = async (
   if (phoneConflict && phoneConflict.id !== idUser)
     return { error: "Phone already exist!" };
 
-  //TO-DO: Implementar update/include/delete in bucket
+  let imgUrl: string | undefined;
+  let imageName: string | undefined;
 
-  let img: string | undefined;
+  //explciando fluxo
+  // se tem imagem -> upsert na imagem
+  // sem imagem    -> delete imagem existente
 
   if (user.photo) {
     try {
-      // TO-DO: Fazer tratamento do nome para a inclusão da imagem
+      imageName = `${existingUser.id}.${user.photo.name.split(".").pop()}`; // Tratamento do nome da imagem
+      console.log(imageName);
       const res = await supabase.storage
         .from("profileImages")
-        .upload("aaaaaaaa", user.photo, {
+        .upload(imageName, user.photo, {
           cacheControl: "3600",
           upsert: true,
         });
 
+      console.log(res);
+
       if (res.error) throw res.error;
 
-      //TO-DO: Puxar link do .env e não deixar HARDCODE
-      img = `https://vdeckufzmvmcfnfcyugz.supabase.co/storage/v1/object/public/${res.data.fullPath}`;
+      imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/${res.data.fullPath}`; // Usando variável de ambiente
     } catch (error) {
       console.error(error);
-
-      img = undefined;
-      //TO-DO: Implementar lógica para deletar do banco caos existaa alguma imagem
-
-      return { error: "Não foi possivel fazer upload de image" };
+      return { error: "Não foi possível fazer upload de imagem" };
     }
   } else {
-    return { error: "user do not has photo" };
+    // Verificar se existe imagem no bucket e deletar
+
+    if (existingUser.imageName) {
+      const existingImage = `profileImages/${existingUser.imageName}`;
+      try {
+        await supabase.storage.from("profileImages").remove([existingImage]);
+      } catch (error) {
+        console.error("Erro ao deletar imagem existente:", error);
+        return { error: "Erro ao deletar imagem existente" };
+      }
+    }
   }
+
+  console.log(imgUrl);
 
   if (user.role === UserRole.student) {
     await db.user.update({
@@ -162,7 +206,8 @@ export const updateuser = async (
         role: user.role,
         city: user.city,
         state: user.state,
-        image: img,
+        imageName: imageName ? imageName : null,
+        imageurl: imgUrl ? imgUrl : null,
       },
     });
   } else {
@@ -180,11 +225,11 @@ export const updateuser = async (
         phone: sanitizeInput(user.phone),
         cpf: sanitizeInput(user.cpf),
         role: user.role,
-        image: img,
+        imageName: imageName ? imageName : null,
+        imageurl: imgUrl ? imgUrl : null,
       },
     });
   }
-
   revalidatePath("/admin/users");
 
   return { success: "User updated!" };

@@ -166,9 +166,9 @@ export default function UsersPage() {
                   {filteredUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
-                        {user.image ? (
+                        {user.imageUrl ? (
                           <Image
-                            src={user.image || "/placeholder.svg"}
+                            src={user.imageUrl || "/placeholder.svg"}
                             alt={`Foto de ${user.name}`}
                             className="w-10 h-10 rounded-full object-cover"
                             width={40}

@@ -89,10 +89,13 @@ model User {
   name          String
   email         String    @unique
   emailVerified DateTime?
-  image         String?
-  passwordHash  String? // Adicionando o campo passwordHash
-  accounts      Account[]
-  role          UserRole  @default(student)
+
+  imageurl  String?
+  imageName String?
+
+  passwordHash String? // Adicionando o campo passwordHash
+  accounts     Account[]
+  role         UserRole  @default(student)
 
   phone String  @unique
   //admin

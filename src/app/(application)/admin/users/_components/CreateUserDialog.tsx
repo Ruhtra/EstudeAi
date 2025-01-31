@@ -212,7 +212,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                     <ImageUploadField
                       form={form}
                       name="photo"
-                      initialImageUrl={userData?.image || undefined}
+                      initialImageUrl={userData?.imageUrl || undefined}
                       isPending={isPending}
                       userType={userType}
                     />
