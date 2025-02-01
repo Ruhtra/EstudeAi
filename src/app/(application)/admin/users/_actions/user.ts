@@ -59,7 +59,7 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
 
   const existingPhone = await db.user.findUnique({
     where: {
-      phone: user.phone,
+      phone: sanitizeInput(user.phone),
     },
   });
   if (existingPhone) return { error: "Phone already exist!" };
@@ -106,7 +106,7 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
   } else {
     const existingCpf = await db.user.findUnique({
       where: {
-        cpf: user.cpf,
+        cpf: sanitizeInput(user.cpf),
       },
     });
     if (existingCpf) return { error: "Cpf already exist!" };
@@ -212,7 +212,7 @@ export const updateuser = async (
     });
   } else {
     const cpfConflict = await db.user.findUnique({
-      where: { cpf: user.cpf },
+      where: { cpf: sanitizeInput(user.cpf) },
     });
     if (cpfConflict && cpfConflict.id !== idUser)
       return { error: "Cpf already exist!" };
@@ -243,6 +243,16 @@ export const deleteUser = async (userId: string) => {
   });
 
   if (!user) return { error: "User not found" };
+
+  if (user.imageName) {
+    try {
+      const existingImage = `profileImages/${user.imageName}`;
+      await supabase.storage.from("profileImages").remove([existingImage]);
+    } catch (error) {
+      console.error("Erro ao deletar imagem existente:", error);
+      return { error: "Erro ao deletar imagem existente" };
+    }
+  }
 
   await db.user.delete({
     where: {

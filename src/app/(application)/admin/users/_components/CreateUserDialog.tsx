@@ -31,6 +31,8 @@ import { toast } from "sonner";
 import { queryClient } from "@/lib/queryCLient";
 import { useQuery } from "@tanstack/react-query";
 import { ImageUploadField } from "./image-upload-field";
+import { InputCpfField } from "./input-cpf-field";
+import { InputPhoneField } from "./input-phone-field";
 
 const estadosBrasileiros = [
   "Acre",
@@ -253,24 +255,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                               </FormItem>
                             )}
                           />
-                          <FormField
-                            control={form.control}
-                            name="cpf"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>CPF</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    disabled={isPending}
-                                    mask="xxx.xxx.xxx-xx"
-                                    placeholder="000.000.000-00"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                         <InputCpfField form={form} isPending={isPending} />
                         </div>
                       </TabsContent>
                       <TabsContent value="teacher">
@@ -288,24 +273,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                               </FormItem>
                             )}
                           />
-                          <FormField
-                            control={form.control}
-                            name="cpf"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>CPF</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    disabled={isPending}
-                                    mask="xxx.xxx.xxx-xx"
-                                    placeholder="000.000.000-00"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                          <InputCpfField form={form} isPending={isPending} />
                         </div>
                       </TabsContent>
                       <TabsContent value="student">
@@ -390,24 +358,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Telefone</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isPending}
-                          {...field}
-                          placeholder="(00) 0 0000-0000"
-                          mask="(xx) x xxxx-xxxx"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                 <InputPhoneField form={form} isPending={isPending} />
                 <Button
                   disabled={isPending || isLoading}
                   type="submit"

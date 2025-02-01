@@ -3,7 +3,7 @@ import { z } from "zod";
 
 const baseSchema = z.object({
   email: z.string().email("Email inválido"),
-  phone: z.string().min(14, "Telefone inválido"),
+  phone: z.string(), // adicionar validção de telefone
 });
 
 const collaboratorTeacherSchema = baseSchema.extend({

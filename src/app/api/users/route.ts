@@ -6,6 +6,8 @@ import { currentUser } from "@/lib/auth";
 export async function GET() {
   try {
     const user = await currentUser();
+    console.log(user);
+    
 
     const users = await db.user.findMany();
     const usersFiltered = users.filter((u) => u.id !== user.id);
