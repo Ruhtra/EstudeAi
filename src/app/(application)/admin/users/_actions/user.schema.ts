@@ -1,15 +1,27 @@
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
 
+const cpfSchema = z
+  .string()
+  .regex(/^\d{11}$/, "O CPF deve conter exatamente 11 dígitos.");
+
+// Validação para Telefone - DDD + "9" + 8 dígitos (total de 11 dígitos)
+const phoneSchema = z
+  .string()
+  .regex(
+    /^\d{2}9\d{8}$/,
+    "O telefone deve conter 11 dígitos, começando com DDD seguido do número 9."
+  );
+
 const baseSchema = z.object({
   email: z.string().email("Email inválido"),
-  phone: z.string(), // adicionar validção de telefone
+  phone: phoneSchema, // adicionar validção de telefone
 });
 
 const collaboratorTeacherSchema = baseSchema.extend({
   fullName: z.string().min(2, "Nome completo é obrigatório"),
   // cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido"),
-  cpf: z.string().min(1),
+  cpf: cpfSchema,
   photo: z
     .instanceof(File)
     .refine((file) => file.size <= 5000000, `Tamanho máximo do arquivo é 5MB.`),

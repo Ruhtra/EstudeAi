@@ -70,18 +70,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white">
-      {/* <Head>
-        <meta property="og:title" content="Mauhel • Admin" />
-        <meta
-          property="og:description"
-          content="Descubra o poder do Mauhel App para gerenciar suas atividades e acompanhar seu progresso de maneira prática e eficiente."
-        />
-        <meta property="og:image" content="/manifest/icon512_maskable.png" />
-        <meta property="og:url" content="/" />
-        <meta property="og:type" content="website" />
-        <meta property="theme-color" content="#e63946" />
-      </Head> */}
-
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-50"
         style={{ scaleX }}

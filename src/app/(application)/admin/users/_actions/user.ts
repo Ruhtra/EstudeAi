@@ -22,11 +22,6 @@ export interface UserDTO {
   // Adicione outros campos necessários aqui
 }
 
-// Função utilitária para remover caracteres especiais
-const sanitizeInput = (input: string) => {
-  return input.replace(/[^a-zA-Z0-9]/g, ""); // Mantém apenas letras e números
-};
-
 export const getUsers = async (): Promise<UserDTO[] | undefined> => {
   const users = await db.user.findMany();
 
@@ -58,7 +53,7 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
 
   const existingPhone = await db.user.findUnique({
     where: {
-      phone: sanitizeInput(user.phone),
+      phone: user.phone,
     },
   });
   if (existingPhone) return { error: "Phone already exist!" };
@@ -93,7 +88,7 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
         id,
         name: user.firstName + " " + user.lastName,
         email: user.email,
-        phone: sanitizeInput(user.phone),
+        phone: user.phone,
         role: user.role,
         city: user.city,
         state: user.state,
@@ -104,7 +99,7 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
   } else {
     const existingCpf = await db.user.findUnique({
       where: {
-        cpf: sanitizeInput(user.cpf),
+        cpf: user.cpf,
       },
     });
     if (existingCpf) return { error: "Cpf already exist!" };
@@ -113,8 +108,8 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
         id,
         name: user.fullName,
         email: user.email,
-        phone: sanitizeInput(user.phone),
-        cpf: sanitizeInput(user.cpf),
+        phone: user.phone,
+        cpf: user.cpf,
         role: user.role,
         imageName: imageName ? imageName : null,
         imageurl: imgUrl ? imgUrl : null,
@@ -132,6 +127,7 @@ export const updateuser = async (
   data: z.infer<typeof formSchema>
 ) => {
   const parseUser = formSchema.safeParse(data);
+  console.log(parseUser);
 
   if (!parseUser.success) return { error: "Invalid data" };
   const user = parseUser.data;
@@ -141,7 +137,7 @@ export const updateuser = async (
       db.user.findUnique({ where: { email: user.email } }),
       db.user.findUnique({ where: { phone: user.phone } }),
       user.role !== UserRole.student
-        ? db.user.findUnique({ where: { cpf: sanitizeInput(user.cpf) } })
+        ? db.user.findUnique({ where: { cpf: user.cpf } })
         : Promise.resolve(null),
     ]);
 
@@ -202,7 +198,7 @@ export const updateuser = async (
       data: {
         name: user.firstName + " " + user.lastName,
         email: user.email,
-        phone: sanitizeInput(user.phone),
+        phone: user.phone,
         role: user.role,
         city: user.city,
         state: user.state,
@@ -212,7 +208,7 @@ export const updateuser = async (
     });
   } else {
     // const cpfConflict = await db.user.findUnique({
-    //   where: { cpf: sanitizeInput(user.cpf) },
+    //   where: { cpf: user.cpf },
     // });
     // if (cpfConflict && cpfConflict.id !== idUser)
     //   return { error: "Cpf already exist!" };
@@ -222,8 +218,8 @@ export const updateuser = async (
       data: {
         name: user.fullName,
         email: user.email,
-        phone: sanitizeInput(user.phone),
-        cpf: sanitizeInput(user.cpf),
+        phone: user.phone,
+        cpf: user.cpf,
         role: user.role,
         imageName: imageName ? imageName : null,
         imageurl: imgUrl ? imgUrl : null,
