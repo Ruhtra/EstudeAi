@@ -1,37 +1,43 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef, ReactNode } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { motion, useSpring, useInView } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { ChevronDown, LogIn, UserPlus } from "lucide-react"
+import { useState, useEffect, useRef, ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion, useSpring, useInView } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ChevronDown, LogIn, UserPlus } from "lucide-react";
 
 const useScrollProgress = () => {
-  const [progress, setProgress] = useState(0)
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const updateScroll = () => {
-      const currentProgress = window.scrollY
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
+      const currentProgress = window.scrollY;
+      const scrollHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
       if (scrollHeight) {
-        setProgress(Number((currentProgress / scrollHeight).toFixed(2)))
+        setProgress(Number((currentProgress / scrollHeight).toFixed(2)));
       }
-    }
+    };
 
-    window.addEventListener("scroll", updateScroll)
+    window.addEventListener("scroll", updateScroll);
 
-    return () => window.removeEventListener("scroll", updateScroll)
-  }, [])
+    return () => window.removeEventListener("scroll", updateScroll);
+  }, []);
 
-  return progress
-}
+  return progress;
+};
 
-const FadeInWhenVisible = ({ children }: {children: ReactNode}) => {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, amount: 0.3 })
+const FadeInWhenVisible = ({ children }: { children: ReactNode }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.3 });
 
   return (
     <motion.div
@@ -42,29 +48,44 @@ const FadeInWhenVisible = ({ children }: {children: ReactNode}) => {
     >
       {children}
     </motion.div>
-  )
-}
+  );
+};
 
 export default function LandingPage() {
-  const [isScrolled, setIsScrolled] = useState(false)
-  const scrollProgress = useScrollProgress()
+  const [isScrolled, setIsScrolled] = useState(false);
+  const scrollProgress = useScrollProgress();
   const scaleX = useSpring(scrollProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
-  })
+  });
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white">
-      <motion.div className="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-50" style={{ scaleX }} />
+      {/* <Head>
+        <meta property="og:title" content="Mauhel • Admin" />
+        <meta
+          property="og:description"
+          content="Descubra o poder do Mauhel App para gerenciar suas atividades e acompanhar seu progresso de maneira prática e eficiente."
+        />
+        <meta property="og:image" content="/manifest/icon512_maskable.png" />
+        <meta property="og:url" content="/" />
+        <meta property="og:type" content="website" />
+        <meta property="theme-color" content="#e63946" />
+      </Head> */}
+
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-50"
+        style={{ scaleX }}
+      />
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isScrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"
@@ -75,7 +96,10 @@ export default function LandingPage() {
             EstudeAI
           </Link>
           <nav className="hidden md:flex space-x-4">
-            <Link href="#features" className="text-gray-600 hover:text-blue-600">
+            <Link
+              href="#features"
+              className="text-gray-600 hover:text-blue-600"
+            >
               Recursos
             </Link>
             <Link href="#about" className="text-gray-600 hover:text-blue-600">
@@ -93,18 +117,18 @@ export default function LandingPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <Link href={'/auth/login'}>
-              <DropdownMenuItem>
-                <LogIn className="mr-2 h-4 w-4" />
-                <span>Login</span>
-              </DropdownMenuItem>
+              <Link href={"/auth/login"}>
+                <DropdownMenuItem>
+                  <LogIn className="mr-2 h-4 w-4" />
+                  <span>Login</span>
+                </DropdownMenuItem>
               </Link>
-              
-              <Link href={'/auth/register'}>
-              <DropdownMenuItem>
-                <UserPlus className="mr-2 h-4 w-4" />
-                <span>Criar Conta</span>
-              </DropdownMenuItem>
+
+              <Link href={"/auth/register"}>
+                <DropdownMenuItem>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  <span>Criar Conta</span>
+                </DropdownMenuItem>
               </Link>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -126,15 +150,15 @@ export default function LandingPage() {
                   <span className="text-blue-600">Evolua com EstudeAI</span>
                 </h1>
                 <p className="text-xl text-gray-600 mb-8">
-                  Transforme sua jornada de aprendizado com nossa plataforma de estudos inovadora e interativa.
+                  Transforme sua jornada de aprendizado com nossa plataforma de
+                  estudos inovadora e interativa.
                 </p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.5 }}
                 >
-                  
-                  <Link href={'/auth/register'}>
+                  <Link href={"/auth/register"}>
                     <Button size="lg" className="mr-4">
                       Comece Agora
                     </Button>
@@ -165,7 +189,9 @@ export default function LandingPage() {
         <section id="features" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <FadeInWhenVisible>
-              <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Recursos Principais</h2>
+              <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
+                Recursos Principais
+              </h2>
             </FadeInWhenVisible>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
@@ -231,16 +257,20 @@ export default function LandingPage() {
                 viewport={{ once: true, amount: 0.3 }}
                 className="md:w-1/2 md:pl-10"
               >
-                <h2 className="text-3xl font-bold text-gray-800 mb-6">Sobre o EstudeAI</h2>
+                <h2 className="text-3xl font-bold text-gray-800 mb-6">
+                  Sobre o EstudeAI
+                </h2>
                 <p className="text-gray-600 mb-6">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
-                  dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                  aliquip ex ea commodo consequat.
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                  laboris nisi ut aliquip ex ea commodo consequat.
                 </p>
                 <p className="text-gray-600 mb-6">
-                  Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                  Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-                  laborum.
+                  Duis aute irure dolor in reprehenderit in voluptate velit esse
+                  cillum dolore eu fugiat nulla pariatur. Excepteur sint
+                  occaecat cupidatat non proident, sunt in culpa qui officia
+                  deserunt mollit anim id est laborum.
                 </p>
                 <Button>Conheça Nossa História</Button>
               </motion.div>
@@ -253,13 +283,14 @@ export default function LandingPage() {
             <FadeInWhenVisible>
               <h2 className="text-3xl font-bold mb-8">Pronto para Começar?</h2>
               <p className="text-xl mb-8">
-                Junte-se a milhares de estudantes que já estão transformando sua forma de aprender.
+                Junte-se a milhares de estudantes que já estão transformando sua
+                forma de aprender.
               </p>
-              
-              <Link href={'/auth/register'}>
-              <Button size="lg" variant="secondary">
-                Crie Sua Conta Grátis
-              </Button>
+
+              <Link href={"/auth/register"}>
+                <Button size="lg" variant="secondary">
+                  Crie Sua Conta Grátis
+                </Button>
               </Link>
             </FadeInWhenVisible>
           </div>
@@ -273,7 +304,9 @@ export default function LandingPage() {
               <Link href="/" className="text-2xl font-bold">
                 EstudeAI
               </Link>
-              <p className="mt-2 text-sm text-gray-400">© 2023 EstudeAI. Todos os direitos reservados.</p>
+              <p className="mt-2 text-sm text-gray-400">
+                © 2023 EstudeAI. Todos os direitos reservados.
+              </p>
             </div>
             <nav className="flex space-x-4">
               <Link href="#" className="hover:text-blue-400">
@@ -290,6 +323,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
-
