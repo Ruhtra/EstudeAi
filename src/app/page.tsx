@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useSpring, useInView } from "framer-motion";
@@ -69,7 +69,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white overflow-x-hidden">
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-50"
         style={{ scaleX }}
@@ -160,7 +160,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8 }}
-                className="md:w-1/2"
+                className="md:w-1/2 flex justify-center items-center"
               >
                 <Image
                   src="/placeholder.svg"
