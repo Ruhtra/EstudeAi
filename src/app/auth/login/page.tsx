@@ -52,7 +52,8 @@ export default function LoginPage() {
           setSuccess(null);
 
           if (data.error) {
-            form.reset();
+            form.resetField("password");
+            // form.reset();
             setError(data?.error);
           }
           if (data.success) {

@@ -42,7 +42,7 @@ export default auth(async (req) => {
   if (!isLoggedIn && !isPublicRoute)
     return Response.redirect(new URL("/auth/login", nextUrl));
 
-  if (isAdminRoute && role != "admin")
+  if (isAdminRoute && ["admin", "sup", "teatcher"].includes(role))
     return Response.redirect(new URL("/404", nextUrl));
   return;
 });

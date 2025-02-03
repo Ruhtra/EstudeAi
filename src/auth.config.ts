@@ -1,4 +1,4 @@
-import type { NextAuthConfig, User } from "next-auth";
+import { AuthError, type NextAuthConfig, type User } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 // import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
@@ -24,7 +24,8 @@ export default {
 
           const user = await getUserByEmail(email);
 
-          if (!user || !user.passwordHash) return null;
+          if (!user || !user.passwordHash)
+            throw new Error("Email does not exist");
 
           const passwordMatch = await bcrypt.compare(
             password,

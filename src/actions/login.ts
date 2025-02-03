@@ -2,7 +2,6 @@
 
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
-import { getUserByEmail } from "@/lib/user";
 import { z } from "zod";
 import { LoginSchema } from "@/schemas/LoginSchema";
 
@@ -11,12 +10,6 @@ export async function login(values: z.infer<typeof LoginSchema>) {
 
   if (!validatedFields.success) return { error: "Invalid fields!" };
   const { email, password } = validatedFields.data;
-
-  //TO-DO: remove remail daqui
-  const existingUser = await getUserByEmail(email);
-
-  if (!existingUser || !existingUser.email || !existingUser.passwordHash)
-    return { error: "Email does not exist!" };
 
   try {
     await signIn("credentials", {
@@ -31,6 +24,10 @@ export async function login(values: z.infer<typeof LoginSchema>) {
       switch (error.type) {
         case "CredentialsSignin":
           return { error: "Invalid credentials" };
+
+        case "CallbackRouteError":
+          if (error.cause?.err?.message == "Email does not exist")
+            return { error: "Email does Not exist" };
 
         default:
           return { error: "An error occurred" };
