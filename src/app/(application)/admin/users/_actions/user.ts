@@ -6,7 +6,6 @@ import { z } from "zod";
 // import { createUserSchema } from "./user.schema";
 import { getUserByEmail } from "@/lib/user";
 import { formSchema } from "./user.schema";
-import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import cuid from "cuid";
 
@@ -65,7 +64,6 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
   if (existingPhone) return { error: "Phone already exist!" };
 
   const id = cuid();
-  console.log(id);
 
   let imgUrl;
   let imageName;
@@ -124,7 +122,7 @@ export const createUser = async (data: z.infer<typeof formSchema>) => {
     });
   }
 
-  revalidatePath("/admin/users");
+  // revalidatePath("/admin/users");
 
   return { success: "User create!" };
 };
@@ -137,21 +135,23 @@ export const updateuser = async (
 
   if (!parseUser.success) return { error: "Invalid data" };
   const user = parseUser.data;
+  const [existingUser, emailConflict, phoneConflict, cpfConflict] =
+    await Promise.all([
+      db.user.findUnique({ where: { id: idUser } }),
+      db.user.findUnique({ where: { email: user.email } }),
+      db.user.findUnique({ where: { phone: user.phone } }),
+      user.role !== UserRole.student
+        ? db.user.findUnique({ where: { cpf: sanitizeInput(user.cpf) } })
+        : Promise.resolve(null),
+    ]);
 
-  const existingUser = await db.user.findUnique({ where: { id: idUser } });
   if (!existingUser) return { error: "User not found!" };
-
-  const emailConflict = await db.user.findUnique({
-    where: { email: user.email },
-  });
   if (emailConflict && emailConflict.id !== idUser)
     return { error: "Email already exist!" };
-
-  const phoneConflict = await db.user.findUnique({
-    where: { phone: user.phone },
-  });
   if (phoneConflict && phoneConflict.id !== idUser)
     return { error: "Phone already exist!" };
+  if (cpfConflict && cpfConflict.id !== idUser)
+    return { error: "Cpf already exist!" };
 
   let imgUrl: string | undefined;
   let imageName: string | undefined;
@@ -211,11 +211,11 @@ export const updateuser = async (
       },
     });
   } else {
-    const cpfConflict = await db.user.findUnique({
-      where: { cpf: sanitizeInput(user.cpf) },
-    });
-    if (cpfConflict && cpfConflict.id !== idUser)
-      return { error: "Cpf already exist!" };
+    // const cpfConflict = await db.user.findUnique({
+    //   where: { cpf: sanitizeInput(user.cpf) },
+    // });
+    // if (cpfConflict && cpfConflict.id !== idUser)
+    //   return { error: "Cpf already exist!" };
 
     await db.user.update({
       where: { id: idUser },
@@ -230,7 +230,7 @@ export const updateuser = async (
       },
     });
   }
-  revalidatePath("/admin/users");
+  // revalidatePath("/admin/users");
 
   return { success: "User updated!" };
 };
@@ -260,6 +260,6 @@ export const deleteUser = async (userId: string) => {
     },
   });
 
-  revalidatePath("/admin/users");
+  // revalidatePath("/admin/users");
   return { success: "User deleted" };
 };

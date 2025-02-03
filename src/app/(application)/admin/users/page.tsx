@@ -185,8 +185,18 @@ export default function UsersPage() {
                       <TableCell className="font-medium">{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{UserRole[user.role]}</TableCell>
-                      <TableCell>{user.phone}</TableCell>
-                      <TableCell>{user.cpf}</TableCell>
+                      <TableCell className="text-nowrap">
+                        {user.phone.replace(
+                          /(\d{2})(\d{1})(\d{4})(\d{4})/,
+                          "($1) $2 $3-$4"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-nowrap">
+                        {user.cpf?.replace(
+                          /(\d{3})(\d{3})(\d{3})(\d{2})/,
+                          "$1.$2.$3-$4"
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

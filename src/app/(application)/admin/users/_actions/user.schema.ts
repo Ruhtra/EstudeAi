@@ -8,7 +8,8 @@ const baseSchema = z.object({
 
 const collaboratorTeacherSchema = baseSchema.extend({
   fullName: z.string().min(2, "Nome completo é obrigatório"),
-  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido"),
+  // cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido"),
+  cpf: z.string().min(1),
   photo: z
     .instanceof(File)
     .refine((file) => file.size <= 5000000, `Tamanho máximo do arquivo é 5MB.`),

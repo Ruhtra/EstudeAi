@@ -76,14 +76,11 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
   const [userType, setUserType] = useState<UserRole>(UserRole.student);
   // const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const {
-    data: userData,
-    isLoading,
-    refetch,
-  } = useQuery({
+  const { data: userData, isPending: isLoading } = useQuery({
     queryKey: ["user", idUser],
     queryFn: () => fetchUser(idUser),
-    enabled: false,
+    enabled: true,
+    refetchOnMount: true,
   });
 
   const defaultValues: Record<string, string> = {
@@ -134,13 +131,16 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
           .then((data) => {
             if (data.error) toast(data.error);
             if (data.success) {
+              queryClient.refetchQueries({
+                queryKey: ["users"],
+              });
+              queryClient.removeQueries({
+                queryKey: ["user", idUser],
+              });
+
               setIsOpen(false);
               form.reset();
               toast("Usuário atualizado com sucesso");
-              // setPreviewUrl(null);
-              queryClient.invalidateQueries({
-                queryKey: ["users"],
-              });
             }
           })
           .catch(() => {
@@ -155,7 +155,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
               form.reset();
               toast("Usuário criado com sucesso");
               // setPreviewUrl(null);
-              queryClient.invalidateQueries({
+              queryClient.refetchQueries({
                 queryKey: ["users"],
               });
             }
@@ -168,15 +168,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
   }
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (open && idUser) {
-          refetch();
-        }
-      }}
-    >
+    <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -255,7 +247,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                               </FormItem>
                             )}
                           />
-                         <InputCpfField form={form} isPending={isPending} />
+                          <InputCpfField form={form} isPending={isPending} />
                         </div>
                       </TabsContent>
                       <TabsContent value="teacher">
@@ -358,7 +350,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                     </FormItem>
                   )}
                 />
-                 <InputPhoneField form={form} isPending={isPending} />
+                <InputPhoneField form={form} isPending={isPending} />
                 <Button
                   disabled={isPending || isLoading}
                   type="submit"

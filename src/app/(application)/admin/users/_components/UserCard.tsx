@@ -91,9 +91,19 @@ export function UserCard({ user, onDelete }: UserCardProps) {
               <span className="font-semibold">Email:</span>
               <span>{user.email}</span>
               <span className="font-semibold">Telefone:</span>
-              <span>{user.phone}</span>
+              <span>
+                {user.phone.replace(
+                  /(\d{2})(\d{1})(\d{4})(\d{4})/,
+                  "($1) $2 $3-$4"
+                )}
+              </span>
               <span className="font-semibold">CPF:</span>
-              <span>{user.cpf}</span>
+              <span>
+                {user.cpf?.replace(
+                  /(\d{3})(\d{3})(\d{3})(\d{2})/,
+                  "$1.$2.$3-$4"
+                )}
+              </span>
             </div>
           </CardContent>
         )}
