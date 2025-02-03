@@ -1,5 +1,6 @@
 "use server";
 import { Resend } from "resend";
+import EmailTemplate from "./EmailTemplate";
 // import { EmailTemplate } from "./email-template";
 
 const resend = new Resend(process.env.RESENT_API_KEY);
@@ -29,13 +30,16 @@ const FROM = "EstudeAi <no-reply@ruhtra.work>";
 // };
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
-  const resetLink = `${process.env.DNS_FRONT}/auth/new-password?token=${token}`;
+  // const resetLink = `${process.env.DNS_FRONT}/auth/new-password?token=${token}`;
 
   await resend.emails.send({
     from: FROM,
     to: [email],
-    subject: "Reset Password!",
-    html: `<p>Click <a href="${resetLink}">here</a> to reset password</p>`,
-    // react: await EmailTemplate({ firstName: "John" }),
+    subject: "Redefinição de Senha - EstudeAi",
+    react: await EmailTemplate({
+      email,
+      name: "seu nome será incluido aqui",
+      token,
+    }),
   });
 };
