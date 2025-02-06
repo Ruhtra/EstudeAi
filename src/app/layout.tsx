@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { auth } from "@/auth";
 import App from "./app";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,10 +59,9 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionProvider session={sesion}>
-          <App>
-            {children}
-            <SpeedInsights />
-          </App>
+          <App>{children}</App>
+          <SpeedInsights />
+          <Analytics />
         </SessionProvider>
       </body>
     </html>
