@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from "react";
 import { auth } from "@/auth";
 import App from "./app";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,7 +58,10 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionProvider session={sesion}>
-          <App>{children}</App>
+          <App>
+            {children}
+            <SpeedInsights />
+          </App>
         </SessionProvider>
       </body>
     </html>
