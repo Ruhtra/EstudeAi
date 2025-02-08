@@ -14,6 +14,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+
+  // Do not use permanet why save in cache client side
+  async redirects() {
+    return [
+      {
+        source: "/admin/exams/:id",
+        destination: "/admin/exams/:id/questions",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

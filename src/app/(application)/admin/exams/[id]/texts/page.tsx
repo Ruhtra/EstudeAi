@@ -1,4 +1,5 @@
 'use client'
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import {
   EyeOff,
   ChevronRight,
 } from "lucide-react";
-// import { CreateExamDialog } from "./CreateExamDialog";'
+// import { CreateExamDialog } from "./CreateExamDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -79,7 +80,6 @@ export default function ExamsPage() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   //TO-DO: Remove this
   console.log(isCreateDialogOpen);
-  
 
   const years = Array.from(new Set(examData.map((exam) => exam.year))).sort(
     (a, b) => b - a
@@ -174,12 +174,12 @@ export default function ExamsPage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Link href={`/admin/exams/${exam.id}/questions`} className="flex-1">
+                  <Link href={`${exam.id}/questions`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       Questões
                     </Button>
                   </Link>
-                  <Link href={`/admin/exams/${exam.id}/texts`} className="flex-1">
+                  <Link href={`${exam.id}/texts`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       Textos
                     </Button>
@@ -266,12 +266,12 @@ export default function ExamsPage() {
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Link href={`/admin/exams/${exam.id}/questions`}>
+                  <Link href={`${exam.id}/questions`}>
                     <Button variant="outline" size="sm">
                       Questões
                     </Button>
                   </Link>
-                  <Link href={`/admin/exams/${exam.id}/texts`}>
+                  <Link href={`${exam.id}/texts`}>
                     <Button variant="outline" size="sm">
                       Textos
                     </Button>

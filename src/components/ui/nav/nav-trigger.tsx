@@ -13,6 +13,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "../breadcrumb";
+import React from "react";
 
 export function NavTrigger() {
   const { toggleSidebar } = useSidebar();
@@ -49,7 +50,7 @@ export function NavTrigger() {
             <BreadcrumbItem>
               <BreadcrumbLink href="/admin/dashboard">Home</BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
+
             {pathnames.map((name, index) => {
               if (isUUID(name)) return null;
               if (name === "admin") return null;
@@ -58,18 +59,18 @@ export function NavTrigger() {
               const isLast = index === pathnames.length - 1;
 
               return (
-                <BreadcrumbItem key={routeTo}>
-                  {isLast ? (
-                    <BreadcrumbPage>{name}</BreadcrumbPage>
-                  ) : (
-                    <>
+                <React.Fragment key={routeTo}>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    {isLast ? (
+                      <BreadcrumbPage>{name}</BreadcrumbPage>
+                    ) : (
                       <BreadcrumbLink asChild>
                         <Link href={routeTo}>{name}</Link>
                       </BreadcrumbLink>
-                      <BreadcrumbSeparator />
-                    </>
-                  )}
-                </BreadcrumbItem>
+                    )}
+                  </BreadcrumbItem>
+                </React.Fragment>
               );
             })}
           </BreadcrumbList>
