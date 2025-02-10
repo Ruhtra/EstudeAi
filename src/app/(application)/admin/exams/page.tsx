@@ -46,8 +46,6 @@ import Link from "next/link";
 import type { ExamsDto } from "@/app/api/exams/route";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { deleteExam } from "./_actions/exam";
-import { queryClient } from "@/lib/queryCLient";
 
 export default function ExamsPage() {
   const { isPending, data } = useQuery<ExamsDto[]>({
@@ -78,18 +76,6 @@ export default function ExamsPage() {
           }
         })
     : [];
-
-  const handleEdit = (id: string) => {
-    console.log(`Edit exam ${id}`);
-  };
-
-  const handleDelete = (id: string) => {
-    deleteExam(id).then(() => {
-      queryClient.invalidateQueries({
-        queryKey: ["exams"],
-      });
-    });
-  };
 
   const togglePublish = (id: string) => {
     setPublishedExams((prev) => {
@@ -288,7 +274,7 @@ export default function ExamsPage() {
                         )}
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDelete(exam.id)}
+                        // onClick={() => handleDelete(exam.id)}
                         className="text-red-600"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -387,7 +373,7 @@ export default function ExamsPage() {
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleDelete(exam.id)}
+                      // onClick={() => handleDelete(exam.id)}
                       className="text-red-600"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />

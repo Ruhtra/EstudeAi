@@ -16,6 +16,7 @@ import { useDropzone } from "react-dropzone";
 import { Upload } from "lucide-react";
 import { ContentTypeSelect } from "@/components/ContentTypeSelect";
 import TiptapEditor from "@/components/TipTapEditor";
+import Image from "next/image";
 
 const formSchema = z.object({
   number: z.string().min(1, {
@@ -139,7 +140,9 @@ export function CreateTextForm() {
                       <input {...getInputProps()} />
                       {previewImage ? (
                         <div className="max-w-full max-h-[300px] mx-auto relative">
-                          <img
+                          <Image
+                            width={300}
+                            height={300}
                             src={previewImage}
                             alt="Preview"
                             className="max-w-full max-h-[300px] object-contain"
