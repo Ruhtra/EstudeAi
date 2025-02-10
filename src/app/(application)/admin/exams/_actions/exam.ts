@@ -18,36 +18,40 @@ export const createExaxm = async (data: z.infer<typeof examSchema>) => {
   await db.exam.create({
     data: {
       id: id,
+      name: exam.name,
       year: exam.year, // Ano do exame
       position: exam.position,
       level: exam.level,
       isComplete: false,
 
+      bank: exam.banca,
+      institute: exam.instituto,
+
       // Substituindo upsert por connectOrCreate para Bank
-      Bank: {
-        connectOrCreate: {
-          where: {
-            name: exam.banca, // Tentando conectar com o Bank pelo ID
-          },
-          create: {
-            id: cuid(),
-            name: exam.banca, // Nome do banco
-          },
-        },
-      },
+      // Bank: {
+      //   connectOrCreate: {
+      //     where: {
+      //       name: exam.banca, // Tentando conectar com o Bank pelo ID
+      //     },
+      //     create: {
+      //       id: cuid(),
+      //       name: exam.banca, // Nome do banco
+      //     },
+      //   },
+      // },
 
       // Substituindo upsert por connectOrCreate para Institute
-      Institute: {
-        connectOrCreate: {
-          where: {
-            name: exam.instituto, // Tentando conectar com o Bank pelo ID
-          },
-          create: {
-            id: cuid(),
-            name: exam.instituto, // Nome do banco
-          },
-        },
-      },
+      // Institute: {
+      //   connectOrCreate: {
+      //     where: {
+      //       name: exam.instituto, // Tentando conectar com o Bank pelo ID
+      //     },
+      //     create: {
+      //       id: cuid(),
+      //       name: exam.instituto, // Nome do banco
+      //     },
+      //   },
+      // },
 
       createdAt: new Date(), // Data de criação
       updatedAt: new Date(), // Data de atualização
@@ -55,6 +59,33 @@ export const createExaxm = async (data: z.infer<typeof examSchema>) => {
   });
 
   return { success: "Exam create!" };
+};
+
+export const updateExam = async (
+  idUser: string,
+  data: z.infer<typeof examSchema>
+) => {
+  const parseExam = examSchema.safeParse(data);
+
+  if (!parseExam.success) return { error: "Invalid data" };
+  const exam = parseExam.data;
+
+  await db.exam.update({
+    where: { id: idUser },
+    data: {
+      name: exam.name,
+      bank: exam.banca,
+      institute: exam.instituto,
+      level: exam.level,
+      position: exam.position,
+      updatedAt: new Date(),
+      year: exam.year,
+    },
+  });
+
+  // revalidatePath("/admin/users");
+
+  return { success: "Exam updated!" };
 };
 
 export const deleteExam = async (examId: string) => {

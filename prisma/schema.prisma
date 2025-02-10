@@ -18,11 +18,11 @@ model Alternative {
   Question   Question @relation(fields: [questionId], references: [id])
 }
 
-model Bank {
-  id   String @id
-  name String @unique
-  Exam Exam[]
-}
+// model Bank {
+//   id   String @id
+//   name String @unique
+//   Exam Exam[]
+// }
 
 model Discipline {
   id       String     @id
@@ -31,25 +31,28 @@ model Discipline {
 }
 
 model Exam {
-  id          String     @id
-  year        Int
-  position    String
-  level       String
-  instituteId String
-  bankId      String
-  isComplete  Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime
-  Bank        Bank       @relation(fields: [bankId], references: [id])
-  Institute   Institute  @relation(fields: [instituteId], references: [id])
-  Question    Question[]
+  id         String     @id
+  name       String
+  year       Int
+  position   String
+  level      String
+  // instituteId String
+  // bankId      String
+  isComplete Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  // Bank        Bank       @relation(fields: [bankId], references: [id])
+  // Institute   Institute  @relation(fields: [instituteId], references: [id])
+  bank       String
+  institute  String
+  updatedAt  DateTime
+  Question   Question[]
 }
 
-model Institute {
-  id   String @id
-  name String @unique
-  Exam Exam[]
-}
+// model Institute {
+//   id   String @id
+//   name String @unique
+//   Exam Exam[]
+// }
 
 model Question {
   id           String        @id

@@ -16,6 +16,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useExamOptions } from "../_queries/examQueries";
 import { ComboboxCreate } from "@/components/comboboxCreate";
@@ -23,39 +24,70 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { YearPicker } from "./YearPicker";
 import { Input } from "@/components/ui/input";
-import { createExaxm } from "../_actions/exam";
-import { useTransition } from "react";
+import { createExaxm, updateExam } from "../_actions/exam";
+import { ReactNode, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { queryClient } from "@/lib/queryCLient";
 import { examSchema } from "../_actions/ExamSchema";
+import { ExamsDto } from "@/app/api/exams/route";
+import { useQuery } from "@tanstack/react-query";
 
 type FormData = z.infer<typeof examSchema>;
 
 export const CreateExamDialog = ({
   idExam,
-  open,
-  onOpenChange,
+  children,
 }: {
   idExam?: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  children: ReactNode;
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  const { data: examData, isPending: isLoading } = useQuery({
+    queryKey: ["exam", idExam],
+    queryFn: () => fetchExam(idExam),
+    enabled: true,
+    refetchOnMount: true,
+  });
 
   const form = useForm<FormData>({
     resolver: zodResolver(examSchema),
     defaultValues: {
-      year: new Date().getFullYear(),
-      instituto: "",
-      banca: "",
-      level: "",
-      position: "",
-      name: "",
+      year: examData?.year || new Date().getFullYear(),
+      instituto: examData?.instituteName || "",
+      banca: examData?.bankName || "",
+      level: examData?.level || "",
+      position: examData?.position || "",
+      name: examData?.name || "",
     },
   });
 
-  const { institutes, banks, levels, positions, isLoading, isError } =
-    useExamOptions();
+  useEffect(() => {
+    if (examData) {
+      Object.entries(examData).forEach(([key, value]) => {
+        form.setValue(key as keyof FormData, value);
+      });
+
+      console.log(examData);
+
+      form.setValue("year", examData.year ?? "");
+      form.setValue("instituto", examData.instituteName ?? "");
+      form.setValue("banca", examData.bankName ?? "");
+      form.setValue("level", examData.level ?? "");
+      form.setValue("position", examData.position ?? "");
+      form.setValue("name", examData.name ?? "");
+    }
+  }, [examData, form]);
+
+  const {
+    institutes,
+    banks,
+    levels,
+    positions,
+    isLoading: isLoadingOptions,
+    isError,
+  } = useExamOptions();
 
   if (isError) {
     return <div>Error loading options. Please try again later.</div>;
@@ -64,30 +96,30 @@ export const CreateExamDialog = ({
   const onSubmit = async (values: FormData) => {
     startTransition(() => {
       if (idExam) {
-        // updateuser(idUser, values)
-        //   .then((data) => {
-        //     if (data.error) toast(data.error);
-        //     if (data.success) {
-        //       queryClient.refetchQueries({
-        //         queryKey: ["users"],
-        //       });
-        //       queryClient.removeQueries({
-        //         queryKey: ["user", idUser],
-        //       });
-        //       setIsOpen(false);
-        //       form.reset();
-        //       toast("Usuário atualizado com sucesso");
-        //     }
-        //   })
-        //   .catch(() => {
-        //     toast("Algo deu errado, informe o suporte!");
-        //   });
+        updateExam(idExam, values)
+          .then((data) => {
+            if (data.error) toast(data.error);
+            if (data.success) {
+              queryClient.refetchQueries({
+                queryKey: ["exams"],
+              });
+              queryClient.removeQueries({
+                queryKey: ["exam", idExam],
+              });
+              setIsOpen(false);
+              form.reset();
+              toast("Exam atualizado com sucesso");
+            }
+          })
+          .catch(() => {
+            toast("Algo deu errado, informe o suporte!");
+          });
       } else {
         createExaxm(values)
           .then((data) => {
             if (data.error) toast(data.error);
             if (data.success) {
-              onOpenChange(false);
+              setIsOpen(false);
               form.reset();
               toast("Exame criado com sucesso");
               // setPreviewUrl(null);
@@ -108,12 +140,15 @@ export const CreateExamDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className=" p-6">
         <DialogHeader>
-          <DialogTitle className="text-lg font-medium">Criar Exame</DialogTitle>
+          <DialogTitle className="text-lg font-medium">
+            {idExam ? "Editar Exame" : "Criar Exame"}
+          </DialogTitle>
         </DialogHeader>
-        {isLoading ? (
+        {isLoadingOptions || isLoading ? (
           <div className="space-y-6">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
@@ -265,7 +300,7 @@ export const CreateExamDialog = ({
               />
 
               <div className="flex justify-end">
-                <Button type="submit" className="text-sm">
+                <Button disabled={isPending} type="submit" className="text-sm">
                   {isPending
                     ? idExam
                       ? "Atualizando Exame"
@@ -282,3 +317,14 @@ export const CreateExamDialog = ({
     </Dialog>
   );
 };
+
+async function fetchExam(id: string | undefined): Promise<ExamsDto | null> {
+  if (id) {
+    const response = await fetch(`/api/exams/${id}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch exam");
+    }
+    return response.json();
+  }
+  return null;
+}

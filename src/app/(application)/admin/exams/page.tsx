@@ -1,9 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   PlusCircle,
   MoreHorizontal,
@@ -14,83 +20,100 @@ import {
   Eye,
   EyeOff,
   ChevronRight,
-} from "lucide-react"
-import { CreateExamDialog } from "./_components/CreateExamDialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent } from "@/components/ui/card"
-import Link from "next/link"
-import type { ExamsDto } from "@/app/api/exams/route"
-import { useQuery } from "@tanstack/react-query"
-import { Skeleton } from "@/components/ui/skeleton"
-import { deleteExam } from "./_actions/exam"
-import { queryClient } from "@/lib/queryCLient"
+} from "lucide-react";
+import { CreateExamDialog } from "./_components/CreateExamDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import type { ExamsDto } from "@/app/api/exams/route";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { deleteExam } from "./_actions/exam";
+import { queryClient } from "@/lib/queryCLient";
 
 export default function ExamsPage() {
   const { isPending, data } = useQuery<ExamsDto[]>({
     queryKey: ["exams"],
     queryFn: async () => {
-      const response = await fetch("/api/exams")
-      return await response.json()
+      const response = await fetch("/api/exams");
+      return await response.json();
     },
-  })
+  });
 
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [filterYear, setFilterYear] = useState<number | "all">("all")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-  const [publishedExams, setPublishedExams] = useState<Set<string>>(new Set())
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
+  const [filterYear, setFilterYear] = useState<number | "all">("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [publishedExams, setPublishedExams] = useState<Set<string>>(new Set());
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
-  const years = data ? Array.from(new Set(data.map((exam) => exam.year))).sort((a, b) => b - a) : []
+  const years = data
+    ? Array.from(new Set(data.map((exam) => exam.year))).sort((a, b) => b - a)
+    : [];
 
   const filteredAndSortedExams = data
     ? data
         .filter((exam) => filterYear === "all" || exam.year === filterYear)
         .sort((a, b) => {
           if (sortOrder === "asc") {
-            return a.year - b.year
+            return a.year - b.year;
           } else {
-            return b.year - a.year
+            return b.year - a.year;
           }
         })
-    : []
+    : [];
 
   const handleEdit = (id: string) => {
-    console.log(`Edit exam ${id}`)
-  }
+    console.log(`Edit exam ${id}`);
+  };
 
   const handleDelete = (id: string) => {
     deleteExam(id).then(() => {
       queryClient.invalidateQueries({
         queryKey: ["exams"],
-      })
-    })
-  }
+      });
+    });
+  };
 
   const togglePublish = (id: string) => {
     setPublishedExams((prev) => {
-      const newSet = new Set(prev)
+      const newSet = new Set(prev);
       if (newSet.has(id)) {
-        newSet.delete(id)
+        newSet.delete(id);
       } else {
-        newSet.add(id)
+        newSet.add(id);
       }
-      return newSet
-    })
-  }
+      return newSet;
+    });
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedItems((prev) => {
-      const newSet = new Set(prev)
+      const newSet = new Set(prev);
       if (newSet.has(id)) {
-        newSet.delete(id)
+        newSet.delete(id);
       } else {
-        newSet.add(id)
+        newSet.add(id);
       }
-      return newSet
-    })
-  }
+      return newSet;
+    });
+  };
 
   const LoadingSkeleton = () => (
     <>
@@ -120,6 +143,7 @@ export default function ExamsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Name</TableHead>
                 <TableHead>Posição</TableHead>
                 <TableHead>Ano</TableHead>
                 <TableHead>Instituto</TableHead>
@@ -133,6 +157,9 @@ export default function ExamsPage() {
             <TableBody>
               {[...Array(5)].map((_, index) => (
                 <TableRow key={index}>
+                  <TableCell>
+                    <Skeleton className="h-5 w-40" />
+                  </TableCell>
                   <TableCell>
                     <Skeleton className="h-5 w-40" />
                   </TableCell>
@@ -167,21 +194,30 @@ export default function ExamsPage() {
         </div>
       </div>
     </>
-  )
+  );
 
   const MobileView = () => (
     <div className="space-y-4">
       {filteredAndSortedExams.map((exam) => (
         <Card key={exam.id}>
           <CardContent className="p-4">
-            <Collapsible open={expandedItems.has(exam.id)} onOpenChange={() => toggleExpand(exam.id)}>
+            <Collapsible
+              open={expandedItems.has(exam.id)}
+              onOpenChange={() => toggleExpand(exam.id)}
+            >
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <h3 className="font-medium">{exam.position}</h3>
+                  <h3 className="font-medium">{exam.name}</h3>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="secondary">{exam.year}</Badge>
-                    <Badge variant={publishedExams.has(exam.id) ? "default" : "secondary"}>
-                      {publishedExams.has(exam.id) ? "Publicado" : "Não publicado"}
+                    <Badge
+                      variant={
+                        publishedExams.has(exam.id) ? "default" : "secondary"
+                      }
+                    >
+                      {publishedExams.has(exam.id)
+                        ? "Publicado"
+                        : "Não publicado"}
                     </Badge>
                   </div>
                 </div>
@@ -198,6 +234,8 @@ export default function ExamsPage() {
               <CollapsibleContent className="space-y-4">
                 <div className="mt-4 space-y-2">
                   <div className="grid grid-cols-2 gap-2 text-sm">
+                    <span className="text-muted-foreground">Posição:</span>
+                    <span>{exam.position}</span>
                     <span className="text-muted-foreground">Instituto:</span>
                     <span>{exam.instituteName}</span>
                     <span className="text-muted-foreground">Banca:</span>
@@ -207,12 +245,18 @@ export default function ExamsPage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Link href={`/admin/exams/${exam.id}/questions`} className="flex-1">
+                  <Link
+                    href={`/admin/exams/${exam.id}/questions`}
+                    className="flex-1"
+                  >
                     <Button variant="outline" size="sm" className="w-full">
                       Questões
                     </Button>
                   </Link>
-                  <Link href={`/admin/exams/${exam.id}/texts`} className="flex-1">
+                  <Link
+                    href={`/admin/exams/${exam.id}/texts`}
+                    className="flex-1"
+                  >
                     <Button variant="outline" size="sm" className="w-full">
                       Textos
                     </Button>
@@ -224,10 +268,12 @@ export default function ExamsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(exam.id)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Editar
-                      </DropdownMenuItem>
+                      <CreateExamDialog idExam={exam.id}>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                      </CreateExamDialog>
                       <DropdownMenuItem onClick={() => togglePublish(exam.id)}>
                         {publishedExams.has(exam.id) ? (
                           <>
@@ -241,7 +287,10 @@ export default function ExamsPage() {
                           </>
                         )}
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDelete(exam.id)} className="text-red-600">
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(exam.id)}
+                        className="text-red-600"
+                      >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Deletar
                       </DropdownMenuItem>
@@ -254,13 +303,14 @@ export default function ExamsPage() {
         </Card>
       ))}
     </div>
-  )
+  );
 
   const DesktopView = () => (
     <div className="rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Name</TableHead>
             <TableHead>Posição</TableHead>
             <TableHead>Ano</TableHead>
             <TableHead>Instituto</TableHead>
@@ -274,6 +324,7 @@ export default function ExamsPage() {
         <TableBody>
           {filteredAndSortedExams.map((exam) => (
             <TableRow key={exam.id}>
+              <TableCell>{exam.name}</TableCell>
               <TableCell>{exam.position}</TableCell>
               <TableCell>
                 <Badge variant="secondary">{exam.year}</Badge>
@@ -286,7 +337,11 @@ export default function ExamsPage() {
                 <Badge>{exam.level}</Badge>
               </TableCell>
               <TableCell>
-                <Badge variant={publishedExams.has(exam.id) ? "default" : "secondary"}>
+                <Badge
+                  variant={
+                    publishedExams.has(exam.id) ? "default" : "secondary"
+                  }
+                >
                   {publishedExams.has(exam.id) ? "Publicado" : "Não publicado"}
                 </Badge>
               </TableCell>
@@ -312,10 +367,12 @@ export default function ExamsPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEdit(exam.id)}>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Editar
-                    </DropdownMenuItem>
+                    <CreateExamDialog idExam={exam.id}>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar
+                      </DropdownMenuItem>
+                    </CreateExamDialog>
                     <DropdownMenuItem onClick={() => togglePublish(exam.id)}>
                       {publishedExams.has(exam.id) ? (
                         <>
@@ -329,7 +386,10 @@ export default function ExamsPage() {
                         </>
                       )}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDelete(exam.id)} className="text-red-600">
+                    <DropdownMenuItem
+                      onClick={() => handleDelete(exam.id)}
+                      className="text-red-600"
+                    >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Deletar
                     </DropdownMenuItem>
@@ -341,20 +401,28 @@ export default function ExamsPage() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 
   return (
     <div className="container mx-auto">
       <div className="mb-4 flex flex-col gap-4">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Provas</h1>
-          <Button onClick={() => setIsCreateDialogOpen(true)} size="sm" className="w-full sm:w-auto">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Novo Exame
-          </Button>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
+            Provas
+          </h1>
+          <CreateExamDialog>
+            <Button size="sm" className="w-full sm:w-auto">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Novo Exame
+            </Button>
+          </CreateExamDialog>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <Select onValueChange={(value) => setFilterYear(value === "all" ? "all" : Number.parseInt(value))}>
+          <Select
+            onValueChange={(value) =>
+              setFilterYear(value === "all" ? "all" : Number.parseInt(value))
+            }
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filtrar por ano" />
             </SelectTrigger>
@@ -373,7 +441,11 @@ export default function ExamsPage() {
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
             className="w-full sm:w-auto"
           >
-            {sortOrder === "asc" ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
+            {sortOrder === "asc" ? (
+              <ChevronUp className="mr-2 h-4 w-4" />
+            ) : (
+              <ChevronDown className="mr-2 h-4 w-4" />
+            )}
             {sortOrder === "asc" ? "Mais antigos" : "Mais recentes"}
           </Button>
         </div>
@@ -391,9 +463,6 @@ export default function ExamsPage() {
           </div>
         </>
       )}
-
-      <CreateExamDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
     </div>
-  )
+  );
 }
-
