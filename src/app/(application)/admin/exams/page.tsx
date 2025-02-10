@@ -1,14 +1,9 @@
-'use client'
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+"use client"
+
+import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   PlusCircle,
   MoreHorizontal,
@@ -19,136 +14,174 @@ import {
   Eye,
   EyeOff,
   ChevronRight,
-} from "lucide-react";
-// import { CreateExamDialog } from "./CreateExamDialog";'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
-
-export interface Exam {
-  id: string;
-  year: number;
-  instituto: string;
-  banca: string;
-  position: string;
-  level: string;
-}
-
-const examData: Exam[] = [
-  {
-    id: "4fd4eeb1-7c98-4b4b-9121-5f1cb4956b0e",
-    year: 2023,
-    instituto: "Instituto Federal",
-    banca: "CESPE",
-    position: "Professor de Matemática",
-    level: "Superior",
-  },
-  {
-    id: "5fd4eeb1-7c98-4b4b-9121-5f1cb4956b0f",
-    year: 2022,
-    instituto: "Universidade Federal",
-    banca: "CEBRASPE",
-    position: "Professor de Física",
-    level: "Superior",
-  },
-];
+} from "lucide-react"
+import { CreateExamDialog } from "./_components/CreateExamDialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card"
+import Link from "next/link"
+import type { ExamsDto } from "@/app/api/exams/route"
+import { useQuery } from "@tanstack/react-query"
+import { Skeleton } from "@/components/ui/skeleton"
+import { deleteExam } from "./_actions/exam"
+import { queryClient } from "@/lib/queryCLient"
 
 export default function ExamsPage() {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [filterYear, setFilterYear] = useState<number | "all">("all");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [publishedExams, setPublishedExams] = useState<Set<string>>(new Set());
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  //TO-DO: Remove this
-  console.log(isCreateDialogOpen);
-  
+  const { isPending, data } = useQuery<ExamsDto[]>({
+    queryKey: ["exams"],
+    queryFn: async () => {
+      const response = await fetch("/api/exams")
+      return await response.json()
+    },
+  })
 
-  const years = Array.from(new Set(examData.map((exam) => exam.year))).sort(
-    (a, b) => b - a
-  );
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [filterYear, setFilterYear] = useState<number | "all">("all")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  const [publishedExams, setPublishedExams] = useState<Set<string>>(new Set())
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
 
-  const filteredAndSortedExams = examData
-    .filter((exam) => filterYear === "all" || exam.year === filterYear)
-    .sort((a, b) => {
-      if (sortOrder === "asc") {
-        return a.year - b.year;
-      } else {
-        return b.year - a.year;
-      }
-    });
+  const years = data ? Array.from(new Set(data.map((exam) => exam.year))).sort((a, b) => b - a) : []
+
+  const filteredAndSortedExams = data
+    ? data
+        .filter((exam) => filterYear === "all" || exam.year === filterYear)
+        .sort((a, b) => {
+          if (sortOrder === "asc") {
+            return a.year - b.year
+          } else {
+            return b.year - a.year
+          }
+        })
+    : []
 
   const handleEdit = (id: string) => {
-    console.log(`Edit exam ${id}`);
-  };
+    console.log(`Edit exam ${id}`)
+  }
 
   const handleDelete = (id: string) => {
-    console.log(`Delete exam ${id}`);
-  };
+    deleteExam(id).then(() => {
+      queryClient.invalidateQueries({
+        queryKey: ["exams"],
+      })
+    })
+  }
 
   const togglePublish = (id: string) => {
     setPublishedExams((prev) => {
-      const newSet = new Set(prev);
+      const newSet = new Set(prev)
       if (newSet.has(id)) {
-        newSet.delete(id);
+        newSet.delete(id)
       } else {
-        newSet.add(id);
+        newSet.add(id)
       }
-      return newSet;
-    });
-  };
+      return newSet
+    })
+  }
 
   const toggleExpand = (id: string) => {
     setExpandedItems((prev) => {
-      const newSet = new Set(prev);
+      const newSet = new Set(prev)
       if (newSet.has(id)) {
-        newSet.delete(id);
+        newSet.delete(id)
       } else {
-        newSet.add(id);
+        newSet.add(id)
       }
-      return newSet;
-    });
-  };
+      return newSet
+    })
+  }
+
+  const LoadingSkeleton = () => (
+    <>
+      {/* Mobile and Tablet Skeleton */}
+      <div className="lg:hidden space-y-4">
+        {[...Array(3)].map((_, index) => (
+          <Card key={index}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-40" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-6 w-24" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Desktop Skeleton */}
+      <div className="hidden lg:block">
+        <div className="rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Posição</TableHead>
+                <TableHead>Ano</TableHead>
+                <TableHead>Instituto</TableHead>
+                <TableHead>Banca</TableHead>
+                <TableHead>Nível</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Conteúdo</TableHead>
+                <TableHead className="w-[60px]">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(5)].map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <Skeleton className="h-5 w-40" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-8 w-20" />
+                      <Skeleton className="h-8 w-20" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-8" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </>
+  )
 
   const MobileView = () => (
     <div className="space-y-4">
       {filteredAndSortedExams.map((exam) => (
         <Card key={exam.id}>
           <CardContent className="p-4">
-            <Collapsible
-              open={expandedItems.has(exam.id)}
-              onOpenChange={() => toggleExpand(exam.id)}
-            >
+            <Collapsible open={expandedItems.has(exam.id)} onOpenChange={() => toggleExpand(exam.id)}>
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <h3 className="font-medium">{exam.position}</h3>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="secondary">{exam.year}</Badge>
-                    <Badge
-                      variant={
-                        publishedExams.has(exam.id) ? "default" : "secondary"
-                      }
-                    >
-                      {publishedExams.has(exam.id)
-                        ? "Publicado"
-                        : "Não publicado"}
+                    <Badge variant={publishedExams.has(exam.id) ? "default" : "secondary"}>
+                      {publishedExams.has(exam.id) ? "Publicado" : "Não publicado"}
                     </Badge>
                   </div>
                 </div>
@@ -166,9 +199,9 @@ export default function ExamsPage() {
                 <div className="mt-4 space-y-2">
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <span className="text-muted-foreground">Instituto:</span>
-                    <span>{exam.instituto}</span>
+                    <span>{exam.instituteName}</span>
                     <span className="text-muted-foreground">Banca:</span>
-                    <span>{exam.banca}</span>
+                    <span>{exam.bankName}</span>
                     <span className="text-muted-foreground">Nível:</span>
                     <span>{exam.level}</span>
                   </div>
@@ -208,10 +241,7 @@ export default function ExamsPage() {
                           </>
                         )}
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleDelete(exam.id)}
-                        className="text-red-600"
-                      >
+                      <DropdownMenuItem onClick={() => handleDelete(exam.id)} className="text-red-600">
                         <Trash2 className="mr-2 h-4 w-4" />
                         Deletar
                       </DropdownMenuItem>
@@ -224,7 +254,7 @@ export default function ExamsPage() {
         </Card>
       ))}
     </div>
-  );
+  )
 
   const DesktopView = () => (
     <div className="rounded-lg border">
@@ -248,19 +278,15 @@ export default function ExamsPage() {
               <TableCell>
                 <Badge variant="secondary">{exam.year}</Badge>
               </TableCell>
-              <TableCell>{exam.instituto}</TableCell>
+              <TableCell>{exam.instituteName}</TableCell>
               <TableCell>
-                <Badge variant="outline">{exam.banca}</Badge>
+                <Badge variant="outline">{exam.bankName}</Badge>
               </TableCell>
               <TableCell>
                 <Badge>{exam.level}</Badge>
               </TableCell>
               <TableCell>
-                <Badge
-                  variant={
-                    publishedExams.has(exam.id) ? "default" : "secondary"
-                  }
-                >
+                <Badge variant={publishedExams.has(exam.id) ? "default" : "secondary"}>
                   {publishedExams.has(exam.id) ? "Publicado" : "Não publicado"}
                 </Badge>
               </TableCell>
@@ -303,10 +329,7 @@ export default function ExamsPage() {
                         </>
                       )}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDelete(exam.id)}
-                      className="text-red-600"
-                    >
+                    <DropdownMenuItem onClick={() => handleDelete(exam.id)} className="text-red-600">
                       <Trash2 className="mr-2 h-4 w-4" />
                       Deletar
                     </DropdownMenuItem>
@@ -318,30 +341,20 @@ export default function ExamsPage() {
         </TableBody>
       </Table>
     </div>
-  );
+  )
 
   return (
     <div className="container mx-auto">
       <div className="mb-4 flex flex-col gap-4">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
-            Provas
-          </h1>
-          <Button
-            onClick={() => setIsCreateDialogOpen(true)}
-            size="sm"
-            className="w-full sm:w-auto"
-          >
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Provas</h1>
+          <Button onClick={() => setIsCreateDialogOpen(true)} size="sm" className="w-full sm:w-auto">
             <PlusCircle className="mr-2 h-4 w-4" />
             Novo Exame
           </Button>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <Select
-            onValueChange={(value) =>
-              setFilterYear(value === "all" ? "all" : parseInt(value))
-            }
-          >
+          <Select onValueChange={(value) => setFilterYear(value === "all" ? "all" : Number.parseInt(value))}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filtrar por ano" />
             </SelectTrigger>
@@ -360,27 +373,27 @@ export default function ExamsPage() {
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
             className="w-full sm:w-auto"
           >
-            {sortOrder === "asc" ? (
-              <ChevronUp className="mr-2 h-4 w-4" />
-            ) : (
-              <ChevronDown className="mr-2 h-4 w-4" />
-            )}
+            {sortOrder === "asc" ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
             {sortOrder === "asc" ? "Mais antigos" : "Mais recentes"}
           </Button>
         </div>
       </div>
 
-      <div className="lg:hidden">
-        <MobileView />
-      </div>
-      <div className="hidden lg:block">
-        <DesktopView />
-      </div>
+      {isPending ? (
+        <LoadingSkeleton />
+      ) : (
+        <>
+          <div className="lg:hidden">
+            <MobileView />
+          </div>
+          <div className="hidden lg:block">
+            <DesktopView />
+          </div>
+        </>
+      )}
 
-      {/* <CreateExamDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-      /> */}
+      <CreateExamDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
     </div>
-  );
+  )
 }
+
