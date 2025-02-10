@@ -45,6 +45,8 @@ export const getUsers = async (): Promise<UserDTO[] | undefined> => {
 export const createUser = async (data: z.infer<typeof formSchema>) => {
   const parseUser = formSchema.safeParse(data);
 
+  //TO-DO: Optmizing promise all for valids datas in database
+
   if (!parseUser.success) return { error: "Invalid data" };
   const user = parseUser.data;
 

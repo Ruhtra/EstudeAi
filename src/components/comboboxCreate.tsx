@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/popover";
 
 export interface ComboboxProps {
+  disabled?: boolean;
   options: string[];
   value: string;
   onSetValue: (value: string) => void;
@@ -30,6 +31,7 @@ export interface ComboboxProps {
 }
 
 export function ComboboxCreate({
+  disabled = false,
   options: initialOptions,
   value,
   onSetValue,
@@ -62,19 +64,23 @@ export function ComboboxCreate({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={disabled ? false : open}
+      onOpenChange={disabled ? undefined : setOpen}
+    >
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[full] justify-between"
+          className={cn("w-full justify-between")}
+          disabled={disabled}
         >
           {value || searchPlaceholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[full] p-0">
+      <PopoverContent className="w-full p-0">
         <Command>
           <CommandInput
             placeholder={placeholder}

@@ -161,7 +161,7 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full text-sm sm:text-base"
-                  disabled={isPending}
+                  disabled={isPending || !!success}
                 >
                   {isPending ? "Entrando..." : "Entrar"}
                 </Button>
