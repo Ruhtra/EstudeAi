@@ -57,11 +57,17 @@ export function ComboboxCreate({
 
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
-    if (value && !options.includes(value)) {
-      setOptions((prev) => prev.filter((option) => option !== value));
-      onSetValue("");
-    }
   };
+
+  const filteredOptions = options.filter((option) =>
+    option.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
+  const showCreateOption =
+    inputValue !== "" &&
+    !options.some(
+      (option) => option.toLowerCase() === inputValue.toLowerCase()
+    );
 
   return (
     <Popover
@@ -90,7 +96,7 @@ export function ComboboxCreate({
           <CommandList>
             <CommandEmpty>{emptyMessage}</CommandEmpty>
             <CommandGroup>
-              {options.map((option) => (
+              {filteredOptions.map((option) => (
                 <CommandItem
                   key={option}
                   value={option}
@@ -106,17 +112,33 @@ export function ComboboxCreate({
                 </CommandItem>
               ))}
             </CommandGroup>
-            {inputValue && !options.includes(inputValue) && (
-              <>
-                <CommandSeparator />
+            {/* TO-DO: Bug que quando o elemento da tela é removido, ele não tem o contéudo de CommandGorup Adicionado novamente */}
+            {/* Código antigo: 
+            
+               {showCreateOption && (
                 <CommandGroup>
                   <CommandItem onSelect={() => handleSelect("create-new")}>
                     <Plus className="mr-2 h-4 w-4" />
                     Create &quot;{inputValue}&quot;
                   </CommandItem>
                 </CommandGroup>
-              </>
-            )}
+                )}
+            
+            */}
+            <CommandSeparator />
+            <CommandGroup
+              className={cn(
+                !showCreateOption &&
+                  "pointer-events-none opacity-0 invisible hidden",
+                "transition-all duration-200"
+              )}
+              aria-hidden={!showCreateOption}
+            >
+              <CommandItem onSelect={() => handleSelect("create-new")}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create &quot;{inputValue}&quot;
+              </CommandItem>
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
