@@ -116,3 +116,47 @@ export const deleteExam = async (examId: string) => {
   // revalidatePath("/admin/users");
   return { success: "Exam deleted" };
 };
+
+export const publishExam = async (examId: string) => {
+  const exam = await db.exam.findUnique({
+    where: {
+      id: examId,
+    },
+  });
+
+  if (!exam) return { error: "Exam not found" };
+  if (exam.isComplete) return { error: "Exam is already published" };
+
+  await db.exam.update({
+    where: {
+      id: examId,
+    },
+    data: {
+      isComplete: true,
+    },
+  });
+
+  return { success: "Exam Published" };
+};
+
+export const unPublishExam = async (examId: string) => {
+  const exam = await db.exam.findUnique({
+    where: {
+      id: examId,
+    },
+  });
+
+  if (!exam) return { error: "Exam not found" };
+  if (!exam.isComplete) return { error: "Exam is not published" };
+
+  await db.exam.update({
+    where: {
+      id: examId,
+    },
+    data: {
+      isComplete: false,
+    },
+  });
+
+  return { success: "Exam UnPublished" };
+};

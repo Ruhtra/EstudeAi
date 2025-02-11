@@ -46,6 +46,9 @@ import Link from "next/link";
 import type { ExamsDto } from "@/app/api/exams/route";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { publishExam, unPublishExam } from "./_actions/exam";
+import { toast } from "sonner";
+import { queryClient } from "@/lib/queryCLient";
 
 export default function ExamsPage() {
   const { isPending, data } = useQuery<ExamsDto[]>({
@@ -58,7 +61,6 @@ export default function ExamsPage() {
 
   const [filterYear, setFilterYear] = useState<number | "all">("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [publishedExams, setPublishedExams] = useState<Set<string>>(new Set());
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const years = data
@@ -77,16 +79,38 @@ export default function ExamsPage() {
         })
     : [];
 
-  const togglePublish = (id: string) => {
-    setPublishedExams((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
+  const togglePublish = async (id: string, isComplete: boolean) => {
+    if (isComplete) {
+      unPublishExam(id)
+        .then((data) => {
+          if (data.error) toast(data.error);
+          if (data.success) {
+            queryClient.refetchQueries({
+              queryKey: ["exams"],
+            });
+
+            toast("Exame despublicado com sucesso");
+          }
+        })
+        .catch(() => {
+          toast("Algo deu errado, informe o suporte!");
+        });
+    } else {
+      publishExam(id)
+        .then((data) => {
+          if (data.error) toast(data.error);
+          if (data.success) {
+            queryClient.refetchQueries({
+              queryKey: ["exams"],
+            });
+
+            toast("Exame publicado com sucesso");
+          }
+        })
+        .catch(() => {
+          toast("Algo deu errado, informe o suporte!");
+        });
+    }
   };
 
   const toggleExpand = (id: string) => {
@@ -196,14 +220,8 @@ export default function ExamsPage() {
                   <h3 className="font-medium">{exam.name}</h3>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="secondary">{exam.year}</Badge>
-                    <Badge
-                      variant={
-                        publishedExams.has(exam.id) ? "default" : "secondary"
-                      }
-                    >
-                      {publishedExams.has(exam.id)
-                        ? "Publicado"
-                        : "Não publicado"}
+                    <Badge variant={exam.isComplete ? "default" : "secondary"}>
+                      {exam.isComplete ? "Publicado" : "Não publicado"}
                     </Badge>
                   </div>
                 </div>
@@ -260,8 +278,10 @@ export default function ExamsPage() {
                           Editar
                         </DropdownMenuItem>
                       </CreateExamDialog>
-                      <DropdownMenuItem onClick={() => togglePublish(exam.id)}>
-                        {publishedExams.has(exam.id) ? (
+                      <DropdownMenuItem
+                        onClick={() => togglePublish(exam.id, exam.isComplete)}
+                      >
+                        {exam.isComplete ? (
                           <>
                             <EyeOff className="mr-2 h-4 w-4" />
                             Despublicar
@@ -323,12 +343,8 @@ export default function ExamsPage() {
                 <Badge>{exam.level}</Badge>
               </TableCell>
               <TableCell>
-                <Badge
-                  variant={
-                    publishedExams.has(exam.id) ? "default" : "secondary"
-                  }
-                >
-                  {publishedExams.has(exam.id) ? "Publicado" : "Não publicado"}
+                <Badge variant={exam.isComplete ? "default" : "secondary"}>
+                  {exam.isComplete ? "Publicado" : "Não publicado"}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -359,8 +375,10 @@ export default function ExamsPage() {
                         Editar
                       </DropdownMenuItem>
                     </CreateExamDialog>
-                    <DropdownMenuItem onClick={() => togglePublish(exam.id)}>
-                      {publishedExams.has(exam.id) ? (
+                    <DropdownMenuItem
+                      onClick={() => togglePublish(exam.id, exam.isComplete)}
+                    >
+                      {exam.isComplete ? (
                         <>
                           <EyeOff className="mr-2 h-4 w-4" />
                           Despublicar
