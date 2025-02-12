@@ -16,7 +16,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useExamOptions } from "../_queries/examQueries";
 import { ComboboxCreate } from "@/components/comboboxCreate";
@@ -25,7 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { YearPicker } from "./YearPicker";
 import { Input } from "@/components/ui/input";
 import { createExaxm, updateExam } from "../_actions/exam";
-import { ReactNode, useEffect, useState, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { toast } from "sonner";
 import { queryClient } from "@/lib/queryCLient";
 import { examSchema } from "../_actions/ExamSchema";
@@ -36,12 +35,13 @@ type FormData = z.infer<typeof examSchema>;
 
 export const CreateExamDialog = ({
   idExam,
-  children,
+  open,
+  onOpenChange,
 }: {
   idExam?: string;
-  children: ReactNode;
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const { data: examData, isPending: isLoading } = useQuery({
@@ -106,7 +106,7 @@ export const CreateExamDialog = ({
               queryClient.removeQueries({
                 queryKey: ["exam", idExam],
               });
-              setIsOpen(false);
+              onOpenChange(false);
               form.reset();
               toast("Exam atualizado com sucesso");
             }
@@ -119,7 +119,7 @@ export const CreateExamDialog = ({
           .then((data) => {
             if (data.error) toast(data.error);
             if (data.success) {
-              setIsOpen(false);
+              onOpenChange(false);
               form.reset();
               toast("Exame criado com sucesso");
               // setPreviewUrl(null);
@@ -140,8 +140,8 @@ export const CreateExamDialog = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {/* { children && <DialogTrigger asChild>{children}</DialogTrigger>} */}
       <DialogContent className=" p-6">
         <DialogHeader>
           <DialogTitle className="text-lg font-medium">

@@ -139,7 +139,7 @@ export function ExamItem({
               <ExamActions
                 exam={exam}
                 isComplete={exam.isComplete}
-                togglePublish={togglePublish}
+                handlePublish={togglePublish}
                 handleDelete={handleDelete}
                 isPending={isPending}
               />
@@ -187,7 +187,7 @@ export function ExamItem({
         <ExamActions
           exam={exam}
           isComplete={exam.isComplete}
-          togglePublish={togglePublish}
+          handlePublish={togglePublish}
           handleDelete={handleDelete}
           isPending={isPending}
         />
