@@ -7,7 +7,8 @@ import { motion, useSpring, useInView } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { ChevronDown, LogIn, UserPlus } from "lucide-react"
+import { ChevronDown, ChevronRight, LogIn, UserPlus } from "lucide-react"
+import { useCurrentUser } from "@/hooks/use-current-user"
 
 const useScrollProgress = () => {
   const [progress, setProgress] = useState(0)
@@ -46,6 +47,7 @@ const FadeInWhenVisible = ({ children }: { children: ReactNode }) => {
 }
 
 export default function LandingPage() {
+  const user = useCurrentUser()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const scrollProgress = useScrollProgress()
@@ -78,9 +80,8 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white overflow-x-hidden">
       <motion.div className="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-50" style={{ scaleX }} />
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          isScrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${isScrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"
+          }`}
       >
         <div className="container mx-auto px-4 flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold text-blue-600">
@@ -97,32 +98,47 @@ export default function LandingPage() {
               Contato
             </Link>
           </nav>
-          <DropdownMenu onOpenChange={setIsDropdownOpen}>
-            <DropdownMenuTrigger asChild>
+          {user ? (
+            // TO-DO: Alterar para o default redirect do usuário
+            <Link href={"/auth/login"}>
               <Button
                 variant="outline"
                 className="bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-gray-900"
               >
-                Área do Usuário
-                <ChevronDown className="ml-2 h-4 w-4" />
+                Go to Dashboard
+                <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border-gray-200">
-              <Link href={"/auth/login"}>
-                <DropdownMenuItem className="text-gray-800 hover:bg-gray-100">
-                  <LogIn className="mr-2 h-4 w-4" />
-                  <span>Login</span>
-                </DropdownMenuItem>
-              </Link>
+            </Link>
+          ) : (
+            <DropdownMenu onOpenChange={setIsDropdownOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-gray-900"
+                >
 
-              <Link href={"/auth/register"}>
-                <DropdownMenuItem className="text-gray-800 hover:bg-gray-100">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  <span>Criar Conta</span>
-                </DropdownMenuItem>
-              </Link>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  Área do Usuário
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-white border-gray-200">
+                <Link href={"/auth/login"}>
+                  <DropdownMenuItem className="text-gray-800 hover:bg-gray-100">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    <span>Login</span>
+                  </DropdownMenuItem>
+                </Link>
+
+                <Link href={"/auth/register"}>
+                  <DropdownMenuItem className="text-gray-800 hover:bg-gray-100">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    <span>Criar Conta</span>
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+          )}
         </div>
       </header>
 
