@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,8 +41,7 @@ const textData: Text[] = [
 
 export default function TextsExamPage() {
   const [texts, setTexts] = useState<Text[]>(textData);
-    const {id : examId} = useParams<{ id: string  }>()
-  
+  const { id: examId } = useParams<{ id: string }>();
 
   const handleEdit = (textId: string) => {
     // Implement edit functionality
@@ -57,6 +56,9 @@ export default function TextsExamPage() {
 
   return (
     <div className="container mx-auto">
+      <h1 className="bg-red-500">
+        ATENÇÃO! AINDA ESTAMOS IMPORTANTE ESSA TELA
+      </h1>
       <div className="mb-6 flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
           Textos do Exame {examId}

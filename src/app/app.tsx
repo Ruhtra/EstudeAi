@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryCLient";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export default function App({
   children,
@@ -21,6 +22,8 @@ export default function App({
         {children}
         <Toaster />
       </ThemeProvider>
+
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

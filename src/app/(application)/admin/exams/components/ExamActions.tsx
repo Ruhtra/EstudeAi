@@ -17,6 +17,7 @@ interface ExamActionsProps {
   exam: ExamsDto;
   isComplete: boolean;
   togglePublish: () => Promise<void>;
+  handleDelete: () => Promise<void>;
   isPending: boolean;
 }
 
@@ -24,6 +25,7 @@ export function ExamActions({
   exam,
   isComplete,
   togglePublish,
+  handleDelete,
   isPending,
 }: ExamActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -64,7 +66,10 @@ export function ExamActions({
           )}
         </DropdownMenuItem>
         <DropdownMenuItem
-          // onClick={() => handleDelete(exam.id)}
+          onSelect={(e: Event) => {
+            e.preventDefault();
+            handleDelete();
+          }}
           className="text-red-600"
           disabled={isPending}
         >

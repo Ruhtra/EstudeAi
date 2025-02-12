@@ -97,10 +97,10 @@ export const CreateExamDialog = ({
     startTransition(() => {
       if (idExam) {
         updateExam(idExam, values)
-          .then((data) => {
+          .then(async (data) => {
             if (data.error) toast(data.error);
             if (data.success) {
-              queryClient.refetchQueries({
+              await queryClient.refetchQueries({
                 queryKey: ["exams"],
               });
               queryClient.removeQueries({

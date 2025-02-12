@@ -128,10 +128,10 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
     startTransition(() => {
       if (idUser) {
         updateuser(idUser, values)
-          .then((data) => {
+          .then(async (data) => {
             if (data.error) toast(data.error);
             if (data.success) {
-              queryClient.refetchQueries({
+              await queryClient.refetchQueries({
                 queryKey: ["users"],
               });
               queryClient.removeQueries({
@@ -148,14 +148,14 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
           });
       } else {
         createUser(values)
-          .then((data) => {
+          .then(async (data) => {
             if (data.error) toast(data.error);
             if (data.success) {
               setIsOpen(false);
               form.reset();
               toast("Usuário criado com sucesso");
               // setPreviewUrl(null);
-              queryClient.refetchQueries({
+              await queryClient.refetchQueries({
                 queryKey: ["users"],
               });
             }
@@ -361,8 +361,8 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
                       ? "Atualizando Usuário"
                       : "Criando Usuário"
                     : idUser
-                    ? "Atualizar Usuário"
-                    : "Adicionar Usuário"}
+                      ? "Atualizar Usuário"
+                      : "Adicionar Usuário"}
                 </Button>
               </div>
             </form>

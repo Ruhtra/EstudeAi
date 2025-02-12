@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
 import { TableCell } from "@/components/ui/table";
 import { ExamActions } from "./ExamActions";
 import type { ExamsDto } from "@/app/api/exams/route";
-import { publishExam, unPublishExam } from "../_actions/exam";
+import { deleteExam, publishExam, unPublishExam } from "../_actions/exam";
 import { toast } from "sonner";
 import { queryClient } from "@/lib/queryCLient";
 import { cn } from "@/lib/utils";
@@ -32,12 +32,11 @@ export function ExamItem({
   isMobile,
 }: ExamItemProps) {
   const [isPending, startTransition] = useTransition();
-  const [isComplete, setIsComplete] = useState(exam.isComplete);
 
   const togglePublish = async () => {
     startTransition(async () => {
-      const action = isComplete ? unPublishExam : publishExam;
-      const successMessage = isComplete
+      const action = exam.isComplete ? unPublishExam : publishExam;
+      const successMessage = exam.isComplete
         ? "Exame despublicado com sucesso"
         : "Exame publicado com sucesso";
 
@@ -46,8 +45,7 @@ export function ExamItem({
         if (data.error) {
           toast(data.error);
         } else if (data.success) {
-          setIsComplete(!isComplete);
-          queryClient.refetchQueries({
+          await queryClient.refetchQueries({
             queryKey: ["exams"],
           });
           toast(successMessage);
@@ -57,13 +55,23 @@ export function ExamItem({
       }
     });
   };
-
-  const renderStatus = () => (
-    <Badge variant={isComplete ? "default" : "secondary"}>
-      {isComplete ? "Publicado" : "Não publicado"}
-    </Badge>
-  );
-
+  const handleDelete = async () => {
+    startTransition(async () => {
+      try {
+        const data = await deleteExam(exam.id);
+        if (data.error) {
+          toast(data.error);
+        } else if (data.success) {
+          await queryClient.refetchQueries({
+            queryKey: ["exams"],
+          });
+          toast(data.success);
+        }
+      } catch {
+        toast("Algo deu errado, informe o suporte!");
+      }
+    });
+  };
   const itemClasses = cn(
     "transition-opacity duration-200",
     isPending && "opacity-50 pointer-events-none"
@@ -78,7 +86,9 @@ export function ExamItem({
               <h3 className="font-medium">{exam.name}</h3>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{exam.year}</Badge>
-                {renderStatus()}
+                <Badge variant={exam.isComplete ? "default" : "secondary"}>
+                  {exam.isComplete ? "Publicado" : "Não publicado"}
+                </Badge>
               </div>
             </div>
             <CollapsibleTrigger asChild>
@@ -128,8 +138,9 @@ export function ExamItem({
               </Link>
               <ExamActions
                 exam={exam}
-                isComplete={isComplete}
+                isComplete={exam.isComplete}
                 togglePublish={togglePublish}
+                handleDelete={handleDelete}
                 isPending={isPending}
               />
             </div>
@@ -153,7 +164,11 @@ export function ExamItem({
       <TableCell className={itemClasses}>
         <Badge>{exam.level}</Badge>
       </TableCell>
-      <TableCell className={itemClasses}>{renderStatus()}</TableCell>
+      <TableCell className={itemClasses}>
+        <Badge variant={exam.isComplete ? "default" : "secondary"}>
+          {exam.isComplete ? "Publicado" : "Não publicado"}
+        </Badge>
+      </TableCell>
       <TableCell className={itemClasses}>
         <div className="flex items-center gap-2">
           <Link href={`/admin/exams/${exam.id}/questions`}>
@@ -171,8 +186,9 @@ export function ExamItem({
       <TableCell className={itemClasses}>
         <ExamActions
           exam={exam}
-          isComplete={isComplete}
+          isComplete={exam.isComplete}
           togglePublish={togglePublish}
+          handleDelete={handleDelete}
           isPending={isPending}
         />
       </TableCell>
