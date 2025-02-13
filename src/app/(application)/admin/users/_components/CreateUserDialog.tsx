@@ -109,7 +109,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
       form.setValue(
         "role",
         (userData.role.toLowerCase() as "admin" | "teacher" | "student") ??
-          "student"
+        "student"
       );
       form.setValue("email", userData.email ?? "");
       form.setValue("phone", userData.phone ?? "");
@@ -125,44 +125,39 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
   }, [userData, form]);
 
   function onSubmit(values: FormValues) {
-    startTransition(() => {
-      if (idUser) {
-        updateuser(idUser, values)
-          .then(async (data) => {
-            if (data.error) toast(data.error);
-            if (data.success) {
-              await queryClient.refetchQueries({
-                queryKey: ["users"],
-              });
-              queryClient.removeQueries({
-                queryKey: ["user", idUser],
-              });
+    startTransition(async () => {
+      try {
+        if (idUser) {
+          const data = await updateuser(idUser, values)
 
-              setIsOpen(false);
-              form.reset();
-              toast("Usuário atualizado com sucesso");
-            }
-          })
-          .catch(() => {
-            toast("Algo deu errado, informe o suporte!");
-          });
-      } else {
-        createUser(values)
-          .then(async (data) => {
-            if (data.error) toast(data.error);
-            if (data.success) {
-              setIsOpen(false);
-              form.reset();
-              toast("Usuário criado com sucesso");
-              // setPreviewUrl(null);
-              await queryClient.refetchQueries({
-                queryKey: ["users"],
-              });
-            }
-          })
-          .catch(() => {
-            toast("Algo deu errado, informe o suporte!");
-          });
+          if (data.error) toast(data.error);
+          if (data.success) {
+            await queryClient.refetchQueries({
+              queryKey: ["users"],
+            });
+            queryClient.removeQueries({
+              queryKey: ["user", idUser],
+            });
+
+            setIsOpen(false);
+            form.reset();
+            toast("Usuário atualizado com sucesso");
+          }
+        } else {
+          const data = await createUser(values)
+          if (data.error) toast(data.error);
+          if (data.success) {
+            setIsOpen(false);
+            form.reset();
+            toast("Usuário criado com sucesso");
+            // setPreviewUrl(null);
+            await queryClient.refetchQueries({
+              queryKey: ["users"],
+            });
+          }
+        }
+      } catch {
+        toast("Algo deu errado, contate o suporte!");
       }
     });
   }

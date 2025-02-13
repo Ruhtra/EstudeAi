@@ -94,50 +94,45 @@ export const CreateExamDialog = ({
   }
 
   const onSubmit = async (values: FormData) => {
-    startTransition(() => {
-      if (idExam) {
-        updateExam(idExam, values)
-          .then(async (data) => {
-            if (data.error) toast(data.error);
-            if (data.success) {
-              await queryClient.refetchQueries({
-                queryKey: ["exams"],
-              });
-              queryClient.removeQueries({
-                queryKey: ["exam", idExam],
-              });
-              onOpenChange(false);
-              form.reset();
-              toast("Exam atualizado com sucesso");
-            }
-          })
-          .catch(() => {
-            toast("Algo deu errado, informe o suporte!");
-          });
-      } else {
-        createExaxm(values)
-          .then((data) => {
-            if (data.error) toast(data.error);
-            if (data.success) {
-              onOpenChange(false);
-              form.reset();
-              toast("Exame criado com sucesso");
-              // setPreviewUrl(null);
-              queryClient.refetchQueries({
-                queryKey: ["exams"],
-              });
-            }
-          })
-          .catch(() => {
-            toast("Algo deu errado, informe o suporte!");
-          });
-      }
-    });
+    startTransition(async () => {
+      try {
+        if (idExam) {
+          const data = await updateExam(idExam, values)
 
-    // Handle form submission here
-    // onOpenChange(false);
-    // console.log(data);
-  };
+          if (data.error) {
+            toast(data.error);
+            return;
+          }
+          if (data.success) {
+            await queryClient.refetchQueries({
+              queryKey: ["exams"],
+            });
+            queryClient.removeQueries({
+              queryKey: ["exam", idExam],
+            });
+            onOpenChange(false);
+            form.reset();
+            toast("Exam atualizado com sucesso");
+          }
+
+        } else {
+          const data = await createExaxm(values)
+          if (data.error) toast(data.error);
+          if (data.success) {
+            onOpenChange(false);
+            form.reset();
+            toast("Exame criado com sucesso");
+            // setPreviewUrl(null);
+            queryClient.refetchQueries({
+              queryKey: ["exams"],
+            });
+          }
+        }
+      } catch {
+        toast("Algo deu errado, contate o suporte!");
+      }
+    })
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
