@@ -4,7 +4,6 @@ import { CreateExamDialog } from "../_components/CreateExamDialog";
 import { useState } from "react";
 
 export function ExamsHeader() {
-
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   return (
@@ -15,7 +14,11 @@ export function ExamsHeader() {
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
             Provas
           </h1>
-          <Button size="sm" className="w-full sm:w-auto">
+          <Button
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={() => setIsCreateOpen(true)}
+          >
             <PlusCircle className="mr-2 h-4 w-4" />
             Novo Exame
           </Button>
