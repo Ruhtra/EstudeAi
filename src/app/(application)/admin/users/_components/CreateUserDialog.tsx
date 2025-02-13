@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition, useEffect, type ReactNode } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type * as z from "zod";
@@ -10,7 +10,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -68,11 +67,15 @@ export type FormValues = z.infer<typeof formSchema>;
 
 interface AddUserDialogProps {
   idUser?: string;
-  children: ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function CreateUserDialog({
+  idUser,
+  open,
+  onOpenChange,
+}: AddUserDialogProps) {
   const [userType, setUserType] = useState<UserRole>(UserRole.student);
   // const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -109,7 +112,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
       form.setValue(
         "role",
         (userData.role.toLowerCase() as "admin" | "teacher" | "student") ??
-        "student"
+          "student"
       );
       form.setValue("email", userData.email ?? "");
       form.setValue("phone", userData.phone ?? "");
@@ -128,7 +131,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
     startTransition(async () => {
       try {
         if (idUser) {
-          const data = await updateuser(idUser, values)
+          const data = await updateuser(idUser, values);
 
           if (data.error) toast(data.error);
           if (data.success) {
@@ -139,15 +142,15 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
               queryKey: ["user", idUser],
             });
 
-            setIsOpen(false);
+            onOpenChange(false);
             form.reset();
             toast("Usuário atualizado com sucesso");
           }
         } else {
-          const data = await createUser(values)
+          const data = await createUser(values);
           if (data.error) toast(data.error);
           if (data.success) {
-            setIsOpen(false);
+            onOpenChange(false);
             form.reset();
             toast("Usuário criado com sucesso");
             // setPreviewUrl(null);
@@ -163,8 +166,7 @@ export function CreateUserDialog({ idUser, children }: AddUserDialogProps) {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>

@@ -1,27 +1,27 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { ExamItem } from "./ExamItem";
-import type { ExamsDto } from "@/app/api/exams/route";
+import { UserItem } from "./UserItem";
+import { UserDTO } from "../_actions/user";
 
 interface MobileExamListProps {
-  exams: ExamsDto[];
+  users: UserDTO[];
   expandedItems: Set<string>;
   toggleExpand: (id: string) => void;
 }
 
-export function MobileExamList({
-  exams,
+export function MobileUserList({
+  users,
   expandedItems,
   toggleExpand,
 }: MobileExamListProps) {
   return (
     <div className="space-y-4">
-      {exams.map((exam) => (
-        <Card key={exam.id}>
+      {users.map((user) => (
+        <Card key={user.id}>
           <CardContent className="p-4">
-            <ExamItem
-              exam={exam}
-              isExpanded={expandedItems.has(exam.id)}
-              onToggleExpand={() => toggleExpand(exam.id)}
+            <UserItem
+              user={user}
+              isExpanded={expandedItems.has(user.id)}
+              onToggleExpand={() => toggleExpand(user.id)}
               isMobile={true}
             />
           </CardContent>
