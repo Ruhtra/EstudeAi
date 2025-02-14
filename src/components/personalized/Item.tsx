@@ -58,17 +58,23 @@ export const ItemDesktopCell = ({
 export const ItemMobileTrigger = ({
   isPending,
   isExpanded,
+  children,
 }: {
   isPending: boolean;
   isExpanded?: boolean;
+  children?: ReactNode;
 }) => {
   return (
     <CollapsibleTrigger asChild>
-      <Button variant="ghost" size="sm" disabled={isPending}>
-        <ChevronRight
-          className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
-        />
-      </Button>
+      {children ? (
+        children
+      ) : (
+        <Button variant="ghost" size="sm" disabled={isPending}>
+          <ChevronRight
+            className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+          />
+        </Button>
+      )}
     </CollapsibleTrigger>
   );
 };
