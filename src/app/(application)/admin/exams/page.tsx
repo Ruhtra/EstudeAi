@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ExamsHeader } from "./components/ExamsHeader";
 import { ExamsFilters } from "./components/ExamsFilters";
 import { ExamsList } from "./components/ExamsList";
-import { LoadingSkeleton } from "./components/LoadingSkeleton";
+import { ExamSkeleton } from "./components/ExamSkeleton";
 import type { ExamsDto } from "@/app/api/exams/route";
 
 export default function ExamsPage() {
@@ -46,7 +46,7 @@ export default function ExamsPage() {
         setSortOrder={setSortOrder}
       />
       {isPending ? (
-        <LoadingSkeleton />
+        <ExamSkeleton />
       ) : (
         <ExamsList exams={filteredAndSortedExams} />
       )}

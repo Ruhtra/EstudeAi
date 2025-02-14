@@ -20,7 +20,6 @@ import {
 import { useExamOptions } from "../_queries/examQueries";
 import { ComboboxCreate } from "@/components/comboboxCreate";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { YearPicker } from "./YearPicker";
 import { Input } from "@/components/ui/input";
 import { createExaxm, updateExam } from "../_actions/exam";
@@ -30,6 +29,7 @@ import { queryClient } from "@/lib/queryCLient";
 import { examSchema } from "../_actions/ExamSchema";
 import { ExamsDto } from "@/app/api/exams/route";
 import { useQuery } from "@tanstack/react-query";
+import { SkeletonExamDialog } from "./SekeletonExamDialog";
 
 type FormData = z.infer<typeof examSchema>;
 
@@ -39,8 +39,8 @@ export const CreateExamDialog = ({
   onOpenChange,
 }: {
   idExam?: string;
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) => {
   const [isPending, startTransition] = useTransition();
 
@@ -97,7 +97,7 @@ export const CreateExamDialog = ({
     startTransition(async () => {
       try {
         if (idExam) {
-          const data = await updateExam(idExam, values)
+          const data = await updateExam(idExam, values);
 
           if (data.error) {
             toast(data.error);
@@ -114,9 +114,8 @@ export const CreateExamDialog = ({
             form.reset();
             toast("Exam atualizado com sucesso");
           }
-
         } else {
-          const data = await createExaxm(values)
+          const data = await createExaxm(values);
           if (data.error) toast(data.error);
           if (data.success) {
             onOpenChange(false);
@@ -131,8 +130,8 @@ export const CreateExamDialog = ({
       } catch {
         toast("Algo deu errado, contate o suporte!");
       }
-    })
-  }
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -144,17 +143,7 @@ export const CreateExamDialog = ({
           </DialogTitle>
         </DialogHeader>
         {isLoadingOptions || isLoading ? (
-          <div className="space-y-6">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <div className="flex justify-end">
-              <Skeleton className="h-10 w-24" />
-            </div>
-          </div>
+          <SkeletonExamDialog />
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

@@ -31,6 +31,7 @@ import { ContentType } from "@prisma/client";
 import { ImageUploadFieldWithUrl } from "./Image-upload-field-url";
 import { queryClient } from "@/lib/queryCLient";
 import { createText, updateText } from "../_actions/text";
+import { CreateSkeletonText } from "./SkeletonTextDialog";
 
 interface CreateTextDialogProps {
   idText?: string;
@@ -132,7 +133,7 @@ export function CreateTextDialog({
         </DialogHeader>
 
         {isLoading ? (
-          <>loading</>
+          <CreateSkeletonText />
         ) : (
           <div className="container mx-auto">
             <div className="w-full max-w-4xl mx-auto">

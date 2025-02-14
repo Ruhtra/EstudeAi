@@ -6,8 +6,9 @@ import { PlusCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 import { TextsDto } from "@/app/api/texts/route";
 import { useQuery } from "@tanstack/react-query";
-import { TextList } from "./components/TextList";
 import { CreateTextDialog } from "./_components/CreateTextDialog";
+import { TextSkeleton } from "./components/TextSkeleton";
+import { TextList } from "./components/TextList";
 
 export default function TextsExamPage() {
   const { id: idExam } = useParams<{ id: string }>();
@@ -37,7 +38,7 @@ export default function TextsExamPage() {
             Novo Texto
           </Button>
         </div>
-        {isPending ? <p>loading</p> : <TextList texts={data!} />}
+        {isPending ? <TextSkeleton /> : <TextList texts={data!} />}
       </div>
     </>
   );

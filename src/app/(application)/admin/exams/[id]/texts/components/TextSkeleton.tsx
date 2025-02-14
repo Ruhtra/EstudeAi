@@ -1,8 +1,15 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-export function LoadingSkeleton() {
+export function TextSkeleton() {
   return (
     <>
       {/* Mobile and Tablet Skeleton */}
@@ -11,11 +18,12 @@ export function LoadingSkeleton() {
           <Card key={index}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <Skeleton className="h-5 w-40" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-4 w-full" />
                   <div className="flex gap-2">
                     <Skeleton className="h-6 w-16" />
-                    <Skeleton className="h-6 w-24" />
+                    <Skeleton className="h-6 w-32" />
                   </div>
                 </div>
                 <Skeleton className="h-8 w-8 rounded-full" />
@@ -31,14 +39,11 @@ export function LoadingSkeleton() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Posição</TableHead>
-                <TableHead>Ano</TableHead>
-                <TableHead>Instituto</TableHead>
-                <TableHead>Banca</TableHead>
-                <TableHead>Nível</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Number</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Conteúdo</TableHead>
+                <TableHead>Referência</TableHead>
+                <TableHead>Qtd. Questões</TableHead>
                 <TableHead className="w-[60px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -46,34 +51,24 @@ export function LoadingSkeleton() {
               {[...Array(5)].map((_, index) => (
                 <TableRow key={index}>
                   <TableCell>
-                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-5 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-20" />
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-5 w-40" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-16" />
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-5 w-32" />
                   </TableCell>
                   <TableCell>
-                    <Skeleton className="h-6 w-24" />
+                    <Skeleton className="h-5 w-12" />
                   </TableCell>
                   <TableCell>
-                    <Skeleton className="h-6 w-20" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-24" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-8 w-20" />
-                      <Skeleton className="h-8 w-20" />
+                    <div className="flex justify-end">
+                      <Skeleton className="h-8 w-8" />
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-8 w-8" />
                   </TableCell>
                 </TableRow>
               ))}
@@ -82,6 +77,5 @@ export function LoadingSkeleton() {
         </div>
       </div>
     </>
-  )
+  );
 }
-
