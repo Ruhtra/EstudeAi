@@ -22,12 +22,14 @@ interface TiptapEditorProps {
   content: string;
   onChange: (content: string) => void;
   placeholder?: string;
+  isPending: boolean; // New prop
 }
 
 const TiptapEditor = ({
   content,
   onChange,
   placeholder,
+  isPending,
 }: TiptapEditorProps) => {
   const { theme } = useTheme();
 
@@ -54,7 +56,10 @@ const TiptapEditor = ({
     },
     editorProps: {
       attributes: {
-        class: "min-h-[30svh] mx-auto focus:outline-none",
+        class: cn(
+          "min-h-[30svh] mx-auto focus:outline-none",
+          isPending && "opacity-50 pointer-events-none"
+        ),
       },
     },
   });
@@ -64,12 +69,13 @@ const TiptapEditor = ({
   }
 
   return (
-    <div className="border rounded-md p-2">
+    <div className={cn("border rounded-md p-2", isPending && "opacity-50")}>
       <div className="flex flex-wrap gap-2 mb-2 border-b pb-2">
         <Toggle
           pressed={editor.isActive("bold")}
           onPressedChange={() => editor.chain().focus().toggleBold().run()}
           aria-label="Toggle bold"
+          disabled={isPending}
         >
           <Bold className="h-4 w-4" />
         </Toggle>
@@ -77,6 +83,7 @@ const TiptapEditor = ({
           pressed={editor.isActive("italic")}
           onPressedChange={() => editor.chain().focus().toggleItalic().run()}
           aria-label="Toggle italic"
+          disabled={isPending}
         >
           <Italic className="h-4 w-4" />
         </Toggle>
@@ -84,6 +91,7 @@ const TiptapEditor = ({
           pressed={editor.isActive("underline")}
           onPressedChange={() => editor.chain().focus().toggleUnderline().run()}
           aria-label="Toggle underline"
+          disabled={isPending}
         >
           <UnderlineIcon className="h-4 w-4" />
         </Toggle>
@@ -91,6 +99,7 @@ const TiptapEditor = ({
           pressed={editor.isActive("strike")}
           onPressedChange={() => editor.chain().focus().toggleStrike().run()}
           aria-label="Toggle strike"
+          disabled={isPending}
         >
           <StrikethroughIcon className="h-4 w-4" />
         </Toggle>
@@ -100,6 +109,7 @@ const TiptapEditor = ({
             editor.chain().focus().toggleBulletList().run()
           }
           aria-label="Toggle bullet list"
+          disabled={isPending}
         >
           <List className="h-4 w-4" />
         </Toggle>
@@ -109,13 +119,15 @@ const TiptapEditor = ({
             editor.chain().focus().toggleOrderedList().run()
           }
           aria-label="Toggle ordered list"
+          disabled={isPending}
         >
           <ListOrdered className="h-4 w-4" />
         </Toggle>
       </div>
       <EditorContent
         className={cn(
-          `prose ${theme == "dark" && "prose-invert"}  prose-purple`
+          `prose ${theme == "dark" && "prose-invert"} prose-purple`,
+          isPending && "pointer-events-none"
         )}
         editor={editor}
       />

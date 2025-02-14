@@ -8,22 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Alternative {
-  id         String   @id
-  questionId String
-  content    String
-  isCorrect  Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime
-  Question   Question @relation(fields: [questionId], references: [id])
-}
-
-// model Bank {
-//   id   String @id
-//   name String @unique
-//   Exam Exam[]
-// }
-
 model Discipline {
   id       String     @id
   name     String     @unique
@@ -36,23 +20,14 @@ model Exam {
   year       Int
   position   String
   level      String
-  // instituteId String
-  // bankId      String
   isComplete Boolean    @default(false)
   createdAt  DateTime   @default(now())
-  // Bank        Bank       @relation(fields: [bankId], references: [id])
-  // Institute   Institute  @relation(fields: [instituteId], references: [id])
   bank       String
   institute  String
   updatedAt  DateTime
   Question   Question[]
+  Text       Text[]
 }
-
-// model Institute {
-//   id   String @id
-//   name String @unique
-//   Exam Exam[]
-// }
 
 model Question {
   id           String        @id
@@ -62,23 +37,42 @@ model Question {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime
   Alternative  Alternative[]
+  Text         Text[]
   Discipline   Discipline    @relation(fields: [disciplineId], references: [id])
   Exam         Exam          @relation(fields: [examId], references: [id])
 }
 
-// model User {
-//   id             String    @id
-//   birthDate      DateTime
-//   isSubscribed   Boolean
-//   name           String
-//   email          String    @unique
-//   profilePicture String?
-//   createdAt      DateTime
-//   updatetAt      DateTime?
-//   idClientStripe String?   @unique
-//   passwordHash   String
-//   role           role
-// }
+model Alternative {
+  id         String   @id
+  questionId String
+  content    String
+  isCorrect  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  Question   Question @relation(fields: [questionId], references: [id])
+}
+
+enum ContentType {
+  text
+  image
+}
+
+model Text {
+  id          String      @id
+  number      String
+  contentType ContentType
+  content     String
+  reference   String
+  examId      String
+  Exam        Exam        @relation(fields: [examId], references: [id])
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime
+  Question   Question[]
+  questionId String?
+
+  @@unique([number, examId])
+}
 
 enum UserRole {
   admin
@@ -110,30 +104,9 @@ model User {
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
 
-  // admin   Admin?  @relation 
-  // student   Student?  @relation 
-
-  // sessions      Session[]
-  // Optional for WebAuthn support
-  // Authenticator Authenticator[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-// model Admin {
-//   id   String @id @default(cuid())
-//   name String
-
-//   user   User   @relation(fields: [userId], references: [id]) // Relacionamento obrigatório com User
-//   userId String @unique // Cada Admin está associado a um User único
-// }
-// model Student {
-//   id   String @id @default(cuid())
-//   first String
-
-//   user   User   @relation(fields: [userId], references: [id]) // Relacionamento obrigatório com User
-//   userId String @unique // Cada Admin está associado a um User único
-// }
 
 model Account {
   userId            String
