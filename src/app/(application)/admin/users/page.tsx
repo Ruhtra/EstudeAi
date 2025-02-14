@@ -1,17 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
 import { type UserDTO } from "./_actions/user";
 import { useQuery } from "@tanstack/react-query";
 import { UserList } from "./components/UserList";
-import { CreateUserDialog } from "./_components/CreateUserDialog";
 import { UserSkeleton } from "./components/UserSkeleton";
+import { UserHeader } from "./components/UsesHeader";
+import { UserFilter } from "./components/UserFilters";
 
 export default function UsersPage() {
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const { isPending, data } = useQuery<UserDTO[]>({
     queryKey: ["users"],
     queryFn: async () => {
@@ -30,21 +27,13 @@ export default function UsersPage() {
 
   return (
     <>
-      <CreateUserDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
       <div className="container mx-auto">
-        <h1 className="text-3xl font-bold mb-3">Usuários</h1>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-          <Input
-            placeholder="Buscar usuários..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full sm:max-w-xs"
+        <UserHeader>
+          <UserFilter
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
           />
-          <Button onClick={() => setIsCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Adicionar Usuário
-          </Button>
-        </div>
-
+        </UserHeader>
         {isPending ? <UserSkeleton /> : <UserList users={filteredUsers} />}
       </div>
     </>
