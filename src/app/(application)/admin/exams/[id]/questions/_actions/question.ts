@@ -36,6 +36,7 @@ export const createQuestion = async (
   await db.question.create({
     data: {
       id: cuid(),
+      number: question.number.toString(),
       statement: question.statement,
       Alternative: {
         create: question.alternatives.map((e) => {
@@ -44,6 +45,7 @@ export const createQuestion = async (
             content: e.content,
             updatedAt: new Date(),
             createdAt: new Date(),
+            contentType: e.contentType,
             isCorrect: e.isCorrect,
           };
         }),
@@ -84,9 +86,15 @@ export const updateQuestion = async (
   const parseQuestion = questionSchema.safeParse(data);
   if (!parseQuestion.success) return { error: "Invalid data" };
 
+  console.log(idQuestion);
+
   return { success: "Question updated!" };
 };
 
 export const deleteQuestion = async (questionId: string) => {
+  if (questionId == "12") return { error: "fffff" };
+
+  console.log(questionId);
+
   return { success: "Question deleted" };
 };

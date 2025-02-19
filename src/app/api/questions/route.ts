@@ -1,14 +1,22 @@
 import { db } from "@/lib/db";
+import { ContentType } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export interface QuestionsDto {
   id: string;
+  number: string;
   statement: string;
   discipline: string;
   alternatives: {
     id: string;
     content: string;
+    contentType: ContentType;
     isCorrect: boolean;
+  }[];
+  texts: {
+    id: string;
+    number: string;
+    content: string;
   }[];
 }
 
@@ -16,19 +24,28 @@ export async function GET() {
   try {
     // const user = await currentUser();
     const questions = await db.question.findMany({
-      include: { Alternative: true, Discipline: true },
+      include: { Alternative: true, Discipline: true, Text: true },
     });
     // const usersFiltered = users.filter((u) => u.id !== user.id);
 
     const examsDto: QuestionsDto[] = questions.map((e) => {
       return {
         id: e.id,
+        number: e.number,
         statement: e.statement,
         alternatives: e.Alternative.map((a) => {
           return {
             id: a.id,
             content: a.content,
+            contentType: a.contentType,
             isCorrect: a.isCorrect,
+          };
+        }),
+        texts: e.Text.map((e) => {
+          return {
+            id: e.id,
+            number: e.number,
+            content: e.content,
           };
         }),
         discipline: e.Discipline.name,

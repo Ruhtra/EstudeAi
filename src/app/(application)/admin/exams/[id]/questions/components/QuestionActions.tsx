@@ -9,26 +9,35 @@ import {
   ActionsDelete,
   ActionsEdit,
 } from "@/components/personalized/Actions";
+import { QuestionsSheet } from "../_components/CreateAlternative/QuestionSheet";
+import { useState } from "react";
 
 interface QuestionActionsProps {
   question: QuestionsDto;
+  idExam: string;
   handleDelete: () => Promise<void>;
   isPending: boolean;
 }
 
 export function QuestionActions({
-  // question,
+  question,
+  idExam,
   handleDelete,
   isPending,
 }: QuestionActionsProps) {
-  // const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const handleEdit = () => {
-    // setIsEditOpen(true);
+    setIsEditOpen(true);
   };
   return (
     <>
-      {/* <CreateQuestionDialog idQuestion={question.id} open={isEditOpen} onOpenChange={setIsEditOpen} /> */}
+      <QuestionsSheet
+        idQuestions={question.id}
+        idExam={idExam}
+        onOpenChange={setIsEditOpen}
+        open={isEditOpen}
+      />
 
       <Actions isPending={isPending}>
         <ActionsEdit handleEdit={handleEdit} isPending={isPending} />

@@ -16,15 +16,20 @@ import { Form } from "@/components/ui/form";
 import { questionSchema } from "../../_actions/QuestionSchema";
 import { toast } from "sonner";
 import { createQuestion } from "../../_actions/question";
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { queryClient } from "@/lib/queryCLient";
 import { useQuestionOptions } from "../../_queries/QuestionQueries";
+import { useQuery } from "@tanstack/react-query";
+import { QuestionsDto } from "@/app/api/questions/route";
 interface QuestionsSheetProps {
   idExam: string;
   idQuestions?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+export type FormValues = z.infer<typeof questionSchema>;
+
 export function QuestionsSheet({
   idExam,
   idQuestions,
@@ -32,19 +37,41 @@ export function QuestionsSheet({
   open,
 }: QuestionsSheetProps) {
   const [isPending, startTransition] = useTransition();
+
+  const { data: questionData, isPending: isLoading } = useQuery({
+    queryKey: ["questions", idQuestions],
+    queryFn: () => fetchQuestion(idQuestions),
+    enabled: true,
+    refetchOnMount: true,
+  });
+
   const form = useForm<z.infer<typeof questionSchema>>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      number: 0,
-      linkedTexts: [],
-      statement: "",
-      discipline: "",
-      alternatives: [
+      number: Number(questionData?.number) || 0,
+      linkedTexts: questionData?.texts.map((e) => e.number) || [],
+      statement: questionData?.statement || "",
+      discipline: questionData?.discipline || "",
+      alternatives: questionData?.alternatives.map((e) => {
+        return {
+          content: e.content,
+          contentType: e.contentType,
+          isCorrect: e.isCorrect,
+        };
+      }) || [
         { content: "", contentType: "text", isCorrect: false },
         { content: "", contentType: "text", isCorrect: false },
       ],
     },
   });
+
+  useEffect(() => {
+    if (questionData) {
+      Object.entries(questionData).forEach(([key, value]) => {
+        form.setValue(key as keyof FormValues, value);
+      });
+    }
+  }, [questionData, form]);
 
   const {
     disciplines,
@@ -56,7 +83,6 @@ export function QuestionsSheet({
   if (isError) {
     return <div>Error loading options. Please try again later.</div>;
   }
-  if (isLoadingOptions) <>'skelton'</>;
 
   function onSubmit(values: z.infer<typeof questionSchema>) {
     startTransition(async () => {
@@ -101,7 +127,7 @@ export function QuestionsSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-3xl p-4 overflow-y-auto">
-        {isLoadingOptions ? (
+        {isLoadingOptions || isLoading ? (
           <>loading</>
         ) : (
           <Form {...form}>
@@ -120,7 +146,11 @@ export function QuestionsSheet({
                 />
               </div>
               <SheetFooter>
-                <Button type="submit" className="w-full sm:w-auto">
+                <Button
+                  disabled={isPending}
+                  type="submit"
+                  className="w-full sm:w-auto"
+                >
                   Criar Questão
                 </Button>
               </SheetFooter>
@@ -130,4 +160,17 @@ export function QuestionsSheet({
       </SheetContent>
     </Sheet>
   );
+}
+
+async function fetchQuestion(
+  id: string | undefined
+): Promise<QuestionsDto | null> {
+  if (id) {
+    const response = await fetch(`/api/questions/${id}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch question");
+    }
+    return response.json();
+  }
+  return null;
 }

@@ -1,10 +1,5 @@
 import type React from "react";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField, FormItem } from "@/components/ui/form";
 import { GripVertical, X } from "lucide-react";
 import type { QuestionFormValues } from "../QuestionForm";
 import { useFormContext } from "react-hook-form";

@@ -12,7 +12,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
-import { Control, useFieldArray, useWatch } from "react-hook-form";
+import { Control, useFieldArray } from "react-hook-form";
 import { QuestionFormValues } from "../QuestionForm";
 import { SortableAlternative } from "./SortableAlternative";
 

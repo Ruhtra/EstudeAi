@@ -31,7 +31,7 @@ export function ImageArea({
         reader.readAsDataURL(file);
       }
     },
-    [setValue, index]
+    [setValue, index, setPreviewImage]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

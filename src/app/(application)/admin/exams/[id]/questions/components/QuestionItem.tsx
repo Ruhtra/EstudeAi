@@ -18,6 +18,10 @@ import {
 } from "@/components/personalized/Item";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { deleteQuestion } from "../_actions/question";
+import { toast } from "sonner";
+import { queryClient } from "@/lib/queryCLient";
+import { useParams } from "next/navigation";
 
 interface QuestionItemProps {
   question: QuestionsDto;
@@ -33,22 +37,23 @@ export function QuestionItem({
   isMobile,
 }: QuestionItemProps) {
   const [isPending, startTransition] = useTransition();
+  const { id: idExam } = useParams<{ id: string }>();
 
   const handleDelete = async () => {
     startTransition(async () => {
-      // try {
-      //   const data = await deleteQuestion(question.id);
-      //   if (data.error) {
-      //     toast(data.error);
-      //   } else if (data.success) {
-      //     await queryClient.refetchQueries({
-      //       queryKey: ["questions"],
-      //     });
-      //     toast(data.success);
-      //   }
-      // } catch {
-      //   toast("Algo deu errado, informe o suporte!");
-      // }
+      try {
+        const data = await deleteQuestion(question.id);
+        if (data.error) {
+          toast(data.error);
+        } else if (data.success) {
+          await queryClient.refetchQueries({
+            queryKey: ["questions"],
+          });
+          toast(data.success);
+        }
+      } catch {
+        toast("Algo deu errado, informe o suporte!");
+      }
     });
   };
 
@@ -71,6 +76,7 @@ export function QuestionItem({
             </ItemMobileHeaderTitle>
             <ItemMobileHeaderOptions>
               <QuestionActions
+                idExam={idExam}
                 question={question}
                 handleDelete={handleDelete}
                 isPending={isPending}
@@ -134,6 +140,7 @@ export function QuestionItem({
 
       <ItemDesktopCell isPending={isPending}>
         <QuestionActions
+          idExam={idExam}
           question={question}
           handleDelete={handleDelete}
           isPending={isPending}

@@ -6,7 +6,7 @@ export interface DisciplinesDto {
   name: string;
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const disciplines = await db.discipline.findMany({});
 
