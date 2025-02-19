@@ -1,16 +1,21 @@
-import { FormControl, FormField, FormItem } from "@/components/ui/form";
+import type React from "react";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { GripVertical, X } from "lucide-react";
-import { QuestionFormValues } from "../QuestionForm";
+import type { QuestionFormValues } from "../QuestionForm";
 import { useFormContext } from "react-hook-form";
 import { ContentTypeSelect } from "@/components/ContentTypeSelect";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 interface OptionsProps {
   index: number;
   dragHandleProps: React.HTMLAttributes<HTMLDivElement>;
   onRemove: () => void;
-
   setPreviewImage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
@@ -47,30 +52,20 @@ export function Options({
       />
       <FormField
         control={control}
-        name="correctAlternative"
+        name={`alternatives.${index}.isCorrect`}
         render={({ field }) => (
           <FormItem>
             <FormControl>
-              <RadioGroup
-                onValueChange={field.onChange}
-                value={field.value}
-                className="flex items-center"
-              >
-                <RadioGroupItem
-                  value={index.toString()}
-                  id={`correct-${index}`}
-                />
-                <label
-                  htmlFor={`correct-${index}`}
-                  className="text-xs text-gray-600 ml-1"
-                >
-                  Correta
-                </label>
-              </RadioGroup>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                id={`correct-${index}`}
+              />
             </FormControl>
           </FormItem>
         )}
       />
+
       <Button
         type="button"
         variant="ghost"

@@ -59,7 +59,7 @@ enum ContentType {
 
 model Text {
   id          String      @id
-  number      String
+  number      String      @unique
   contentType ContentType
   content     String
   reference   String

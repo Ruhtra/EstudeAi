@@ -1,4 +1,4 @@
-import { Control } from "react-hook-form";
+import { Control, FieldErrors } from "react-hook-form";
 import * as z from "zod";
 import {
   FormControl,
@@ -12,56 +12,25 @@ import { ComboboxSelect } from "@/components/comboxSelect";
 import { ComboboxCreate } from "@/components/comboboxCreate";
 import { Editor } from "@/components/Editor";
 import { Input } from "@/components/ui/input";
+import { useQuestionOptions } from "../../_queries/QuestionQueries";
+import { questionSchema } from "../../_actions/QuestionSchema";
 
-export const questionFormSchema = z.object({
-  number: z
-    .number()
-    .int()
-    .positive("O número da questão deve ser um inteiro positivo"),
-  linkedTexts: z.array(z.string()),
-  statement: z
-    .string()
-    .min(1, "O enunciado é obrigatório")
-    .max(1000, "O enunciado deve ter no máximo 1000 caracteres"),
-  discipline: z.string().min(1, "A disciplina é obrigatória"),
-  alternatives: z
-    .array(
-      z.object({
-        content: z.string().min(1, "O conteúdo da alternativa é obrigatório"),
-        contentType: z.enum(["text", "image"]),
-      })
-    )
-    .min(2, "Deve haver pelo menos duas alternativas"),
-  correctAlternative: z.string().min(1, "Deve haver uma alternativa correta"),
-});
-
-export type QuestionFormValues = z.infer<typeof questionFormSchema>;
-
-const disciplines = [
-  "Matemática",
-  "Português",
-  "História",
-  "Geografia",
-  "Ciências",
-  "Física",
-  "Química",
-  "Biologia",
-  "Inglês",
-  "Educação Física",
-];
-
-// Mock data for texts
-const mockTexts = [
-  { id: "1", title: "Texto IV" },
-  { id: "2", title: "Texto V" },
-  { id: "3", title: "Texto VI" },
-];
+export type QuestionFormValues = z.infer<typeof questionSchema>;
 
 interface QuestionFormProps {
   control: Control<QuestionFormValues>;
+  errors: FieldErrors<QuestionFormValues>;
+
+  disciplines: string[];
+  texts: string[];
 }
 
-export function QuestionForm({ control }: QuestionFormProps) {
+export function QuestionForm({
+  control,
+  disciplines,
+  texts,
+  errors,
+}: QuestionFormProps) {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -117,7 +86,7 @@ export function QuestionForm({ control }: QuestionFormProps) {
               </FormLabel>
               <FormControl>
                 <ComboboxSelect
-                  texts={[...mockTexts]}
+                  texts={texts}
                   selectedTexts={field.value}
                   onChange={field.onChange}
                 />
@@ -152,6 +121,12 @@ export function QuestionForm({ control }: QuestionFormProps) {
         <DraggableAlternatives control={control} />
         <FormMessage className="text-xs" />
       </FormItem>
+
+      {errors.alternatives?.root && (
+        <p className="text-sm text-destructive mt-2">
+          {errors.alternatives.root.message}
+        </p>
+      )}
     </div>
   );
 }

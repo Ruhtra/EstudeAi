@@ -2,18 +2,83 @@
 
 import { z } from "zod";
 import { questionSchema } from "./QuestionSchema";
+import { db } from "@/lib/db";
+import cuid from "cuid";
 
-export const createExaxm = async (data: z.infer<typeof questionSchema>) => {
+export const createQuestion = async (
+  idExam: string,
+  data: z.infer<typeof questionSchema>
+) => {
   const parseQuestion = questionSchema.safeParse(data);
-
   if (!parseQuestion.success) return { error: "Invalid data" };
-  // const question = parseQuestion.data;
+
+  const textsExist = await db.text.findMany({
+    where: {
+      number: {
+        in: data.linkedTexts,
+      },
+    },
+  });
+  if (textsExist.length !== data.linkedTexts.length)
+    return { error: "Some linked texts do not exist" };
+
+  console.log(idExam);
+
+  const examExists = await db.exam.findUnique({
+    where: {
+      id: idExam,
+    },
+  });
+  if (!examExists) return { error: "Exam does not exist" };
+
+  const question = parseQuestion.data;
+  console.log(question);
+  await db.question.create({
+    data: {
+      id: cuid(),
+      statement: question.statement,
+      Alternative: {
+        create: question.alternatives.map((e) => {
+          return {
+            id: cuid(),
+            content: e.content,
+            updatedAt: new Date(),
+            createdAt: new Date(),
+            isCorrect: e.isCorrect,
+          };
+        }),
+      },
+      Discipline: {
+        connectOrCreate: {
+          create: {
+            id: cuid(),
+            name: question.discipline,
+          },
+          where: {
+            name: question.discipline,
+          },
+        },
+      },
+      Exam: {
+        connect: {
+          id: idExam,
+        },
+      },
+      Text: {
+        connect: question.linkedTexts.map((e) => ({
+          number: e,
+        })),
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  });
 
   return { success: "Question create!" };
 };
 
 export const updateQuestion = async (
-  // idUser: string,
+  idQuestion: string,
   data: z.infer<typeof questionSchema>
 ) => {
   const parseQuestion = questionSchema.safeParse(data);
@@ -23,7 +88,5 @@ export const updateQuestion = async (
 };
 
 export const deleteQuestion = async (questionId: string) => {
-  console.log(questionId);
-
   return { success: "Question deleted" };
 };

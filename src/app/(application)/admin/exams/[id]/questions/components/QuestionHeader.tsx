@@ -3,13 +3,19 @@ import { PlusCircle } from "lucide-react";
 // import { CreateQuestionDialog } from "../_components/CreateQuestionDialog";
 import { useState } from "react";
 import { QuestionsSheet } from "../_components/CreateAlternative/QuestionSheet";
+import { useParams } from "next/navigation";
 
 export function QuestionsHeader() {
+  const { id: idExam } = useParams<{ id: string }>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   return (
     <>
-      <QuestionsSheet onOpenChange={setIsCreateOpen} open={isCreateOpen} />
+      <QuestionsSheet
+        idExam={idExam}
+        onOpenChange={setIsCreateOpen}
+        open={isCreateOpen}
+      />
       <div className="mb-4 flex flex-col gap-4">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">

@@ -15,13 +15,8 @@ import {
 } from "@/components/ui/popover";
 import { CommandList } from "cmdk";
 
-interface Text {
-  id: string;
-  title: string;
-}
-
 interface TextSelectorProps {
-  texts: Text[];
+  texts: string[];
   selectedTexts: string[];
   onChange: (selectedTexts: string[]) => void;
 }
@@ -31,10 +26,10 @@ export function ComboboxSelect({
   selectedTexts,
   onChange,
 }: TextSelectorProps) {
-  const handleSelect = (textId: string) => {
-    const updatedSelection = selectedTexts.includes(textId)
-      ? selectedTexts.filter((id) => id !== textId)
-      : [...selectedTexts, textId];
+  const handleSelect = (title: string) => {
+    const updatedSelection = selectedTexts.includes(title)
+      ? selectedTexts.filter((t) => t !== title)
+      : [...selectedTexts, title];
     onChange(updatedSelection);
   };
 
@@ -44,7 +39,6 @@ export function ComboboxSelect({
         <Button
           variant="outline"
           role="combobox"
-          //   aria-expanded={open}
           className="w-full justify-between"
         >
           {selectedTexts.length > 0
@@ -61,20 +55,17 @@ export function ComboboxSelect({
           <CommandList>
             <CommandEmpty>Nenhum texto encontrado.</CommandEmpty>
             <CommandGroup>
-              {texts.map((text) => (
-                <CommandItem
-                  key={text.id}
-                  onSelect={() => handleSelect(text.id)}
-                >
+              {texts.map((title) => (
+                <CommandItem key={title} onSelect={() => handleSelect(title)}>
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedTexts.includes(text.id)
+                      selectedTexts.includes(title)
                         ? "opacity-100"
                         : "opacity-0"
                     )}
                   />
-                  {text.title}
+                  {title}
                 </CommandItem>
               ))}
             </CommandGroup>

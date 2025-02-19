@@ -59,9 +59,13 @@ export function ComboboxCreate({
     setInputValue(newValue);
   };
 
-  const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(inputValue.toLowerCase())
-  );
+  const filteredOptions = options.filter((option) => {
+    console.log("optin");
+
+    console.log(option);
+
+    return option.toLowerCase().includes(inputValue.toLowerCase());
+  });
 
   const showCreateOption =
     inputValue !== "" &&

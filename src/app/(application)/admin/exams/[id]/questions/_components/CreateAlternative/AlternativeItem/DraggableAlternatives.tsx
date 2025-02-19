@@ -12,7 +12,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
-import { Control, useFieldArray } from "react-hook-form";
+import { Control, useFieldArray, useWatch } from "react-hook-form";
 import { QuestionFormValues } from "../QuestionForm";
 import { SortableAlternative } from "./SortableAlternative";
 
@@ -66,10 +66,12 @@ export function DraggableAlternatives({ control }: DraggableAlternativesProps) {
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => append({ content: "", contentType: "text" })}
+        onClick={() =>
+          append({ content: "", contentType: "text", isCorrect: false })
+        }
         className="w-full text-sm mt-4"
       >
-        Adicionar alternativa
+        Digite alternativa
       </Button>
     </DndContext>
   );
