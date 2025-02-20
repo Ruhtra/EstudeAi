@@ -45,7 +45,11 @@ export function QuestionForm({
                 <Input
                   type="number"
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  value={field.value?.toString() ?? ""}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10);
+                    field.onChange(isNaN(value) ? "" : value.toString());
+                  }}
                   className="text-sm w-20"
                   placeholder="Nº"
                   max="999"

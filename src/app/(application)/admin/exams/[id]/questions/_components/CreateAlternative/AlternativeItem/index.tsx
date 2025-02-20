@@ -55,11 +55,16 @@ export function AlternativeItem({
                   />
                 </div>
                 {contentType === "image" && (
-                  <ImageArea
-                    previewImage={previewImage}
-                    setPreviewImage={setPreviewImage}
-                    index={index}
-                  />
+                  <>
+                    <h1 className="bg-red-500">
+                      Atenção ainda não pode subir imagem
+                    </h1>
+                    <ImageArea
+                      previewImage={previewImage}
+                      setPreviewImage={setPreviewImage}
+                      index={index}
+                    />
+                  </>
                 )}
               </div>
             </FormControl>

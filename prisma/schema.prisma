@@ -39,7 +39,7 @@ model Question {
   updatedAt    DateTime
   Alternative  Alternative[]
   Text         Text[]
-  Discipline   Discipline    @relation(fields: [disciplineId], references: [id])
+  Discipline   Discipline    @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
   Exam         Exam          @relation(fields: [examId], references: [id])
 }
 
@@ -51,7 +51,7 @@ model Alternative {
   isCorrect   Boolean     @default(false)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime
-  Question    Question    @relation(fields: [questionId], references: [id])
+  Question    Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 enum ContentType {

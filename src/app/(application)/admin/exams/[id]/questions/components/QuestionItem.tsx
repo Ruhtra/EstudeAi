@@ -70,9 +70,10 @@ export function QuestionItem({
               <ItemMobileHeaderBadges>
                 <Badge>{question.discipline}</Badge>
               </ItemMobileHeaderBadges>
-              <p className="mb-4 text-sm leading-relaxed">
-                {question.statement}
-              </p>
+              <p
+                className="mb-4 text-sm leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: question.statement }}
+              ></p>
             </ItemMobileHeaderTitle>
             <ItemMobileHeaderOptions>
               <QuestionActions
@@ -113,12 +114,8 @@ export function QuestionItem({
                     ? "bg-green-100 dark:bg-green-900"
                     : "bg-gray-100 dark:bg-gray-800"
                 }`}
-              >
-                <span className="font-semibold">
-                  {alt.id} {")"}
-                </span>{" "}
-                {alt.content}
-              </div>
+                dangerouslySetInnerHTML={{ __html: alt.content }}
+              />
             ))}
           </ItemMobileContentData>
         </ItemMobileContent>
@@ -132,7 +129,7 @@ export function QuestionItem({
         Questão {question.id}
       </ItemDesktopCell>
       <ItemDesktopCell isPending={isPending}>
-        {question.statement}
+        <span dangerouslySetInnerHTML={{ __html: question.statement }} />
       </ItemDesktopCell>
       <ItemDesktopCell isPending={isPending}>
         <Badge variant="secondary">{question.discipline}</Badge>

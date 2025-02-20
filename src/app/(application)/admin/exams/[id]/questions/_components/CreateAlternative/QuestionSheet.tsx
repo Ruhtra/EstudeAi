@@ -15,7 +15,7 @@ import type { z } from "zod";
 import { Form } from "@/components/ui/form";
 import { questionSchema } from "../../_actions/QuestionSchema";
 import { toast } from "sonner";
-import { createQuestion } from "../../_actions/question";
+import { createQuestion, updateQuestion } from "../../_actions/question";
 import { useEffect, useTransition } from "react";
 import { queryClient } from "@/lib/queryCLient";
 import { useQuestionOptions } from "../../_queries/QuestionQueries";
@@ -39,7 +39,7 @@ export function QuestionsSheet({
   const [isPending, startTransition] = useTransition();
 
   const { data: questionData, isPending: isLoading } = useQuery({
-    queryKey: ["questions", idQuestions],
+    queryKey: ["question", idQuestions],
     queryFn: () => fetchQuestion(idQuestions),
     enabled: true,
     refetchOnMount: true,
@@ -48,17 +48,11 @@ export function QuestionsSheet({
   const form = useForm<z.infer<typeof questionSchema>>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      number: Number(questionData?.number) || 0,
-      linkedTexts: questionData?.texts.map((e) => e.number) || [],
-      statement: questionData?.statement || "",
-      discipline: questionData?.discipline || "",
-      alternatives: questionData?.alternatives.map((e) => {
-        return {
-          content: e.content,
-          contentType: e.contentType,
-          isCorrect: e.isCorrect,
-        };
-      }) || [
+      number: "",
+      linkedTexts: [],
+      statement: "", // Pode ser removido também
+      discipline: "",
+      alternatives: [
         { content: "", contentType: "text", isCorrect: false },
         { content: "", contentType: "text", isCorrect: false },
       ],
@@ -70,6 +64,24 @@ export function QuestionsSheet({
       Object.entries(questionData).forEach(([key, value]) => {
         form.setValue(key as keyof FormValues, value);
       });
+
+      form.setValue(
+        "linkedTexts",
+        questionData.texts.map((e) => e.number)
+      );
+      form.setValue("statement", questionData.statement);
+
+      console.log(questionData.statement);
+
+      form.setValue(
+        "alternatives",
+        questionData.alternatives.map((e) => ({
+          id: e.id,
+          content: e.content,
+          contentType: e.contentType,
+          isCorrect: e.isCorrect,
+        }))
+      );
     }
   }, [questionData, form]);
 
@@ -88,25 +100,23 @@ export function QuestionsSheet({
     startTransition(async () => {
       try {
         if (idQuestions) {
-          // const data = await updateQuestion(idExam, values);
-          // if (data.error) {
-          //   toast(data.error);
-          //   return;
-          // }
-          // if (data.success) {
-          //   await queryClient.refetchQueries({
-          //     queryKey: ["questions", idExam],
-          //   });
-          //   queryClient.removeQueries({
-          //     queryKey: ["question", idQuestions],
-          //   });
-          //   onOpenChange(false);
-          //   form.reset();
-          //   toast("Question atualizado com sucesso");
-          // }
+          const data = await updateQuestion(idQuestions, values);
+          if (data.error) {
+            toast(data.error);
+            return;
+          }
+          if (data.success) {
+            await queryClient.refetchQueries({
+              queryKey: ["questions", idExam],
+            });
+            queryClient.removeQueries({
+              queryKey: ["question", idQuestions],
+            });
+            onOpenChange(false);
+            form.reset();
+            toast("Question atualizado com sucesso");
+          }
         } else {
-          console.log(values);
-
           const data = await createQuestion(idExam, values);
           if (data.error) toast(data.error);
           if (data.success) {
@@ -151,7 +161,7 @@ export function QuestionsSheet({
                   type="submit"
                   className="w-full sm:w-auto"
                 >
-                  Criar Questão
+                  {idQuestions ? "Atualizar Questão" : "Criar Questão"}
                 </Button>
               </SheetFooter>
             </form>

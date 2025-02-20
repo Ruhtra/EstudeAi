@@ -2,9 +2,8 @@ import { z } from "zod";
 
 export const questionSchema = z.object({
   number: z
-    .number()
-    .int()
-    .positive("O número da questão deve ser um inteiro positivo"),
+    .string()
+    .regex(/^\d+$/, "O número da questão deve ser um inteiro positivo"),
   linkedTexts: z.array(z.string()),
   statement: z
     .string()
@@ -14,6 +13,7 @@ export const questionSchema = z.object({
   alternatives: z
     .array(
       z.object({
+        id: z.string().optional(),
         content: z.string().min(1, "O conteúdo da alternativa é obrigatório"),
         contentType: z.enum(["text", "image"]),
         isCorrect: z.boolean(),
