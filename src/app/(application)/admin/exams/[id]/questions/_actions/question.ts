@@ -192,8 +192,8 @@ export const updateQuestion = async (
     if (questionCount === 1) {
       // Se for a última questão da disciplina atual, deletar a disciplina junto com o update da questão
       await db.$transaction([
-        db.discipline.delete({ where: { id: question.disciplineId } }),
         update(),
+        db.discipline.delete({ where: { id: question.disciplineId } }),
       ]);
 
       return { success: "Question updated and discipline deleted!" };
