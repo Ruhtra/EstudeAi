@@ -28,30 +28,11 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Shield, User } from "lucide-react";
 import { UserMeDTO } from "@/app/api/users/me/route";
+import { profileSchema } from "./_actions/profile.schema";
+import { queryClient } from "@/lib/queryCLient";
+import { updateMe } from "./_actions/profile";
 
-const cpfSchema = z
-  .string()
-  .regex(/^\d{11}$/, "O CPF deve conter exatamente 11 dígitos.");
-
-const phoneSchema = z
-  .string()
-  .regex(
-    /^\d{2}9\d{8}$/,
-    "O telefone deve conter 11 dígitos, começando com DDD seguido do número 9."
-  );
-
-const formSchema = z.object({
-  name: z.string().min(2, "Nome completo é obrigatório"),
-  email: z.string().email("Email inválido"),
-  phone: phoneSchema,
-  cpf: cpfSchema.optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  imageUrl: z.string().optional(),
-  isTwoFactorEnabled: z.boolean(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof profileSchema>;
 
 const estadosBrasileiros = [
   { value: "AC", label: "Acre" },
@@ -110,41 +91,71 @@ function SkeletonProfile() {
 export default function ProfilePage() {
   const [isPending, startTransition] = useTransition();
   const { data: userData, isPending: isLoading } = useQuery({
-    queryKey: ["user"],
+    queryKey: ["profile"],
     queryFn: fetchCurrentUser,
     refetchOnMount: true,
   });
 
   const [originalValues, setOriginalValues] = useState<FormValues | null>(null);
 
+  const defaultValues: Record<string, string | boolean> = {
+    role: UserRole.student,
+    email: "",
+    phone: "",
+    city: "",
+    firstName: "",
+    lastName: "",
+    fullName: "",
+    cpf: "",
+    state: "",
+    isTwoFactorEnabled: false,
+  };
+
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      cpf: "",
-      city: "",
-      state: "",
-      imageUrl: "",
-      isTwoFactorEnabled: false,
-    },
+    resolver: zodResolver(profileSchema),
+    defaultValues,
   });
 
   const { dirtyFields } = form.formState;
 
   useEffect(() => {
     if (userData) {
-      const values = {
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        cpf: userData.cpf || undefined,
-        city: userData.city || undefined,
-        state: userData.state || undefined,
-        imageUrl: userData.imageUrl || undefined,
-        isTwoFactorEnabled: userData.isTwoFactorEnabled,
+      Object.entries(userData).forEach(([key, value]) => {
+        form.setValue(key as keyof FormValues, value);
+      });
+
+      form.setValue(
+        "role",
+        (userData.role.toLowerCase() as "admin" | "teacher" | "student") ??
+          "student"
+      );
+      form.setValue("email", userData.email ?? "");
+      form.setValue("phone", userData.phone ?? "");
+      form.setValue("city", userData.city ?? "");
+      form.setValue("firstName", userData.name.split(" ")[0] ?? "");
+      form.setValue("lastName", userData.name.split(" ")[1] ?? "");
+      form.setValue("fullName", userData.name ?? "");
+      form.setValue("cpf", userData.cpf ?? "");
+      form.setValue("state", userData.state ?? "");
+      form.setValue("isTwoFactorEnabled", userData.isTwoFactorEnabled ?? false);
+
+      const values: FormValues = {
+        role: userData.role as any,
+        email: userData.email ?? "",
+        phone: userData.phone ?? "",
+        city: userData.city ?? "",
+        state: userData.state ?? "",
+        firstName: userData.name.split(" ")[0] ?? "",
+        lastName: userData.name.split(" ")[1] ?? "",
+        fullName: userData.name ?? "",
+        cpf: userData.cpf ?? "",
+        isTwoFactorEnabled: userData.isTwoFactorEnabled ?? false,
+        photo: undefined,
+
+        // imageUrl: userData.imageUrl || undefined,
+        // isTwoFactorEnabled: userData.isTwoFactorEnabled,
       };
+
       form.reset(values);
       setOriginalValues(values);
     }
@@ -153,12 +164,21 @@ export default function ProfilePage() {
   function onSubmit(values: FormValues) {
     startTransition(async () => {
       try {
-        // Implement the update user function here
-        // const data = await updateUser(values);
-        console.log(values);
-        toast.success("Perfil atualizado com sucesso!");
-        setOriginalValues(values);
-        form.reset(values);
+        const data = await updateMe(values);
+
+        if (data.error) toast(data.error);
+        if (data.success) {
+          await queryClient.refetchQueries({
+            queryKey: ["profile"],
+          });
+          // queryClient.removeQueries({
+          //   queryKey: ["profile", ],
+          // });
+
+          toast.success("Perfil atualizado com sucesso!");
+          setOriginalValues(values);
+          form.reset(values);
+        }
       } catch {
         toast.error("Erro ao atualizar o perfil. Por favor, tente novamente.");
       }
@@ -194,7 +214,7 @@ export default function ProfilePage() {
                   <div className="col-span-1 flex flex-col items-center space-y-4">
                     <ImageUploadField
                       form={form}
-                      name="imageUrl"
+                      name="photo"
                       isPending={isPending}
                       initialImageUrl={userData?.imageUrl ?? undefined}
                       userType={userData?.role || UserRole.student}
@@ -217,23 +237,64 @@ export default function ProfilePage() {
                           : "Usuário"}
                       </span>
                     </div>
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome Completo</FormLabel>
-                          <FormControl>
-                            <Input
-                              disabled={isPending}
-                              {...field}
-                              className="bg-background"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {userData?.role == "student" ? (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="firstName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome Completo</FormLabel>
+                              <FormControl>
+                                <Input
+                                  disabled={isPending}
+                                  {...field}
+                                  className="bg-background"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="lastName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome Completo</FormLabel>
+                              <FormControl>
+                                <Input
+                                  disabled={isPending}
+                                  {...field}
+                                  className="bg-background"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="fullName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome Completo</FormLabel>
+                              <FormControl>
+                                <Input
+                                  disabled={isPending}
+                                  {...field}
+                                  className="bg-background"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
                     <FormField
                       control={form.control}
                       name="email"

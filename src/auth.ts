@@ -5,6 +5,7 @@ import authConfig from "./auth.config";
 import { db } from "./lib/db";
 import "next-auth/jwt";
 export const { auth, handlers, signIn, signOut, unstable_update } = NextAuth({
+  adapter: PrismaAdapter(db),
   pages: {
     signIn: "/auth/login",
     error: "/auth/error",
@@ -37,6 +38,5 @@ export const { auth, handlers, signIn, signOut, unstable_update } = NextAuth({
   session: {
     strategy: "jwt",
   },
-  adapter: PrismaAdapter(db),
   ...authConfig,
 });

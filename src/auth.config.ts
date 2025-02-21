@@ -68,6 +68,22 @@ export default {
     },
 
     async session({ token, session }) {
+      // if (token.sub && session.user) {
+      //   session.user.id = token.sub;
+      //   session.user.id = token.sub;
+
+      //   let user;
+      //   try {
+      //     user = await getUserById(session.user.id);
+      //   } catch (error) {}
+
+      //   if (user) {
+      //     session.user.name = user.name;
+      //     session.user.email = user.email;
+      //     session.user.imageurl = user.imageurl;
+      //   }
+      // }
+
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
