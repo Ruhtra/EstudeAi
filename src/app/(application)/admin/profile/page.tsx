@@ -143,6 +143,7 @@ export default function ProfilePage() {
       form.setValue("isTwoFactorEnabled", userData.isTwoFactorEnabled ?? false);
 
       const values: FormValues = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         role: userData.role as any,
         email: userData.email ?? "",
         phone: userData.phone ?? "",

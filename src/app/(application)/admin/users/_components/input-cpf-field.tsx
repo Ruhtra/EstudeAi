@@ -14,6 +14,7 @@ import type { UseFormReturn } from "react-hook-form";
 
 export interface InputCpfFieldProps {
   isPending: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<any>;
 }
 

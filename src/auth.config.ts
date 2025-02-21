@@ -98,7 +98,7 @@ export default {
 
       return session;
     },
-    async jwt({ token, user, trigger, account, profile, session }) {
+    async jwt({ token }) {
       if (!token.sub) return token;
 
       //TO-DO: Verificar sobre a possiilide de manter o token sendo atualizado pelo banco de dados
@@ -107,7 +107,7 @@ export default {
       let userr;
       try {
         userr = await getUserById(token.sub!);
-      } catch (error) {}
+      } catch {}
 
       if (!userr) return token;
       // if (!user) return token;
