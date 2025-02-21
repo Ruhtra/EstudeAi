@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useTransition, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -12,6 +12,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox";
@@ -20,36 +21,13 @@ import { UserRole } from "@prisma/client";
 import { ImageUploadField } from "../users/_components/image-upload-field";
 import { InputPhoneField } from "../users/_components/input-phone-field";
 import { InputCpfField } from "../users/_components/input-cpf-field";
-
-const estadosBrasileiros = [
-  "Acre",
-  "Alagoas",
-  "Amapá",
-  "Amazonas",
-  "Bahia",
-  "Ceará",
-  "Distrito Federal",
-  "Espírito Santo",
-  "Goiás",
-  "Maranhão",
-  "Mato Grosso",
-  "Mato Grosso do Sul",
-  "Minas Gerais",
-  "Pará",
-  "Paraíba",
-  "Paraná",
-  "Pernambuco",
-  "Piauí",
-  "Rio de Janeiro",
-  "Rio Grande do Norte",
-  "Rio Grande do Sul",
-  "Rondônia",
-  "Roraima",
-  "Santa Catarina",
-  "São Paulo",
-  "Sergipe",
-  "Tocantins",
-];
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, XCircle, Shield, User } from "lucide-react";
+import { UserMeDTO } from "@/app/api/users/me/route";
 
 const cpfSchema = z
   .string()
@@ -62,214 +40,339 @@ const phoneSchema = z
     "O telefone deve conter 11 dígitos, começando com DDD seguido do número 9."
   );
 
-const baseSchema = z.object({
+const formSchema = z.object({
+  name: z.string().min(2, "Nome completo é obrigatório"),
   email: z.string().email("Email inválido"),
   phone: phoneSchema,
+  cpf: cpfSchema.optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  imageUrl: z.string().optional(),
+  isTwoFactorEnabled: z.boolean(),
 });
-
-const collaboratorTeacherSchema = baseSchema.extend({
-  fullName: z.string().min(2, "Nome completo é obrigatório"),
-  cpf: cpfSchema,
-  photo: z
-    .instanceof(File)
-    .refine((file) => file.size <= 5000000, `Tamanho máximo do arquivo é 5MB.`),
-});
-
-const subscriberSchema = baseSchema.extend({
-  firstName: z
-    .string()
-    .min(2, "Nome é obrigatório")
-    .regex(/^\S+$/, "O nome não pode conter espaços"),
-  lastName: z
-    .string()
-    .min(2, "Sobrenome é obrigatório")
-    .regex(/^\S+$/, "O nome não pode conter espaços"),
-  state: z.string().min(2, "Estado é obrigatório"),
-  city: z.string().min(2, "Cidade é obrigatória"),
-  photo: z.optional(
-    z
-      .instanceof(File)
-      .refine(
-        (file) => file.size <= 5000000,
-        `Tamanho máximo do arquivo é 5MB.`
-      )
-  ),
-});
-
-const formSchema = z.discriminatedUnion("role", [
-  collaboratorTeacherSchema.extend({ role: z.literal(UserRole.admin) }),
-  collaboratorTeacherSchema.extend({ role: z.literal(UserRole.teacher) }),
-  subscriberSchema.extend({ role: z.literal(UserRole.student) }),
-]);
 
 type FormValues = z.infer<typeof formSchema>;
 
+const estadosBrasileiros = [
+  { value: "AC", label: "Acre" },
+  { value: "AL", label: "Alagoas" },
+  { value: "AP", label: "Amapá" },
+  { value: "AM", label: "Amazonas" },
+  { value: "BA", label: "Bahia" },
+  { value: "CE", label: "Ceará" },
+  { value: "DF", label: "Distrito Federal" },
+  { value: "ES", label: "Espírito Santo" },
+  { value: "GO", label: "Goiás" },
+  { value: "MA", label: "Maranhão" },
+  { value: "MT", label: "Mato Grosso" },
+  { value: "MS", label: "Mato Grosso do Sul" },
+  { value: "MG", label: "Minas Gerais" },
+  { value: "PA", label: "Pará" },
+  { value: "PB", label: "Paraíba" },
+  { value: "PR", label: "Paraná" },
+  { value: "PE", label: "Pernambuco" },
+  { value: "PI", label: "Piauí" },
+  { value: "RJ", label: "Rio de Janeiro" },
+  { value: "RN", label: "Rio Grande do Norte" },
+  { value: "RS", label: "Rio Grande do Sul" },
+  { value: "RO", label: "Rondônia" },
+  { value: "RR", label: "Roraima" },
+  { value: "SC", label: "Santa Catarina" },
+  { value: "SP", label: "São Paulo" },
+  { value: "SE", label: "Sergipe" },
+  { value: "TO", label: "Tocantins" },
+];
+
+function SkeletonProfile() {
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="col-span-1 flex flex-col items-center space-y-4">
+          <Skeleton className="w-32 h-32 rounded-full" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+        <div className="col-span-1 lg:col-span-2 space-y-6">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+      <Skeleton className="h-10 w-full" />
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const [isPending, startTransition] = useTransition();
-  const [userRole, setUserRole] = useState<UserRole>(UserRole.student);
+  const { data: userData, isPending: isLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchCurrentUser,
+    refetchOnMount: true,
+  });
+
+  const [originalValues, setOriginalValues] = useState<FormValues | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      role: UserRole.student,
+      name: "",
       email: "",
       phone: "",
-      firstName: "",
-      lastName: "",
-      state: "",
+      cpf: "",
       city: "",
+      state: "",
+      imageUrl: "",
+      isTwoFactorEnabled: false,
     },
   });
 
+  const { dirtyFields } = form.formState;
+
   useEffect(() => {
-    // Fetch user data and set form values
-    // This is a placeholder for the actual API call
-    const fetchUserData = async () => {
-      // Simulating API call
-      const userData = {
-        role: UserRole.student,
-        email: "user@example.com",
-        phone: "11987654321",
-        firstName: "John",
-        lastName: "Doe",
-        state: "São Paulo",
-        city: "São Paulo",
+    if (userData) {
+      const values = {
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        cpf: userData.cpf || undefined,
+        city: userData.city || undefined,
+        state: userData.state || undefined,
+        imageUrl: userData.imageUrl || undefined,
+        isTwoFactorEnabled: userData.isTwoFactorEnabled,
       };
-
-      setUserRole(userData.role);
-      form.reset(userData);
-    };
-
-    fetchUserData();
-  }, [form]);
+      form.reset(values);
+      setOriginalValues(values);
+    }
+  }, [userData, form]);
 
   function onSubmit(values: FormValues) {
     startTransition(async () => {
-      // Here you would typically call an API to update the user profile
-      console.log(values);
-      toast.success("Perfil atualizado com sucesso!");
+      try {
+        // Implement the update user function here
+        // const data = await updateUser(values);
+        console.log(values);
+        toast.success("Perfil atualizado com sucesso!");
+        setOriginalValues(values);
+        form.reset(values);
+      } catch {
+        toast.error("Erro ao atualizar o perfil. Por favor, tente novamente.");
+      }
     });
   }
 
+  function handleCancel() {
+    if (originalValues) {
+      form.reset(originalValues);
+    }
+  }
+
+  const hasChanges = Object.keys(dirtyFields).length > 0;
+
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-6">Configurações do Perfil</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="col-span-1">
-              <ImageUploadField
-                form={form}
-                name="photo"
-                isPending={isPending}
-                userType={userRole}
-              />
-            </div>
-            <div className="col-span-1 md:col-span-2 space-y-6">
-              {userRole === UserRole.student ? (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome</FormLabel>
-                        <FormControl>
-                          <Input disabled={isPending} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+    <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      <Card className="max-w-4xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-primary">
+            Configurações do Perfil
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <SkeletonProfile />
+          ) : (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="col-span-1 flex flex-col items-center space-y-4">
+                    <ImageUploadField
+                      form={form}
+                      name="imageUrl"
+                      isPending={isPending}
+                      initialImageUrl={userData?.imageUrl ?? undefined}
+                      userType={userData?.role || UserRole.student}
+                    />
+                    <FormLabel className="text-center">
+                      Foto
+                      {userData?.role === UserRole.student && " (opcional)"}
+                    </FormLabel>
+                  </div>
+                  <div className="col-span-1 lg:col-span-2 space-y-6">
+                    <div className="flex items-center space-x-2 mb-4">
+                      {userData?.role === UserRole.admin ? (
+                        <Shield className="h-5 w-5 text-primary" />
+                      ) : (
+                        <User className="h-5 w-5 text-primary" />
+                      )}
+                      <span className="font-medium">
+                        {userData?.role === UserRole.admin
+                          ? "Administrador"
+                          : "Usuário"}
+                      </span>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome Completo</FormLabel>
+                          <FormControl>
+                            <Input
+                              disabled={isPending}
+                              {...field}
+                              className="bg-background"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <div className="flex items-center space-x-2">
+                            <FormControl>
+                              <Input
+                                disabled={isPending}
+                                type="email"
+                                {...field}
+                                className="bg-background"
+                              />
+                            </FormControl>
+                            {userData?.isEmailVerified ? (
+                              <Badge
+                                variant="outline"
+                                className="bg-green-50 text-green-700 border-green-200"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Verificado
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                className="text-nowrap bg-yellow-50 text-yellow-700 border-yellow-200"
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Não verificado
+                              </Badge>
+                            )}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <InputPhoneField form={form} isPending={isPending} />
+                    {userData?.role !== UserRole.student && (
+                      <InputCpfField form={form} isPending={isPending} />
                     )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Sobrenome</FormLabel>
-                        <FormControl>
-                          <Input disabled={isPending} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              ) : (
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome Completo</FormLabel>
-                      <FormControl>
-                        <Input disabled={isPending} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input disabled={isPending} type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <InputPhoneField form={form} isPending={isPending} />
-              {userRole !== UserRole.student && (
-                <InputCpfField form={form} isPending={isPending} />
-              )}
-              {userRole === UserRole.student && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="state"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Estado</FormLabel>
-                        <Combobox
-                          disabled={isPending}
-                          options={estadosBrasileiros}
-                          value={field.value}
-                          onSetValue={field.onChange}
-                          placeholder="Selecione um estado"
-                          emptyMessage="Nenhum estado encontrado."
-                          searchPlaceholder="Selecione um estado"
+                    {userData?.role === UserRole.student && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="state"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Estado</FormLabel>
+                              <Combobox
+                                disabled={isPending}
+                                options={estadosBrasileiros.map((e) => e.label)}
+                                value={field.value || ""}
+                                onSetValue={field.onChange}
+                                placeholder="Selecione um estado"
+                                emptyMessage="Nenhum estado encontrado."
+                                searchPlaceholder="Selecione um estado"
+                              />
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                        <FormMessage />
-                      </FormItem>
+                        <FormField
+                          control={form.control}
+                          name="city"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cidade</FormLabel>
+                              <FormControl>
+                                <Input
+                                  disabled={isPending}
+                                  {...field}
+                                  className="bg-background"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cidade</FormLabel>
-                        <FormControl>
-                          <Input disabled={isPending} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-            </div>
-          </div>
-          <Button disabled={isPending} type="submit" className="w-full">
-            {isPending ? "Atualizando..." : "Atualizar Perfil"}
-          </Button>
-        </form>
-      </Form>
+                    <FormField
+                      control={form.control}
+                      name="isTwoFactorEnabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">
+                              Autenticação de dois fatores
+                            </FormLabel>
+                            <FormDescription>
+                              Aumente a segurança da sua conta ativando a
+                              autenticação de dois fatores.
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={isPending}
+                              aria-readonly
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={!hasChanges}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isPending || !hasChanges}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    {isPending ? "Atualizando..." : "Atualizar Perfil"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
+}
+
+async function fetchCurrentUser(): Promise<UserMeDTO> {
+  // Implement the API call to fetch the current user's data
+  const response = await fetch("/api/users/me");
+  if (!response.ok) {
+    throw new Error("Failed to fetch user data");
+  }
+  return response.json();
 }
