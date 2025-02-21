@@ -4,7 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
 import { LoginSchema } from "@/schemas/LoginSchema";
-import { getUserByEmail } from "./lib/user";
+import { getUserByEmail, getUserById } from "./lib/user";
 
 // const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 // const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -98,20 +98,26 @@ export default {
 
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, account, profile, session }) {
       if (!token.sub) return token;
 
       //TO-DO: Verificar sobre a possiilide de manter o token sendo atualizado pelo banco de dados
       //       Pois a atualização de role e dados do suuário se mantém sempre atualizado
-      // const userr = await getUs'erById(token.sub);
-      // if (!userr) return token;'
-      if (!user) return token;
-      if (!user.email) throw new Error("User does not email in jwt callback!");
 
-      token.name = user.name;
-      token.picture = user.image;
-      token.email = user.email;
-      token.role = user.role;
+      let userr;
+      try {
+        userr = await getUserById(token.sub!);
+      } catch (error) {}
+
+      if (!userr) return token;
+      // if (!user) return token;
+      if (!userr.email)
+        throw new Error("userr does not email in jwt callback!");
+
+      token.name = userr.name;
+      token.picture = userr.imageurl;
+      token.email = userr.email;
+      token.role = userr.role;
 
       return token;
     },

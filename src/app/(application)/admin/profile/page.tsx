@@ -31,6 +31,7 @@ import { UserMeDTO } from "@/app/api/users/me/route";
 import { profileSchema } from "./_actions/profile.schema";
 import { queryClient } from "@/lib/queryCLient";
 import { updateMe } from "./_actions/profile";
+import { useSession } from "next-auth/react";
 
 type FormValues = z.infer<typeof profileSchema>;
 
@@ -95,6 +96,8 @@ export default function ProfilePage() {
     queryFn: fetchCurrentUser,
     refetchOnMount: true,
   });
+
+  const { update } = useSession();
 
   const [originalValues, setOriginalValues] = useState<FormValues | null>(null);
 
@@ -174,6 +177,8 @@ export default function ProfilePage() {
           // queryClient.removeQueries({
           //   queryKey: ["profile", ],
           // });
+
+          update();
 
           toast.success("Perfil atualizado com sucesso!");
           setOriginalValues(values);

@@ -93,8 +93,8 @@ export function ImageUploadField({
                   {userType === UserRole.student
                     ? "S"
                     : userType === UserRole.teacher
-                    ? "T"
-                    : "C"}
+                      ? "T"
+                      : "C"}
                 </AvatarFallback>
               </Avatar>
               <DropdownMenu>
