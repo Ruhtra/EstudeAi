@@ -41,7 +41,7 @@ export function QuestionsSheet({
   const { data: questionData, isPending: isLoading } = useQuery({
     queryKey: ["question", idQuestions],
     queryFn: () => fetchQuestion(idQuestions),
-    enabled: true,
+    enabled: !!idQuestions,
     refetchOnMount: true,
   });
 

@@ -18,7 +18,7 @@ export function DesktopQuestionList({ questions }: DesktopQuestionListProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            <TableHead>Número</TableHead>
             <TableHead>Pergunta</TableHead>
             <TableHead>Disciplina</TableHead>
             <TableHead className="w-[60px]">Ações</TableHead>

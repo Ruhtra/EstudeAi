@@ -18,7 +18,7 @@ export function DesktopTextList({ texts }: DesktopUserListProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Number</TableHead>
+            <TableHead>Número</TableHead>
             <TableHead>Tipo</TableHead>
             <TableHead>Conteúdo</TableHead>
             <TableHead>Referência</TableHead>

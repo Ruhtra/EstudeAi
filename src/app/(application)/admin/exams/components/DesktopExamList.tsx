@@ -18,7 +18,7 @@ export function DesktopExamList({ exams }: DesktopExamListProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            <TableHead>Nome</TableHead>
             <TableHead>Posição</TableHead>
             <TableHead>Ano</TableHead>
             <TableHead>Instituto</TableHead>

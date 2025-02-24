@@ -79,7 +79,12 @@ export function UserItem({
             )}{" "}
             <ItemMobileHeaderTitle name={user.name}>
               <ItemMobileHeaderBadges>
-                <p className="text-sm text-muted-foreground">{user.role}</p>
+                <p>
+                  {user.role === "student" && "Estudante"}
+                  {user.role === "admin" && "Administrador"}
+                  {user.role === "sup" && "Suporte"}
+                  {user.role === "teacher" && "Professor"}
+                </p>
               </ItemMobileHeaderBadges>
             </ItemMobileHeaderTitle>
           </div>

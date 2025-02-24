@@ -66,7 +66,7 @@ export function QuestionItem({
       >
         <div className="flex flex-col w-full">
           <ItemMobileHeader>
-            <ItemMobileHeaderTitle name={"Questão " + question.id}>
+            <ItemMobileHeaderTitle name={"Questão " + question.number}>
               <ItemMobileHeaderBadges>
                 <Badge>{question.discipline}</Badge>
               </ItemMobileHeaderBadges>
@@ -126,7 +126,7 @@ export function QuestionItem({
   return (
     <ItemDesktop>
       <ItemDesktopCell isPending={isPending}>
-        Questão {question.id}
+        Questão {question.number}
       </ItemDesktopCell>
       <ItemDesktopCell isPending={isPending}>
         <span dangerouslySetInnerHTML={{ __html: question.statement }} />

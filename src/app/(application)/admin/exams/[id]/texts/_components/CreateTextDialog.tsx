@@ -53,7 +53,7 @@ export function CreateTextDialog({
   const { data: textData, isPending: isLoading } = useQuery({
     queryKey: ["text", idText],
     queryFn: () => fetchText(idText),
-    enabled: true,
+    enabled: !!idText,
     refetchOnMount: true,
   });
 

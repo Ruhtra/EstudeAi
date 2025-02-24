@@ -82,7 +82,7 @@ export function CreateUserDialog({
   const { data: userData, isPending: isLoading } = useQuery({
     queryKey: ["user", idUser],
     queryFn: () => fetchUser(idUser),
-    enabled: true,
+    enabled: !!idUser,
     refetchOnMount: true,
   });
 

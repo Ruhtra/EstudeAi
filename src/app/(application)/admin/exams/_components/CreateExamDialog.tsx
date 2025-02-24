@@ -47,7 +47,7 @@ export const CreateExamDialog = ({
   const { data: examData, isPending: isLoading } = useQuery({
     queryKey: ["exam", idExam],
     queryFn: () => fetchExam(idExam),
-    enabled: true,
+    enabled: !!idExam,
     refetchOnMount: true,
   });
 

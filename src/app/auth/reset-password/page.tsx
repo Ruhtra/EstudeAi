@@ -66,69 +66,90 @@ export default function ResetPasswordPage() {
             <h2 className="mb-4 sm:mb-6 text-center text-2xl sm:text-3xl font-bold">
               Redefinir Senha
             </h2>
-            <p className="mb-6 text-center text-sm sm:text-base text-muted-foreground">
-              Insira seu e-mail e enviaremos instruções para redefinir sua
-              senha.
-            </p>
-            <Form {...form}>
-              <form
-                className="space-y-4 sm:space-y-6"
-                onSubmit={form.handleSubmit(submitForm)}
+            {!success ? (
+              <>
+                <p className="mb-6 text-center text-sm sm:text-base text-muted-foreground">
+                  Insira seu e-mail e enviaremos instruções para redefinir sua
+                  senha.
+                </p>
+                <Form {...form}>
+                  <form
+                    className="space-y-4 sm:space-y-6"
+                    onSubmit={form.handleSubmit(submitForm)}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">
+                            Email
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="seu@email.com"
+                              required
+                              className="text-sm sm:text-base"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    {error && (
+                      <Alert variant="destructive" className="mb-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Erro</AlertTitle>
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    )}
+                    <Button
+                      type="submit"
+                      className="w-full text-sm sm:text-base"
+                      disabled={isPending}
+                    >
+                      {isPending
+                        ? "Enviando..."
+                        : "Enviar e-mail de redefinição"}
+                    </Button>
+                  </form>
+                </Form>
+              </>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
               >
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm sm:text-base">
-                        Email
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder="seu@email.com"
-                          required
-                          className="text-sm sm:text-base"
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                {success && (
-                  <Alert variant="success" className="mb-4">
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertTitle>Sucesso</AlertTitle>
-                    <AlertDescription>{success}</AlertDescription>
-                  </Alert>
-                )}
-                {error && (
-                  <Alert variant="destructive" className="mb-4">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Erro</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-                <Button
-                  type="submit"
-                  className="w-full text-sm sm:text-base"
-                  disabled={isPending}
-                >
-                  {isPending ? "Enviando..." : "Enviar e-mail de redefinição"}
-                </Button>
-              </form>
-            </Form>
+                <Alert variant="success" className="mb-4">
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertTitle>Sucesso</AlertTitle>
+                  <AlertDescription>{success}</AlertDescription>
+                </Alert>
+                <p className="mb-6 text-center text-sm sm:text-base text-muted-foreground">
+                  Verifique seu E-mail
+                </p>
+                <Link href="/">
+                  <Button className="w-full text-sm sm:text-base">
+                    Voltar para o Início
+                  </Button>
+                </Link>
+              </motion.div>
+            )}
           </div>
-          <div className="bg-muted/50 px-4 sm:px-8 py-4 sm:py-6 text-center backdrop-blur-sm">
-            <Link
-              href="/auth/login"
-              className="text-primary text-xs sm:text-sm hover:underline inline-flex items-center"
-            >
-              <ArrowLeft size={16} className="mr-2" />
-              Voltar para o login
-            </Link>
-          </div>
+          {!success && (
+            <div className="bg-muted/50 px-4 sm:px-8 py-4 sm:py-6 text-center backdrop-blur-sm">
+              <Link
+                href="/auth/login"
+                className="text-primary text-xs sm:text-sm hover:underline inline-flex items-center"
+              >
+                <ArrowLeft size={16} className="mr-2" />
+                Voltar para o login
+              </Link>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
