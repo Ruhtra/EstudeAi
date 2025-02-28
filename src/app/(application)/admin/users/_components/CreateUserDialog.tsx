@@ -79,10 +79,10 @@ export function CreateUserDialog({
   const [userType, setUserType] = useState<UserRole>(UserRole.student);
   // const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const { data: userData, isPending: isLoading } = useQuery({
+  const { data: userData, isLoading } = useQuery({
     queryKey: ["user", idUser],
     queryFn: () => fetchUser(idUser),
-    enabled: !!idUser,
+    enabled: !!idUser && open,
     refetchOnMount: true,
   });
 
@@ -111,8 +111,11 @@ export function CreateUserDialog({
 
       form.setValue(
         "role",
-        (userData.role.toLowerCase() as "admin" | "teacher" | "student") ??
-          "student"
+        (userData.role.toLowerCase() as
+          | "admin"
+          | "teacher"
+          | "student"
+          | "sup") ?? "student"
       );
       form.setValue("email", userData.email ?? "");
       form.setValue("phone", userData.phone ?? "");
@@ -205,12 +208,13 @@ export function CreateUserDialog({
                         setUserType(UserRole[value as keyof typeof UserRole]);
                         form.setValue(
                           "role",
-                          UserRole[value as keyof Omit<typeof UserRole, "sup">]
+                          UserRole[value as keyof typeof UserRole]
                         );
                       }}
                     >
-                      <TabsList className="grid w-full grid-cols-3">
+                      <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="admin">Colaborador</TabsTrigger>
+                        <TabsTrigger value="sup">Suporte</TabsTrigger>
                         <TabsTrigger value="teacher">Professor</TabsTrigger>
                         <TabsTrigger value="student">Assinante</TabsTrigger>
                       </TabsList>
@@ -233,6 +237,24 @@ export function CreateUserDialog({
                         </div>
                       </TabsContent>
                       <TabsContent value="teacher">
+                        <div className="space-y-4">
+                          <FormField
+                            control={form.control}
+                            name="fullName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome Completo</FormLabel>
+                                <FormControl>
+                                  <Input disabled={isPending} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <InputCpfField form={form} isPending={isPending} />
+                        </div>
+                      </TabsContent>
+                      <TabsContent value="sup">
                         <div className="space-y-4">
                           <FormField
                             control={form.control}

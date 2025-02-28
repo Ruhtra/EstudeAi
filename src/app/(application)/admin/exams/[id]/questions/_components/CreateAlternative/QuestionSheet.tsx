@@ -38,10 +38,10 @@ export function QuestionsSheet({
 }: QuestionsSheetProps) {
   const [isPending, startTransition] = useTransition();
 
-  const { data: questionData, isPending: isLoading } = useQuery({
+  const { data: questionData, isLoading } = useQuery({
     queryKey: ["question", idQuestions],
     queryFn: () => fetchQuestion(idQuestions),
-    enabled: !!idQuestions,
+    enabled: !!idQuestions && open,
     refetchOnMount: true,
   });
 

@@ -51,5 +51,6 @@ const subscriberSchema = baseSchema.extend({
 export const formSchema = z.discriminatedUnion("role", [
   collaboratorTeacherSchema.extend({ role: z.literal(UserRole.admin) }),
   collaboratorTeacherSchema.extend({ role: z.literal(UserRole.teacher) }),
+  collaboratorTeacherSchema.extend({ role: z.literal(UserRole.sup) }),
   subscriberSchema.extend({ role: z.literal(UserRole.student) }),
 ]);

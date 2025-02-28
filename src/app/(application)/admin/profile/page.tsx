@@ -26,7 +26,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Shield, User } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Shield,
+  User,
+  GraduationCap,
+  Headphones,
+} from "lucide-react";
 import { UserMeDTO } from "@/app/api/users/me/route";
 import { profileSchema } from "./_actions/profile.schema";
 import { queryClient } from "@/lib/queryCLient";
@@ -129,8 +136,11 @@ export default function ProfilePage() {
 
       form.setValue(
         "role",
-        (userData.role.toLowerCase() as "admin" | "teacher" | "student") ??
-          "student"
+        (userData.role.toLowerCase() as
+          | "admin"
+          | "teacher"
+          | "student"
+          | "sup") ?? "student"
       );
       form.setValue("email", userData.email ?? "");
       form.setValue("phone", userData.phone ?? "");
@@ -234,13 +244,21 @@ export default function ProfilePage() {
                     <div className="flex items-center space-x-2 mb-4">
                       {userData?.role === UserRole.admin ? (
                         <Shield className="h-5 w-5 text-primary" />
+                      ) : userData?.role === UserRole.teacher ? (
+                        <GraduationCap className="h-5 w-5 text-primary" />
+                      ) : userData?.role === UserRole.sup ? (
+                        <Headphones className="h-5 w-5 text-primary" />
                       ) : (
                         <User className="h-5 w-5 text-primary" />
                       )}
                       <span className="font-medium">
                         {userData?.role === UserRole.admin
                           ? "Administrador"
-                          : "Usuário"}
+                          : userData?.role === UserRole.teacher
+                            ? "Professor"
+                            : userData?.role === UserRole.sup
+                              ? "Suporte"
+                              : "Usuário"}
                       </span>
                     </div>
                     {userData?.role == "student" ? (

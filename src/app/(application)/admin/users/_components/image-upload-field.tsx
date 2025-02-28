@@ -94,7 +94,9 @@ export function ImageUploadField({
                     ? "S"
                     : userType === UserRole.teacher
                       ? "T"
-                      : "C"}
+                      : userType === UserRole.sup
+                        ? "S"
+                        : "C"}
                 </AvatarFallback>
               </Avatar>
               <DropdownMenu>

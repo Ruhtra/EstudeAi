@@ -44,10 +44,10 @@ export const CreateExamDialog = ({
 }) => {
   const [isPending, startTransition] = useTransition();
 
-  const { data: examData, isPending: isLoading } = useQuery({
+  const { data: examData, isLoading } = useQuery({
     queryKey: ["exam", idExam],
     queryFn: () => fetchExam(idExam),
-    enabled: !!idExam,
+    enabled: !!idExam && open,
     refetchOnMount: true,
   });
 

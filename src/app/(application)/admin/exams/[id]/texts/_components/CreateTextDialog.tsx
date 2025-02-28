@@ -50,10 +50,10 @@ export function CreateTextDialog({
 }: CreateTextDialogProps) {
   const [isPending, startTransition] = useTransition();
 
-  const { data: textData, isPending: isLoading } = useQuery({
+  const { data: textData, isLoading } = useQuery({
     queryKey: ["text", idText],
     queryFn: () => fetchText(idText),
-    enabled: !!idText,
+    enabled: !!idText && open,
     refetchOnMount: true,
   });
 

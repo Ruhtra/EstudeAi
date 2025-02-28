@@ -52,5 +52,6 @@ const subscriberSchema = baseSchema.extend({
 export const profileSchema = z.discriminatedUnion("role", [
   collaboratorTeacherSchema.extend({ role: z.literal(UserRole.admin) }),
   collaboratorTeacherSchema.extend({ role: z.literal(UserRole.teacher) }),
+  collaboratorTeacherSchema.extend({ role: z.literal(UserRole.sup) }),
   subscriberSchema.extend({ role: z.literal(UserRole.student) }),
 ]);
