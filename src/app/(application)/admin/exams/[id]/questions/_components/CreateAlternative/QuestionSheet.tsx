@@ -21,6 +21,7 @@ import { queryClient } from "@/lib/queryCLient";
 import { useQuestionOptions } from "../../_queries/QuestionQueries";
 import { useQuery } from "@tanstack/react-query";
 import { QuestionsDto } from "@/app/api/questions/route";
+import { QuestionCreateSkeleton } from "./QuestionCreateSkeleton";
 interface QuestionsSheetProps {
   idExam: string;
   idQuestions?: string;
@@ -135,7 +136,7 @@ export function QuestionsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-3xl p-4 overflow-y-auto">
         {isLoadingOptions || isLoading ? (
-          <>loading</>
+          <QuestionCreateSkeleton />
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
