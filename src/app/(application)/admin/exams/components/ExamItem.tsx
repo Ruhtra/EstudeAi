@@ -117,16 +117,6 @@ export function ExamItem({
             <span>{exam.level}</span>
           </ItemMobileContentData>
           <ItemMobileContentOptions>
-            <Link href={`/admin/exams/${exam.id}/questions`} className="flex-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                disabled={isPending}
-              >
-                Questões
-              </Button>
-            </Link>
             <Link href={`/admin/exams/${exam.id}/texts`} className="flex-1">
               <Button
                 variant="outline"
@@ -135,6 +125,16 @@ export function ExamItem({
                 disabled={isPending}
               >
                 Textos
+              </Button>
+            </Link>
+            <Link href={`/admin/exams/${exam.id}/questions`} className="flex-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                disabled={isPending}
+              >
+                Questões
               </Button>
             </Link>
           </ItemMobileContentOptions>
@@ -166,14 +166,14 @@ export function ExamItem({
       </ItemDesktopCell>
       <ItemDesktopCell isPending={isPending}>
         <div className="flex items-center gap-2">
-          <Link href={`/admin/exams/${exam.id}/questions`}>
-            <Button variant="outline" size="sm" disabled={isPending}>
-              Questões
-            </Button>
-          </Link>
           <Link href={`/admin/exams/${exam.id}/texts`}>
             <Button variant="outline" size="sm" disabled={isPending}>
               Textos
+            </Button>
+          </Link>
+          <Link href={`/admin/exams/${exam.id}/questions`}>
+            <Button variant="outline" size="sm" disabled={isPending}>
+              Questões
             </Button>
           </Link>
         </div>
