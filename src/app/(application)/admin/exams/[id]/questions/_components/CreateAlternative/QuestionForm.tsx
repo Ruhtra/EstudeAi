@@ -11,7 +11,6 @@ import { DraggableAlternatives } from "./AlternativeItem/DraggableAlternatives";
 import { ComboboxSelect } from "@/components/comboxSelect";
 import { ComboboxCreate } from "@/components/comboboxCreate";
 import { Editor } from "@/components/Editor";
-import { Input } from "@/components/ui/input";
 import { questionSchema } from "../../_actions/QuestionSchema";
 
 export type QuestionFormValues = z.infer<typeof questionSchema>;
@@ -32,33 +31,7 @@ export function QuestionForm({
 }: QuestionFormProps) {
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <FormField
-          control={control}
-          name="number"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-sm font-medium">
-                Número da Questão
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  value={field.value?.toString() ?? ""}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value, 10);
-                    field.onChange(isNaN(value) ? "" : value.toString());
-                  }}
-                  className="text-sm w-20"
-                  placeholder="Nº"
-                  max="999"
-                />
-              </FormControl>
-              <FormMessage className="text-xs" />
-            </FormItem>
-          )}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <FormField
           control={control}
           name="discipline"

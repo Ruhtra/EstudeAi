@@ -48,7 +48,6 @@ export function QuestionsSheet({
   const form = useForm<z.infer<typeof questionSchema>>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      number: "",
       linkedTexts: [],
       statement: "", // Pode ser removido também
       discipline: "",
@@ -70,8 +69,6 @@ export function QuestionsSheet({
         questionData.texts.map((e) => e.number)
       );
       form.setValue("statement", questionData.statement);
-
-      console.log(questionData.statement);
 
       form.setValue(
         "alternatives",

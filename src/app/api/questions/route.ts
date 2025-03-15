@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export interface QuestionsDto {
   id: string;
-  number: string;
+  number: number;
   statement: string;
   discipline: string;
   alternatives: {

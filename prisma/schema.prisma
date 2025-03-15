@@ -31,7 +31,7 @@ model Exam {
 
 model Question {
   id           String        @id
-  number       String
+  number       Int           @default(autoincrement()) @unique
   examId       String
   disciplineId String
   statement    String

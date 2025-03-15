@@ -22,8 +22,6 @@ export const createQuestion = async (
   if (textsExist.length !== data.linkedTexts.length)
     return { error: "Some linked texts do not exist" };
 
-  console.log(idExam);
-
   const examExists = await db.exam.findUnique({
     where: {
       id: idExam,
@@ -32,11 +30,10 @@ export const createQuestion = async (
   if (!examExists) return { error: "Exam does not exist" };
 
   const question = parseQuestion.data;
-  console.log(question);
+  
   await db.question.create({
     data: {
       id: cuid(),
-      number: question.number,
       statement: question.statement,
       Alternative: {
         create: question.alternatives.map((e) => {
@@ -129,7 +126,6 @@ export const updateQuestion = async (
     return db.question.update({
       where: { id: idQuestion },
       data: {
-        number: data.number.toString(),
         statement: data.statement,
         Alternative: {
           create: data.alternatives
