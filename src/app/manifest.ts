@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description:
       "Um aplicativo para ajudar nos seus estudos, oferecendo recursos e ferramentas para melhorar seu aprendizado.",
     start_url: "/",
-    background_color: "#033952",
+    background_color: "#008efa",
     theme_color: "#ffffff",
     orientation: "portrait",
     display: "standalone",

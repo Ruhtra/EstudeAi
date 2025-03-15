@@ -18,19 +18,19 @@ export async function login(values: z.infer<typeof LoginSchema>) {
       redirect: false,
     });
 
-    return { success: "Login Successfull, redirecting..." };
+    return { success: "Login bem-sucedido, redirecionando..." };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
-          return { error: "Invalid credentials" };
+            return { error: "Credenciais inválidas" };
 
         case "CallbackRouteError":
-          if (error.cause?.err?.message == "Email does not exist")
-            return { error: "Email does Not exist" };
+            if (error.cause?.err?.message == "Email does not exist")
+            return { error: "Email não existe" };
 
         default:
-          return { error: "An error occurred" };
+            return { error: "Ocorreu um erro" };
       }
     }
     throw error;
