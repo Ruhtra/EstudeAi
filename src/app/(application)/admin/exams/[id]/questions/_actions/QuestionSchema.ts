@@ -4,7 +4,7 @@ export const questionSchema = z.object({
   // number: z
   //   .string()
   //   .regex(/^\d+$/, "O número da questão deve ser um inteiro positivo"),
-  linkedTexts: z.array(z.string()),
+  linkedTexts: z.array(z.number().int().positive()),
   statement: z
     .string()
     .min(1, "O enunciado é obrigatório")

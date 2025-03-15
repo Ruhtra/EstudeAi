@@ -20,12 +20,6 @@ export const createText = async (
   });
   if (!exam) return { error: "Exam ID not found" };
 
-  //validar se number ja existe no banco
-  const existingNumber = await db.text.findUnique({
-    where: { number_examId: { number: text.number, examId: idExam } },
-  });
-  if (existingNumber) return { error: "Number already exists" };
-
   const id = cuid();
 
   if (text.contentType === "image" && text.content) {
@@ -57,7 +51,6 @@ export const createText = async (
     data: {
       id: id,
       contentType: text.contentType,
-      number: text.number,
       content: text.content,
       reference: text.reference,
       Exam: {
@@ -92,23 +85,12 @@ export const updateText = async (
   });
   if (!exam) return { error: "Exam ID not found" };
 
-  if (textData.number !== text.number) {
-    //validar se number ja existe no banco
-    const existingNumber = await db.text.findUnique({
-      where: {
-        number_examId: { number: text.number, examId: textData.examId },
-      },
-    });
-    if (existingNumber) return { error: "Number already exists" };
-  }
-
   //TO-do: validar se a imagem existe e deletar e inserir nova
 
   await db.text.update({
     where: { id: idText },
     data: {
       contentType: text.contentType,
-      number: text.number,
       content: text.content,
       reference: text.reference,
       updatedAt: new Date(),

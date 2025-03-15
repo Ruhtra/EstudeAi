@@ -4,7 +4,7 @@ import { ContentType } from "@prisma/client";
 
 export interface TextsDto {
   id: string;
-  number: string;
+  number: number;
   content: string;
   contentType: ContentType;
   reference: string;

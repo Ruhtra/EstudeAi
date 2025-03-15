@@ -63,7 +63,7 @@ export function QuestionForm({
               <FormControl>
                 <ComboboxSelect
                   texts={texts}
-                  selectedTexts={field.value}
+                  selectedTexts={field.value.map((e) => e.toString())}
                   onChange={field.onChange}
                 />
               </FormControl>

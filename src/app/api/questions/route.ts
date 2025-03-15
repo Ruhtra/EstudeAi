@@ -15,7 +15,7 @@ export interface QuestionsDto {
   }[];
   texts: {
     id: string;
-    number: string;
+    number: number;
     content: string;
   }[];
 }

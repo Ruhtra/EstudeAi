@@ -60,7 +60,6 @@ export function CreateTextDialog({
   const form = useForm<z.infer<typeof textSchema>>({
     resolver: zodResolver(textSchema),
     defaultValues: {
-      number: textData?.number || "",
       contentType: textData?.contentType || ContentType["text"],
       content: textData?.content || "",
       reference: textData?.reference || "",
@@ -77,7 +76,6 @@ export function CreateTextDialog({
         "contentType",
         (textData.contentType.toLowerCase() as "text" | "image") ?? "text"
       );
-      form.setValue("number", textData.number ?? "");
       form.setValue("content", textData.content ?? "");
       form.setValue("reference", textData.reference ?? "");
     }
@@ -142,8 +140,8 @@ export function CreateTextDialog({
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                    {/* <FormField
                       control={form.control}
                       name="number"
                       render={({ field }) => (
@@ -162,7 +160,7 @@ export function CreateTextDialog({
                           <FormMessage className="text-xs" />
                         </FormItem>
                       )}
-                    />
+                    /> */}
                     <FormField
                       control={form.control}
                       name="contentType"

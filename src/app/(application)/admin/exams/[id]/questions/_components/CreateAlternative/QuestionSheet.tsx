@@ -147,7 +147,7 @@ export function QuestionsSheet({
               <div className="mt-6">
                 <QuestionForm
                   disciplines={disciplines.map((e) => e.name)}
-                  texts={texts.map((e) => e.number)}
+                  texts={texts.map((e) => e.number.toString())}
                   control={form.control}
                   errors={form.formState.errors}
                 />

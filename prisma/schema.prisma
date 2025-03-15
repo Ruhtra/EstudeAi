@@ -31,7 +31,7 @@ model Exam {
 
 model Question {
   id           String        @id
-  number       Int           @default(autoincrement()) @unique
+  number       Int           @unique @default(autoincrement())
   examId       String
   disciplineId String
   statement    String
@@ -61,7 +61,7 @@ enum ContentType {
 
 model Text {
   id          String      @id
-  number      String      @unique
+  number      Int         @unique @default(autoincrement())
   contentType ContentType
   content     String
   reference   String
