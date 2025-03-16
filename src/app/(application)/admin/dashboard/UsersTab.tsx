@@ -7,7 +7,7 @@ import { ChevronDown, ChevronUp, Filter } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { UserFilters } from "./UserFilters"
-import { UsersTable } from "./UsersTable"
+import { UsersList } from "./UsersList"
 import { useMediaQuery } from "./mediaQuery"
 
 export function UsersTab() {
@@ -31,13 +31,13 @@ export function UsersTab() {
     subtitle: string
   }) => (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <button onClick={() => setExpandedCard(expandedCard === id ? null : id)} className="md:hidden">
-          {expandedCard === id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          {expandedCard === id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 pt-0">
         <p className="text-2xl font-bold">{value.toLocaleString()}</p>
         <AnimatePresence>
           {(expandedCard === id || !isMobile) && (
@@ -47,7 +47,7 @@ export function UsersTab() {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+              <p className="text-xs text-muted-foreground mt-2">{subtitle}</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -63,7 +63,7 @@ export function UsersTab() {
           variant="outline"
           size="sm"
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-1"
+          className="flex items-center gap-2"
         >
           <Filter size={16} />
           Filtros
@@ -102,11 +102,11 @@ export function UsersTab() {
       <UsersChart />
 
       <Card className="mt-4">
-        <CardHeader>
+        <CardHeader className="p-4">
           <CardTitle>Usuários Recentes</CardTitle>
         </CardHeader>
-        <CardContent>
-          <UsersTable />
+        <CardContent className="p-4 pt-0">
+          <UsersList />
         </CardContent>
       </Card>
     </div>

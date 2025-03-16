@@ -28,13 +28,13 @@ export function UserFilters() {
 
   return (
     <Card className="mb-4">
-      <CardContent className="pt-6">
+      <CardContent className="p-4">
         <div className="grid gap-4 md:grid-cols-4">
           <div className="space-y-2">
             <Label htmlFor="search">Buscar usuário</Label>
             <Input
               id="search"
-              placeholder="Nome, email ou ID"
+              placeholder="Nome ou email"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

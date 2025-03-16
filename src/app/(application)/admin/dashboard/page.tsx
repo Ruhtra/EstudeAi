@@ -21,7 +21,7 @@ export default function DashboardPage() {
         <h1 className="text-2xl md:text-3xl font-bold mb-2">Dashboard</h1>
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full h-full grid-cols-2 md:grid-cols-4 mb-2">
+        <TabsList className="grid w-full h-full grid-cols-2 md:grid-cols-4 mb-2 p-2 gap-2">
           <TabsTrigger value="users">Usuários</TabsTrigger>
           <TabsTrigger value="financial">Financeiro</TabsTrigger>
           <TabsTrigger value="tests">Provas</TabsTrigger>

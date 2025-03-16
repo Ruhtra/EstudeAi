@@ -13,12 +13,12 @@ const data = [
 export function TestsChart() {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-4">
         <CardTitle>Estatísticas de Provas</CardTitle>
         <CardDescription>Provas criadas e realizadas nos últimos 6 meses</CardDescription>
       </CardHeader>
-      <CardContent className="pb-2">
-        <div className="h-[280px]">
+      <CardContent className="p-4 pt-0">
+        <div className="h-[180px] sm:h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />

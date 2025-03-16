@@ -1,18 +1,5 @@
-import {
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 const data = [
   { month: "Jan", subscriptions: 100 },
@@ -21,28 +8,20 @@ const data = [
   { month: "Abr", subscriptions: 180 },
   { month: "Mai", subscriptions: 220 },
   { month: "Jun", subscriptions: 250 },
-];
+]
 
 export function SubscriptionChart() {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-4">
         <CardTitle>Evolução de Assinaturas</CardTitle>
-        <CardDescription>
-          Número de assinaturas nos últimos 6 meses
-        </CardDescription>
+        <CardDescription>Número de assinaturas nos últimos 6 meses</CardDescription>
       </CardHeader>
-      <CardContent className="pb-2">
+      <CardContent className="p-4 pt-0">
         <div className="h-[180px] sm:h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
-              <XAxis
-                dataKey="month"
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
+              <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis
                 stroke="#888888"
                 fontSize={12}
@@ -51,16 +30,12 @@ export function SubscriptionChart() {
                 tickFormatter={(value) => `${value}`}
               />
               <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="subscriptions"
-                stroke="#8884d8"
-                strokeWidth={2}
-              />
+              <Line type="monotone" dataKey="subscriptions" stroke="#8884d8" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
+
