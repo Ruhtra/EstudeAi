@@ -89,7 +89,7 @@ export function ExamItem({
           <ItemMobileHeaderTitle name={exam.name}>
             <ItemMobileHeaderBadges>
               <Badge variant="secondary">{exam.year}</Badge>
-              <Badge variant={exam.isComplete ? "default" : "secondary"}>
+              <Badge variant={exam.isComplete ? "default" : "destructive"}>
                 {exam.isComplete ? "Publicado" : "Não publicado"}
               </Badge>
             </ItemMobileHeaderBadges>
@@ -160,7 +160,7 @@ export function ExamItem({
         <Badge>{exam.level}</Badge>
       </ItemDesktopCell>
       <ItemDesktopCell isPending={isPending}>
-        <Badge variant={exam.isComplete ? "default" : "secondary"}>
+        <Badge variant={exam.isComplete ? "default" : "destructive"}>
           {exam.isComplete ? "Publicado" : "Não publicado"}
         </Badge>
       </ItemDesktopCell>
