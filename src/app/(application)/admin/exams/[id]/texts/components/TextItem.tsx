@@ -19,18 +19,41 @@ import { Badge } from "@/components/ui/badge";
 import { TextActions } from "./TextActions";
 import { deleteText } from "../_actions/text";
 import { useParams } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 function extractRawText(content: string): string {
-  // Extrai o conteúdo da primeira tag <p>
-  const match = content.match(/<p>(.*?)<\/p>/);
-  if (match && match[1]) {
-    const rawText = match[1].trim(); // Texto cru da primeira tag <p>
-    return rawText.length > 50 ? rawText.substring(0, 50) + "..." : rawText;
-  }
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+    const firstElement = doc.body.firstElementChild;
 
-  // Caso não haja tags <p>, remove outras tags HTML e corta os primeiros 50 caracteres
-  const rawText = content.replace(/<[^>]+>/g, "");
-  return rawText.length > 50 ? rawText.substring(0, 50) + "..." : rawText;
+    if (firstElement) {
+      // Verifica se o conteúdo contém uma quebra de linha <br>
+      const brIndex = firstElement.innerHTML.indexOf("<br>");
+      if (brIndex !== -1) {
+        // Retorna o conteúdo até a quebra de linha, garantindo que a tag seja fechada
+        const truncatedContent = firstElement.innerHTML.substring(0, brIndex);
+        return `<${firstElement.tagName.toLowerCase()}>${truncatedContent}</${firstElement.tagName.toLowerCase()}>`;
+      }
+
+      // Se for uma lista <ul>, retorna apenas o conteúdo do primeiro <li> sem as tags <ul> e <li>
+      if (firstElement.tagName.toLowerCase() === "ul") {
+        const firstLi = firstElement.querySelector("li");
+        if (firstLi) {
+          return firstLi.innerHTML; // Retorna apenas o conteúdo interno do <li>
+        }
+      }
+
+      // Retorna a primeira tag HTML normalmente
+      return firstElement.outerHTML;
+    }
+
+    return "";
+  } catch (error) {
+    console.error("Erro ao processar o conteúdo:", error);
+    return "";
+  }
 }
 
 interface ExamItemProps {
@@ -48,6 +71,7 @@ export function TextItem({
 }: ExamItemProps) {
   const [isPending, startTransition] = useTransition();
   const { id: idExam } = useParams<{ id: string }>();
+  const { theme } = useTheme();
 
   const handleDelete = async () => {
     startTransition(async () => {
@@ -79,7 +103,13 @@ export function TextItem({
         <ItemMobileHeader>
           <div className="flex items-center space-x-4">
             <ItemMobileHeaderTitle name={"Texto " + text.number}>
-              <p className="text-sm text-muted-foreground">{rawText}</p>
+              <p
+                className={cn(
+                  "text-sm text-muted-foreground",
+                  `prose ${theme == "dark" && "prose-invert"} prose-purple`
+                )}
+                dangerouslySetInnerHTML={{ __html: rawText }}
+              />
               <ItemMobileHeaderBadges>
                 <Badge variant="secondary" className="text-xs">
                   Nº {text.number}
@@ -111,10 +141,17 @@ export function TextItem({
       <ItemDesktopCell isPending={isPending}>
         {text.contentType}
       </ItemDesktopCell>
-      <ItemDesktopCell isPending={isPending}>{rawText}</ItemDesktopCell>
       <ItemDesktopCell isPending={isPending}>
-        {text.reference.length > 20
-          ? text.reference.substring(0, 20) + "..."
+        <p
+          className={cn(
+            `prose ${theme == "dark" && "prose-invert"} prose-purple`
+          )}
+          dangerouslySetInnerHTML={{ __html: rawText }}
+        />
+      </ItemDesktopCell>
+      <ItemDesktopCell isPending={isPending}>
+        {text.reference && text.reference.length > 20
+          ? text.reference?.substring(0, 20) + "..."
           : text.reference}
       </ItemDesktopCell>
       <ItemDesktopCell isPending={isPending}>

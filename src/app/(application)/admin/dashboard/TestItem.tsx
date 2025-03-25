@@ -1,76 +1,108 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Badge } from "@/components/ui/badge"
-import type { TestDTO } from "./TestsList"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { Badge } from "@/components/ui/badge";
+import type { TestDTO } from "./TestsList";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface TestItemProps {
-  test: TestDTO
-  isExpanded?: boolean
-  onToggleExpand?: () => void
-  isMobile: boolean
+  test: TestDTO;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
+  isMobile: boolean;
 }
 
 // Componentes personalizados para o card mobile
-const ItemMobile = ({ children }: { children: React.ReactNode; isExpanded?: boolean }) => (
-  <div className="w-full">{children}</div>
-)
+const ItemMobile = ({
+  children,
+}: {
+  children: React.ReactNode;
+  isExpanded?: boolean;
+}) => <div className="w-full">{children}</div>;
 
 const ItemMobileHeader = ({ children }: { children: React.ReactNode }) => (
   <div className="flex justify-between items-start">{children}</div>
-)
+);
 
-const ItemMobileHeaderTitle = ({ children, title }: { children: React.ReactNode; title: string }) => (
+const ItemMobileHeaderTitle = ({
+  children,
+  title,
+}: {
+  children: React.ReactNode;
+  title: string;
+}) => (
   <div className="flex flex-col">
     <h3 className="font-medium text-sm">{title}</h3>
     {children}
   </div>
-)
+);
 
-const ItemMobileHeaderBadges = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex flex-wrap gap-2 mt-1">{children}</div>
-)
+const ItemMobileHeaderBadges = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => <div className="flex flex-wrap gap-2 mt-1">{children}</div>;
 
-const ItemMobileHeaderOptions = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center">{children}</div>
-)
+const ItemMobileHeaderOptions = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => <div className="flex items-center">{children}</div>;
 
-const ItemMobileTrigger = ({ isExpanded, onClick }: { isExpanded?: boolean; onClick?: () => void }) => (
+const ItemMobileTrigger = ({
+  isExpanded,
+  onClick,
+}: {
+  isExpanded?: boolean;
+  onClick?: () => void;
+}) => (
   <button className="ml-2" onClick={onClick}>
     {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
   </button>
-)
+);
 
-const ItemMobileContent = ({ children, isExpanded }: { children: React.ReactNode; isExpanded?: boolean }) => (
+const ItemMobileContent = ({
+  children,
+  isExpanded,
+}: {
+  children: React.ReactNode;
+  isExpanded?: boolean;
+}) => (
   <div className={`mt-3 ${isExpanded ? "block" : "hidden"}`}>{children}</div>
-)
+);
 
 const ItemMobileContentData = ({ children }: { children: React.ReactNode }) => (
   <div className="grid grid-cols-2 gap-3 text-sm">{children}</div>
-)
+);
 
 // Componente para células da tabela desktop
-const ItemDesktopCell = ({ children }: { children: React.ReactNode }) => <td className="p-3">{children}</td>
+const ItemDesktopCell = ({ children }: { children: React.ReactNode }) => (
+  <td className="p-3">{children}</td>
+);
 
-export function TestItem({ test, isExpanded, onToggleExpand, isMobile }: TestItemProps) {
+export function TestItem({
+  test,
+  isExpanded,
+  onToggleExpand,
+  isMobile,
+}: TestItemProps) {
   const getDisciplineName = (discipline: string) => {
     switch (discipline) {
       case "math":
-        return "Matemática"
+        return "Matemática";
       case "language":
-        return "Português"
+        return "Português";
       case "science":
-        return "Ciências"
+        return "Ciências";
       case "history":
-        return "História"
+        return "História";
       case "geography":
-        return "Geografia"
+        return "Geografia";
       default:
-        return discipline
+        return discipline;
     }
-  }
+  };
 
   if (isMobile) {
     return (
@@ -79,15 +111,24 @@ export function TestItem({ test, isExpanded, onToggleExpand, isMobile }: TestIte
           <div>
             <ItemMobileHeaderTitle title={test.title}>
               <ItemMobileHeaderBadges>
-                <Badge variant={test.status === "published" ? "default" : "destructive"}>
+                <Badge
+                  variant={
+                    test.status === "published" ? "default" : "destructive"
+                  }
+                >
                   {test.status === "published" ? "Publicado" : "Não publicado"}
                 </Badge>
-                <Badge variant="outline">{getDisciplineName(test.discipline)}</Badge>
+                <Badge variant="outline">
+                  {getDisciplineName(test.discipline)}
+                </Badge>
               </ItemMobileHeaderBadges>
             </ItemMobileHeaderTitle>
           </div>
           <ItemMobileHeaderOptions>
-            <ItemMobileTrigger isExpanded={isExpanded} onClick={onToggleExpand} />
+            <ItemMobileTrigger
+              isExpanded={isExpanded}
+              onClick={onToggleExpand}
+            />
           </ItemMobileHeaderOptions>
         </ItemMobileHeader>
         <ItemMobileContent isExpanded={isExpanded}>
@@ -105,7 +146,7 @@ export function TestItem({ test, isExpanded, onToggleExpand, isMobile }: TestIte
           </ItemMobileContentData>
         </ItemMobileContent>
       </ItemMobile>
-    )
+    );
   }
 
   return (
@@ -116,7 +157,9 @@ export function TestItem({ test, isExpanded, onToggleExpand, isMobile }: TestIte
         <Badge variant="outline">{getDisciplineName(test.discipline)}</Badge>
       </ItemDesktopCell>
       <ItemDesktopCell>
-        <Badge variant={test.status === "published" ? "default" : "destructive"}>
+        <Badge
+          variant={test.status === "published" ? "default" : "destructive"}
+        >
           {test.status === "published" ? "Publicado" : "Não publicado"}
         </Badge>
       </ItemDesktopCell>
@@ -124,6 +167,5 @@ export function TestItem({ test, isExpanded, onToggleExpand, isMobile }: TestIte
       <ItemDesktopCell>{test.texts}</ItemDesktopCell>
       <ItemDesktopCell>{test.completions}</ItemDesktopCell>
     </>
-  )
+  );
 }
-

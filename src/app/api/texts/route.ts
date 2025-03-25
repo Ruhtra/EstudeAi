@@ -7,7 +7,7 @@ export interface TextsDto {
   number: number;
   content: string;
   contentType: ContentType;
-  reference: string;
+  reference: string | null;
   questionCount: number;
 }
 

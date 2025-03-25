@@ -64,7 +64,7 @@ model Text {
   number      Int         @unique @default(autoincrement())
   contentType ContentType
   content     String
-  reference   String
+  reference   String?
   examId      String
   Exam        Exam        @relation(fields: [examId], references: [id])
 

@@ -5,7 +5,5 @@ export const textSchema = z.object({
   content: z.string().min(1, {
     message: "Conteúdo é obrigatório.",
   }),
-  reference: z.string().min(1, {
-    message: "Referência é obrigatória.",
-  }),
+  reference: z.string(),
 });
