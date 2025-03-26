@@ -32,7 +32,7 @@ const FROM = "EstudeAi <no-reply@ruhtra.work>";
 export const sendPasswordResetEmail = async (email: string, token: string) => {
   // const resetLink = `${process.env.DNS_FRONT}/auth/new-password?token=${token}`;
 
-  await resend.emails.send({
+  return await resend.emails.send({
     from: FROM,
     to: [email],
     subject: "Redefinição de Senha - EstudeAi",

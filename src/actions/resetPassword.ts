@@ -18,7 +18,18 @@ export const resetPassword = async (values: z.infer<typeof ResetSchema>) => {
   if (!user) return { error: "Email não existe" };
 
   const userToken = await generatePasswordResetToken(user.email);
-  await sendPasswordResetEmail(userToken.email, userToken.token);
+  const response = await sendPasswordResetEmail(
+    userToken.email,
+    userToken.token
+  );
+
+  if (response.error) {
+    console.error(response.error);
+    return {
+      error:
+        "Não foi possível enviar o email de redefinição de senha. Tente novamente mais tarde.",
+    };
+  }
 
   return {
     success: "Você receberá instruções no email para redefinir sua senha.",
