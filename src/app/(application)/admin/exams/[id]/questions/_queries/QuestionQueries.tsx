@@ -11,19 +11,19 @@ const fetchDisciplines = async (): Promise<DisciplinesDto[]> => {
   return response.json();
 };
 
-const fetchTexts = async (): Promise<TextsDto[]> => {
-  const response = await fetch(`/api/texts`);
+const fetchTexts = async (idExam: string): Promise<TextsDto[]> => {
+  const response = await fetch(`/api/texts?examId=${idExam}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch users`);
   }
   return response.json();
 };
 
-export const useQuestionOptions = () => {
+export const useQuestionOptions = (idExam: string) => {
   const results = useQueries({
     queries: [
       { queryKey: ["disciplines"], queryFn: fetchDisciplines },
-      { queryKey: ["texts"], queryFn: fetchTexts },
+      { queryKey: ["texts"], queryFn: () => fetchTexts(idExam) },
     ],
   });
 

@@ -88,7 +88,7 @@ export function QuestionsSheet({
     texts,
     isError,
     isLoading: isLoadingOptions,
-  } = useQuestionOptions();
+  } = useQuestionOptions(idExam);
 
   if (isError) {
     return <div>Error loading options. Please try again later.</div>;
