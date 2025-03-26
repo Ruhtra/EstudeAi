@@ -20,6 +20,18 @@ export const createText = async (
   });
   if (!exam) return { error: "Exam ID not found" };
 
+  // Busca o maior número já utilizado para esse examId
+  const lastText = await db.text.findFirst({
+    where: {
+      Exam: {
+        id: idExam,
+      },
+    },
+    orderBy: { number: "desc" }, // Ordena pelo maior 'number'
+  });
+
+  const nextNumber = lastText ? lastText.number + 1 : 1;
+
   const id = cuid();
 
   if (text.contentType === "image" && text.content) {
@@ -50,6 +62,7 @@ export const createText = async (
   await db.text.create({
     data: {
       id: id,
+      number: nextNumber,
       contentType: text.contentType,
       content: text.content,
       reference: text.reference,
