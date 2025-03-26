@@ -20,7 +20,10 @@ import {
 } from "@/components/ui/popover";
 
 export interface ComboBoxProps {
-  options: string[];
+  options: {
+    id: string;
+    label: string;
+  }[];
   value: string;
   onSetValue: (value: string) => void;
   placeholder: string;
@@ -50,7 +53,7 @@ export function Combobox({
           disabled={disabled}
         >
           {value
-            ? options.find((options) => options === value)
+            ? options.find(({ id }) => id === value)?.label
             : searchPlaceholder}
           <ChevronsUpDown className="opacity-50" />
         </Button>
@@ -61,20 +64,20 @@ export function Combobox({
           <CommandList>
             <CommandEmpty>{emptyMessage}</CommandEmpty>
             <CommandGroup>
-              {options.map((options) => (
+              {options.map(({ id, label }) => (
                 <CommandItem
-                  key={options}
-                  value={options}
+                  key={id}
+                  value={id}
                   onSelect={(currentValue) => {
                     onSetValue(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
                 >
-                  {options}
+                  {label}
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === options ? "opacity-100" : "opacity-0"
+                      value === id ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

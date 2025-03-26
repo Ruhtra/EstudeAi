@@ -370,7 +370,10 @@ export default function ProfilePage() {
                               <FormLabel>Estado</FormLabel>
                               <Combobox
                                 disabled={isPending}
-                                options={estadosBrasileiros.map((e) => e.label)}
+                                options={estadosBrasileiros.map((e) => ({
+                                  id: e.value,
+                                  label: e.label,
+                                }))}
                                 value={field.value || ""}
                                 onSetValue={field.onChange}
                                 placeholder="Selecione um estado"
