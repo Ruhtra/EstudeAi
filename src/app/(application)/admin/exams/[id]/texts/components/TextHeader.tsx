@@ -7,7 +7,11 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
-export function TextHeader() {
+interface TextHeaderProps {
+  name: string;
+}
+
+export function TextHeader({ name }: TextHeaderProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const { id: idExam } = useParams<{ id: string }>();
 
@@ -20,7 +24,7 @@ export function TextHeader() {
       />
       <div className="mb-6 flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
-          Textos do Exame {idExam}
+          Textos da prova {name}
         </h1>
         <Button onClick={() => setIsCreateOpen(true)} size="sm">
           <PlusCircle className="mr-2 h-4 w-4" />

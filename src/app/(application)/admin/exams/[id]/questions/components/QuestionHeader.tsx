@@ -5,7 +5,11 @@ import { useState } from "react";
 import { QuestionsSheet } from "../_components/CreateAlternative/QuestionSheet";
 import { useParams } from "next/navigation";
 
-export function QuestionsHeader() {
+interface QuestionsHeaderProps {
+  name: string;
+}
+
+export function QuestionsHeader({ name }: QuestionsHeaderProps) {
   const { id: idExam } = useParams<{ id: string }>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -19,7 +23,7 @@ export function QuestionsHeader() {
       <div className="mb-4 flex flex-col gap-4">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
-            Provas
+            Questões da prova {name}
           </h1>
           <Button
             size="sm"

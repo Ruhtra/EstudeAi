@@ -6,6 +6,8 @@ import { QuestionsHeader } from "./components/QuestionHeader";
 import { QuestionSkeleton } from "./components/QuestionSkeleton";
 import { QuestionsList } from "./components/QuestionList";
 import { useParams } from "next/navigation";
+import { ExamsDto } from "@/app/api/exams/route";
+import { QuestionHeaderSkeleton } from "./components/QuestionHeaderSkeleton";
 
 export default function QuestionsExamPage() {
   const { id: examId } = useParams<{ id: string }>();
@@ -17,14 +19,30 @@ export default function QuestionsExamPage() {
     },
   });
 
+  const { data: examData, isPending: isPendingExam } = useQuery<ExamsDto>({
+    queryKey: ["exam", examId],
+    queryFn: async () => {
+      const response = await fetch(`/api/exams/${examId}`);
+      return response.json();
+    },
+  });
+
+  // Combined loading state
+  const isLoading = isPending || isPendingExam;
+
   return (
     <>
       <div className="container mx-auto">
-        <QuestionsHeader />
-        {isPending ? (
-          <QuestionSkeleton />
+        {isLoading ? (
+          <>
+            <QuestionHeaderSkeleton />
+            <QuestionSkeleton />
+          </>
         ) : (
-          <QuestionsList questions={data ?? []} />
+          <>
+            <QuestionsHeader name={examData!.name} />
+            <QuestionsList questions={data ?? []} />
+          </>
         )}
       </div>
     </>
