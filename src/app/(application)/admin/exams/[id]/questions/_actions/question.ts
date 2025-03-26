@@ -14,7 +14,7 @@ export const createQuestion = async (
 
   const textsExist = await db.text.findMany({
     where: {
-      number: {
+      id: {
         in: data.linkedTexts,
       },
     },
@@ -30,7 +30,7 @@ export const createQuestion = async (
   if (!examExists) return { error: "Exam does not exist" };
 
   const question = parseQuestion.data;
-  
+
   await db.question.create({
     data: {
       id: cuid(),
@@ -65,7 +65,7 @@ export const createQuestion = async (
       },
       Text: {
         connect: question.linkedTexts.map((e) => ({
-          number: e,
+          id: e,
         })),
       },
       createdAt: new Date(),
@@ -98,7 +98,7 @@ export const updateQuestion = async (
 
   const textsExist = await db.text.findMany({
     where: {
-      number: {
+      id: {
         in: data.linkedTexts,
       },
     },
@@ -107,9 +107,9 @@ export const updateQuestion = async (
     return { error: "Some linked texts do not exist" };
 
   // Encontrar os textos que foram deselecionados
-  const currentTextIds = question.Text.map((t) => t.number); // Pegamos os números dos textos atuais
+  const currentTextIds = question.Text.map((t) => t.id); // Pegamos os números dos textos atuais
   const textsToDisconnect = currentTextIds.filter(
-    (textNumber) => !data.linkedTexts.includes(textNumber)
+    (textId) => !data.linkedTexts.includes(textId)
   );
 
   // --- Tratamento para Alternatives ---
@@ -166,11 +166,11 @@ export const updateQuestion = async (
         },
         Text: {
           connect: data.linkedTexts.map((e) => ({
-            number: e,
+            id: e,
           })),
           // Desconectar textos deselecionados
-          disconnect: textsToDisconnect.map((textNumber) => ({
-            number: textNumber,
+          disconnect: textsToDisconnect.map((textId) => ({
+            id: textId,
           })),
         },
 

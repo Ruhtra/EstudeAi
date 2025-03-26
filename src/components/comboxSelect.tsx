@@ -16,13 +16,16 @@ import {
 import { CommandList } from "cmdk";
 
 interface TextSelectorProps {
-  texts: string[];
+  options: {
+    id: string;
+    label: string;
+  }[];
   selectedTexts: string[];
   onChange: (selectedTexts: string[]) => void;
 }
 
 export function ComboboxSelect({
-  texts,
+  options,
   selectedTexts,
   onChange,
 }: TextSelectorProps) {
@@ -55,17 +58,15 @@ export function ComboboxSelect({
           <CommandList>
             <CommandEmpty>Nenhum texto encontrado.</CommandEmpty>
             <CommandGroup>
-              {texts.map((title) => (
-                <CommandItem key={title} onSelect={() => handleSelect(title)}>
+              {options.map(({ id, label }) => (
+                <CommandItem key={id} onSelect={() => handleSelect(id)}>
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedTexts.includes(title)
-                        ? "opacity-100"
-                        : "opacity-0"
+                      selectedTexts.includes(id) ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {title}
+                  {label}
                 </CommandItem>
               ))}
             </CommandGroup>

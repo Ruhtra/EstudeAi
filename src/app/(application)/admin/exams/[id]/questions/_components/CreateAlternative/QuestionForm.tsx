@@ -20,7 +20,10 @@ interface QuestionFormProps {
   errors: FieldErrors<QuestionFormValues>;
 
   disciplines: string[];
-  texts: string[];
+  texts: {
+    id: string;
+    label: string;
+  }[];
 }
 
 export function QuestionForm({
@@ -62,8 +65,8 @@ export function QuestionForm({
               </FormLabel>
               <FormControl>
                 <ComboboxSelect
-                  texts={texts}
-                  selectedTexts={field.value.map((e) => e.toString())}
+                  options={texts}
+                  selectedTexts={field.value}
                   onChange={field.onChange}
                 />
               </FormControl>

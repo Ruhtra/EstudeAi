@@ -67,7 +67,7 @@ export function QuestionsSheet({
 
       form.setValue(
         "linkedTexts",
-        questionData.texts.map((e) => e.number)
+        questionData.texts.map((e) => e.id)
       );
       form.setValue("statement", questionData.statement);
 
@@ -148,7 +148,10 @@ export function QuestionsSheet({
               <div className="mt-6">
                 <QuestionForm
                   disciplines={disciplines.map((e) => e.name)}
-                  texts={texts.map((e) => e.number.toString())}
+                  texts={texts.map((e) => ({
+                    id: e.id,
+                    label: "Texto " + e.number.toString(),
+                  }))}
                   control={form.control}
                   errors={form.formState.errors}
                 />

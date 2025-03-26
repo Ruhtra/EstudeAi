@@ -61,7 +61,7 @@ enum ContentType {
 
 model Text {
   id          String      @id
-  number      Int         @unique @default(autoincrement())
+  number      Int
   contentType ContentType
   content     String
   reference   String?
