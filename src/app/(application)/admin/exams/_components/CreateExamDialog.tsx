@@ -112,7 +112,7 @@ export const CreateExamDialog = ({
             });
             onOpenChange(false);
             form.reset();
-            toast("Exam atualizado com sucesso");
+            toast("Prova atualizado com sucesso");
           }
         } else {
           const data = await createExaxm(values);
@@ -120,7 +120,7 @@ export const CreateExamDialog = ({
           if (data.success) {
             onOpenChange(false);
             form.reset();
-            toast("Exame criado com sucesso");
+            toast("Prova criado com sucesso");
             // setPreviewUrl(null);
             queryClient.refetchQueries({
               queryKey: ["exams"],
@@ -139,7 +139,7 @@ export const CreateExamDialog = ({
       <DialogContent className=" p-6">
         <DialogHeader>
           <DialogTitle className="text-lg font-medium">
-            {idExam ? "Editar Exame" : "Criar Exame"}
+            {idExam ? "Editar Prova" : "Criar Prova"}
           </DialogTitle>
         </DialogHeader>
         {isLoadingOptions || isLoading ? (
@@ -198,7 +198,7 @@ export const CreateExamDialog = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Nome do Exame
+                      Nome da Prova
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -287,11 +287,11 @@ export const CreateExamDialog = ({
                 <Button disabled={isPending} type="submit" className="text-sm">
                   {isPending
                     ? idExam
-                      ? "Atualizando Exame"
-                      : "Criando Exame"
+                      ? "Atualizando Prova"
+                      : "Criando Prova"
                     : idExam
-                      ? "Atualizar Exame"
-                      : "Adicionar Exame"}
+                      ? "Atualizar Prova"
+                      : "Adicionar Prova"}
                 </Button>
               </div>
             </form>
