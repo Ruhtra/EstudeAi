@@ -20,7 +20,7 @@ export const createExaxm = async (data: z.infer<typeof examSchema>) => {
       id: id,
       name: exam.name,
       year: exam.year, // Ano do exame
-      position: exam.position,
+      // position: exam.position,
       level: exam.level,
       isComplete: false,
 
@@ -77,7 +77,7 @@ export const updateExam = async (
       bank: exam.banca,
       institute: exam.instituto,
       level: exam.level,
-      position: exam.position,
+      // position: exam.position,
       updatedAt: new Date(),
       year: exam.year,
     },

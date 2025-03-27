@@ -26,7 +26,7 @@ export async function GET(
       instituteName: exam.institute,
       isComplete: exam.isComplete,
       level: exam.level,
-      position: exam.position,
+      // position: exam.position,
       updatedAt: exam.updatedAt,
       year: exam.year,
     };

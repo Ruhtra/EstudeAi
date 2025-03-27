@@ -58,7 +58,7 @@ export const CreateExamDialog = ({
       instituto: examData?.instituteName || "",
       banca: examData?.bankName || "",
       level: examData?.level || "",
-      position: examData?.position || "",
+      // position: examData?.position || "",
       name: examData?.name || "",
     },
   });
@@ -75,7 +75,7 @@ export const CreateExamDialog = ({
       form.setValue("instituto", examData.instituteName ?? "");
       form.setValue("banca", examData.bankName ?? "");
       form.setValue("level", examData.level ?? "");
-      form.setValue("position", examData.position ?? "");
+      // form.setValue("position", examData.position ?? "");
       form.setValue("name", examData.name ?? "");
     }
   }, [examData, form]);
@@ -84,7 +84,7 @@ export const CreateExamDialog = ({
     institutes,
     banks,
     levels,
-    positions,
+    // positions,
     isLoading: isLoadingOptions,
     isError,
   } = useExamOptions();
@@ -259,7 +259,7 @@ export const CreateExamDialog = ({
                 )}
               />
 
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="position"
                 render={({ field }) => (
@@ -281,7 +281,7 @@ export const CreateExamDialog = ({
                     <FormMessage className="text-xs" />
                   </FormItem>
                 )}
-              />
+              /> */}
 
               <div className="flex justify-end">
                 <Button disabled={isPending} type="submit" className="text-sm">

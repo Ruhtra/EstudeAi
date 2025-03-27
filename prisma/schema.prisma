@@ -18,7 +18,7 @@ model Exam {
   id         String     @id
   name       String
   year       Int
-  position   String
+  // position   String
   level      String
   isComplete Boolean    @default(false)
   createdAt  DateTime   @default(now())

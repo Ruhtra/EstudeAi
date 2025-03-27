@@ -110,8 +110,8 @@ export function ExamItem({
         </ItemMobileHeader>
         <ItemMobileContent>
           <ItemMobileContentData>
-            <span className="text-muted-foreground">Posição:</span>
-            <span>{exam.position}</span>
+            {/* <span className="text-muted-foreground">Posição:</span>
+            <span>{exam.position}</span> */}
             <span className="text-muted-foreground">Instituto:</span>
             <span>{exam.instituteName}</span>
             <span className="text-muted-foreground">Banca:</span>
@@ -149,7 +149,7 @@ export function ExamItem({
   return (
     <ItemDesktop>
       <ItemDesktopCell isPending={isPending}>{exam.name}</ItemDesktopCell>
-      <ItemDesktopCell isPending={isPending}>{exam.position}</ItemDesktopCell>
+      {/* <ItemDesktopCell isPending={isPending}>{exam.position}</ItemDesktopCell> */}
       <ItemDesktopCell isPending={isPending}>
         <Badge variant="secondary">{exam.year}</Badge>
       </ItemDesktopCell>

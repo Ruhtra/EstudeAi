@@ -39,7 +39,7 @@ export function ExamSkeleton() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Posição</TableHead>
+                {/* <TableHead>Posição</TableHead> */}
                 <TableHead>Ano</TableHead>
                 <TableHead>Instituto</TableHead>
                 <TableHead>Banca</TableHead>
@@ -55,9 +55,9 @@ export function ExamSkeleton() {
                   <TableCell>
                     <Skeleton className="h-5 w-40" />
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <Skeleton className="h-5 w-40" />
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell>
                     <Skeleton className="h-6 w-16" />
                   </TableCell>

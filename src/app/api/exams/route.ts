@@ -5,7 +5,7 @@ export interface ExamsDto {
   id: string;
   name: string;
   year: number;
-  position: string;
+  // position: string;
   level: string;
   isComplete: boolean;
   createdAt: Date;
@@ -31,7 +31,7 @@ export async function GET() {
         id: e.id,
         name: e.name,
         year: e.year,
-        position: e.position,
+        // position: e.position,
         level: e.level,
         isComplete: e.isComplete,
         createdAt: e.createdAt,
