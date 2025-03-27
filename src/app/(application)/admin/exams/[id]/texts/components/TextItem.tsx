@@ -21,6 +21,7 @@ import { deleteText } from "../_actions/text";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
+import { MeGenerateHTML } from "@/components/TipTapEditor";
 
 function extractRawText(content: string): string {
   try {
@@ -91,7 +92,10 @@ export function TextItem({
     });
   };
 
-  const rawText = extractRawText(text.content);
+  const rawText =
+    text.contentType == "text"
+      ? extractRawText(MeGenerateHTML(text.content))
+      : "";
 
   if (isMobile) {
     return (
