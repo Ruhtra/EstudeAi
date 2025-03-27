@@ -17,6 +17,7 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
+import { useEffect } from "react";
 
 interface TiptapEditorProps {
   content: string;
@@ -32,6 +33,10 @@ const TiptapEditor = ({
   isPending,
 }: TiptapEditorProps) => {
   const { theme } = useTheme();
+
+  useEffect(() => {
+    if (editor) editor.commands.setContent(content);
+  }, [content]);
 
   const editor = useEditor({
     extensions: [

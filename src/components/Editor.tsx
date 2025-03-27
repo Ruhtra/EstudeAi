@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BoldIcon, ItalicIcon, UnderlineIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Underline from "@tiptap/extension-underline";
+import { useEffect } from "react";
 
 export interface EditorProps {
   placeHolder: string;
@@ -34,6 +35,10 @@ export function Editor({
       },
     },
   });
+
+  useEffect(() => {
+    editor?.commands.setContent(value);
+  }, [value]);
 
   return (
     <>
