@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BoldIcon, ItalicIcon, UnderlineIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Underline from "@tiptap/extension-underline";
+import { useEffect, useState } from "react";
 
 export interface EditorProps {
   placeHolder: string;
@@ -35,9 +36,15 @@ export function Editor({
     },
   });
 
-  // useEffect(() => {
-  //   editor?.commands.setContent(value);
-  // }, [value]);
+  //TO-DO: This code is a workaround and should be refactored for better reliability and maintainability.
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (count === 0 && editor && value) {
+      // editor.commands.setContent(JSON.parse(value));
+      editor.commands.setContent(value);
+      setCount(1);
+    }
+  }, [value, editor]);
 
   return (
     <>

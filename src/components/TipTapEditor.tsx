@@ -57,10 +57,6 @@ const TiptapEditor = ({
   const { theme } = useTheme();
   const [customColor, setCustomColor] = useState("#000000");
 
-  useEffect(() => {
-    //possible solution for bug of no load in first render
-  }, [content]);
-
   const editor = useEditor({
     extensions: [
       Document,
@@ -98,6 +94,15 @@ const TiptapEditor = ({
       },
     },
   });
+
+  //TO-DO: This code is a workaround and should be refactored for better reliability and maintainability.
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (count === 0 && editor && content) {
+      editor.commands.setContent(JSON.parse(content));
+      setCount(1);
+    }
+  }, [content, editor]);
 
   if (!editor) {
     return null;
