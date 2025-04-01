@@ -12,17 +12,23 @@ export interface ExamsDto {
   updatedAt: Date;
   bankName: string;
   instituteName: string;
+
+  totalTexts: number;
+  totalQuestions: number;
 }
 
 export async function GET() {
   try {
     // const user = await currentUser();
     const exams = await db.exam.findMany({
-      // include: {
-      //     Bank: true,
-      //     Institute: true,
-      //     // Question: true
-      // }
+      include: {
+        _count: {
+          select: {
+            Question: true,
+            Text: true,
+          },
+        },
+      },
     });
     // const usersFiltered = users.filter((u) => u.id !== user.id);
 
@@ -38,6 +44,9 @@ export async function GET() {
         updatedAt: e.updatedAt,
         bankName: e.bank,
         instituteName: e.institute,
+
+        totalQuestions: e._count.Question,
+        totalTexts: e._count.Text,
       };
     });
 

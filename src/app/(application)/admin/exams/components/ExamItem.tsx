@@ -9,6 +9,7 @@ import type { ExamsDto } from "@/app/api/exams/route";
 import { deleteExam, publishExam, unPublishExam } from "../_actions/exam";
 import { toast } from "sonner";
 import { queryClient } from "@/lib/queryCLient";
+import { FileText, HelpCircle } from "lucide-react";
 import {
   ItemMobile,
   ItemMobileHeader,
@@ -110,8 +111,6 @@ export function ExamItem({
         </ItemMobileHeader>
         <ItemMobileContent>
           <ItemMobileContentData>
-            {/* <span className="text-muted-foreground">Posição:</span>
-            <span>{exam.position}</span> */}
             <span className="text-muted-foreground">Instituto:</span>
             <span>{exam.instituteName}</span>
             <span className="text-muted-foreground">Banca:</span>
@@ -124,20 +123,28 @@ export function ExamItem({
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full"
+                className="w-full flex items-center justify-center gap-1"
                 disabled={isPending}
               >
-                Textos
+                <FileText size={14} />
+                <span>Textos</span>
+                <div className="flex items-center justify-center h-5 min-w-5 px-1 rounded-md bg-secondary text-secondary-foreground text-xs font-bold">
+                  {exam.totalTexts}
+                </div>
               </Button>
             </Link>
             <Link href={`/admin/exams/${exam.id}/questions`} className="flex-1">
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full"
+                className="w-full flex items-center justify-center gap-1"
                 disabled={isPending}
               >
-                Questões
+                <HelpCircle size={14} />
+                <span>Questões</span>
+                <div className="flex items-center justify-center h-5 min-w-5 px-1 rounded-md bg-secondary text-secondary-foreground text-xs font-bold">
+                  {exam.totalQuestions}
+                </div>
               </Button>
             </Link>
           </ItemMobileContentOptions>
@@ -149,7 +156,6 @@ export function ExamItem({
   return (
     <ItemDesktop>
       <ItemDesktopCell isPending={isPending}>{exam.name}</ItemDesktopCell>
-      {/* <ItemDesktopCell isPending={isPending}>{exam.position}</ItemDesktopCell> */}
       <ItemDesktopCell isPending={isPending}>
         <Badge variant="secondary">{exam.year}</Badge>
       </ItemDesktopCell>
@@ -173,13 +179,31 @@ export function ExamItem({
       <ItemDesktopCell isPending={isPending}>
         <div className="flex items-center gap-2">
           <Link href={`/admin/exams/${exam.id}/texts`}>
-            <Button variant="outline" size="sm" disabled={isPending}>
-              Textos
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              className="flex items-center gap-1"
+            >
+              <FileText size={14} />
+              <span>Textos</span>
+              <div className="flex items-center justify-center h-5 min-w-5 px-1 rounded-md bg-secondary text-secondary-foreground text-xs font-bold">
+                {exam.totalTexts}
+              </div>
             </Button>
           </Link>
           <Link href={`/admin/exams/${exam.id}/questions`}>
-            <Button variant="outline" size="sm" disabled={isPending}>
-              Questões
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              className="flex items-center gap-1"
+            >
+              <HelpCircle size={14} />
+              <span>Questões</span>
+              <div className="flex items-center justify-center h-5 min-w-5 px-1 rounded-md bg-secondary text-secondary-foreground text-xs font-bold">
+                {exam.totalQuestions}
+              </div>
             </Button>
           </Link>
         </div>
