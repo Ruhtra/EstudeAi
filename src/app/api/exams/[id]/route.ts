@@ -12,6 +12,14 @@ export async function GET(
 
     const exam = await db.exam.findUnique({
       where: { id: id },
+      include: {
+        _count: {
+          select: {
+            Question: true,
+            Text: true,
+          },
+        },
+      },
     });
 
     if (!exam) {
@@ -29,6 +37,9 @@ export async function GET(
       // position: exam.position,
       updatedAt: exam.updatedAt,
       year: exam.year,
+
+      totalQuestions: exam._count.Question,
+      totalTexts: exam._count.Text,
     };
 
     return NextResponse.json(userDTO);
