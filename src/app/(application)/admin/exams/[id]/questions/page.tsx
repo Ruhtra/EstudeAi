@@ -14,7 +14,7 @@ export default function QuestionsExamPage() {
   const { isPending, data } = useQuery<QuestionsDto[]>({
     queryKey: ["questions", examId],
     queryFn: async () => {
-      const response = await fetch("/api/questions");
+      const response = await fetch("/api/questions?examId=" + examId);
       return await response.json();
     },
   });

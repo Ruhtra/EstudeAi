@@ -20,12 +20,28 @@ export interface QuestionsDto {
   }[];
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const examId = searchParams.get("examId");
+
   try {
+    let questions;
+
+    if (examId) {
+      questions = await db.question.findMany({
+        include: { Alternative: true, Discipline: true, Text: true },
+        where: {
+          examId: examId,
+        },
+      });
+    } else {
+      questions = await db.question.findMany({
+        include: { Alternative: true, Discipline: true, Text: true },
+      });
+    }
+
     // const user = await currentUser();
-    const questions = await db.question.findMany({
-      include: { Alternative: true, Discipline: true, Text: true },
-    });
+
     // const usersFiltered = users.filter((u) => u.id !== user.id);
 
     const examsDto: QuestionsDto[] = questions.map((e) => {
