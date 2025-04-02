@@ -1,8 +1,8 @@
-import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
+import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { Button } from "@/components/ui/button";
-import { BoldIcon, ItalicIcon, UnderlineIcon } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { BoldIcon, ItalicIcon, UnderlineIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Underline from "@tiptap/extension-underline";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ export interface EditorProps {
   onChange: (content: string) => void;
   placeholder?: string;
   isPending: boolean; // New prop
+  className?: string;
 }
 
 export function Editor({
@@ -20,6 +21,7 @@ export function Editor({
   onChange,
   placeholder,
   isPending,
+  className,
 }: EditorProps) {
   const { theme } = useTheme();
   const editor = useEditor({
@@ -52,7 +54,7 @@ export function Editor({
       editor.commands.setContent(content);
       setCount(1);
     }
-  }, [content, editor]);
+  }, [content, editor, count]);
 
   if (!editor) {
     return null;
@@ -63,11 +65,12 @@ export function Editor({
       <EditorContent
         className={cn(
           `prose ${theme == "dark" && "prose-invert"} prose-purple whitespace-pre-wrap`,
-          isPending && "pointer-events-none"
+          isPending && "pointer-events-none",
+          className
         )}
         editor={editor}
       />
-      {editor && (
+      {/* {editor && (
         <>
           <BubbleMenu
             className="shadow-xl border bg-primary rounded-lg overflow-hidden divide-x-2 divide-secondary"
@@ -108,7 +111,7 @@ export function Editor({
             </Button>
           </BubbleMenu>
         </>
-      )}
+      )} */}
     </>
   );
 }

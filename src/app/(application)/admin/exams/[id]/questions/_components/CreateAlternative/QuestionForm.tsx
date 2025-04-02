@@ -84,8 +84,9 @@ export function QuestionForm({
             <FormLabel className="text-sm font-medium">Enunciado</FormLabel>
             <FormControl>
               <Editor
-                value={field.value}
-                placeHolder="Digite o enunciado da questão aqui"
+                isPending={false} // TO-DO: implemente pedngin
+                content={field.value}
+                placeholder="Digite o enunciado da questão aqui"
                 onChange={field.onChange}
                 className="min-h-[150px] text-sm rounded-md border border-input bg-backgroud px-3 py-2"
               />

@@ -102,7 +102,7 @@ export function TiptapEditor({
       editor.commands.setContent(JSON.parse(content));
       setCount(1);
     }
-  }, [content, editor]);
+  }, [content, editor, count]);
 
   if (!editor) {
     return null;
