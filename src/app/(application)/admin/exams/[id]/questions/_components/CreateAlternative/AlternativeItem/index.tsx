@@ -24,7 +24,6 @@ export function AlternativeItem({
 }: AlternativeItemProps) {
   const { control, watch } = useFormContext<QuestionFormValues>();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const contentType = watch(`alternatives.${index}.contentType`);
 
   return (
     <div className="space-y-2">
@@ -43,7 +42,23 @@ export function AlternativeItem({
           <FormItem className="w-full">
             <FormControl>
               <div className="relative">
-                <div
+                {watch(`alternatives.${index}.contentType`) == "text" ? (
+                  <Editor
+                    placeholder={`Digite a alternativa ${String.fromCharCode(
+                      65 + index
+                    )}`}
+                    isPending={false} // TO-DO: add pednign
+                    content={field.value}
+                    onChange={field.onChange}
+                  />
+                ) : (
+                  <ImageArea
+                    previewImage={previewImage}
+                    setPreviewImage={setPreviewImage}
+                    index={index}
+                  />
+                )}
+                {/* <div
                   style={{ display: contentType === "text" ? "block" : "none" }}
                 >
                   <Editor
@@ -65,7 +80,7 @@ export function AlternativeItem({
                       index={index}
                     />
                   </>
-                )}
+                )} */}
               </div>
             </FormControl>
             <FormMessage className="text-xs" />

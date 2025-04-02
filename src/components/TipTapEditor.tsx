@@ -48,12 +48,12 @@ interface TiptapEditorProps {
   isPending: boolean; // New prop
 }
 
-const TiptapEditor = ({
+export function TiptapEditor({
   content,
   onChange,
   placeholder,
   isPending,
-}: TiptapEditorProps) => {
+}: TiptapEditorProps) {
   const { theme } = useTheme();
   const [customColor, setCustomColor] = useState("#000000");
 
@@ -457,9 +457,7 @@ const TiptapEditor = ({
       />
     </div>
   );
-};
-
-export default TiptapEditor;
+}
 
 export function MeGenerateHTML(json: string) {
   if (json) {

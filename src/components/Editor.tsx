@@ -6,32 +6,40 @@ import { BoldIcon, ItalicIcon, UnderlineIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Underline from "@tiptap/extension-underline";
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 export interface EditorProps {
-  placeHolder: string;
-  value: string;
-  onChange: (value: string) => void;
-  className?: string;
+  content: string;
+  onChange: (content: string) => void;
+  placeholder?: string;
+  isPending: boolean; // New prop
 }
 
 export function Editor({
-  placeHolder,
-  value,
+  content,
   onChange,
-  className,
+  placeholder,
+  isPending,
 }: EditorProps) {
+  const { theme } = useTheme();
   const editor = useEditor({
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: placeHolder,
+        placeholder: placeholder,
       }),
       Underline,
     ],
-    content: value,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
+    content: content,
     editorProps: {
       attributes: {
-        class: cn("outline-none h-[100%] min-h-[3em] p-1", className),
+        class: cn(
+          "focus:outline-none h-[100%] min-h-[3em] p-1",
+          isPending && "opacity-50 pointer-events-none"
+        ),
       },
     },
   });
@@ -39,20 +47,25 @@ export function Editor({
   //TO-DO: This code is a workaround and should be refactored for better reliability and maintainability.
   const [count, setCount] = useState(0);
   useEffect(() => {
-    if (count === 0 && editor && value) {
-      // editor.commands.setContent(JSON.parse(value));
-      editor.commands.setContent(value);
+    if (count === 0 && editor && content) {
+      // editor.commands.setContent(JSON.parse(content));
+      editor.commands.setContent(content);
       setCount(1);
     }
-  }, [value, editor]);
+  }, [content, editor]);
+
+  if (!editor) {
+    return null;
+  }
 
   return (
     <>
       <EditorContent
+        className={cn(
+          `prose ${theme == "dark" && "prose-invert"} prose-purple whitespace-pre-wrap`,
+          isPending && "pointer-events-none"
+        )}
         editor={editor}
-        onInput={() => {
-          onChange(editor?.getHTML() || "");
-        }}
       />
       {editor && (
         <>

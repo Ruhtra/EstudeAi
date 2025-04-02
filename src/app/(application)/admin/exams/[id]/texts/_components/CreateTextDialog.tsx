@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ContentTypeSelect } from "@/components/ContentTypeSelect";
-import TiptapEditor from "@/components/TipTapEditor";
+import { TiptapEditor } from "@/components/TipTapEditor";
 import {
   Dialog,
   DialogContent,
