@@ -20,7 +20,13 @@ export const questionSchema = z.object({
       })
     )
     .min(2, "Deve haver pelo menos duas alternativas")
+    .refine(
+      (alternatives) => alternatives.filter((alt) => alt.isCorrect).length <= 1,
+      {
+        message: "Apenas uma alternativa deve estar correta",
+      }
+    )
     .refine((alternatives) => alternatives.some((alt) => alt.isCorrect), {
-      message: "Deve haver pelo menos uma alternativa correta",
+      message: "Uma alternativa deve ser selecionada como correta",
     }),
 });
