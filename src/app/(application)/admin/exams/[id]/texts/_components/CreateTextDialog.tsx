@@ -57,13 +57,15 @@ export function CreateTextDialog({
     refetchOnMount: true,
   });
 
+  const defaultValues: Record<string, string> = {
+    contentType: textData?.contentType || ContentType["text"],
+    content: textData?.content || "",
+    reference: textData?.reference || "",
+  };
+
   const form = useForm<z.infer<typeof textSchema>>({
     resolver: zodResolver(textSchema),
-    defaultValues: {
-      contentType: textData?.contentType || ContentType["text"],
-      content: textData?.content || "",
-      reference: textData?.reference || "",
-    },
+    defaultValues,
   });
 
   useEffect(() => {
@@ -192,7 +194,7 @@ export function CreateTextDialog({
                         <FormControl>
                           {form.watch("contentType") == "text" ? (
                             <TiptapEditor
-                              content={field.value}
+                              content={field.value as string}
                               onChange={field.onChange}
                               placeholder="Digite o conteúdo do texto aqui..."
                               isPending={isPending}
@@ -201,7 +203,7 @@ export function CreateTextDialog({
                             <ImageUploadFieldWithUrl
                               form={form}
                               name="content"
-                              initialImageUrl={field.value}
+                              initialImageUrl={textData?.content}
                               isPending={isPending}
                             />
                           )}
