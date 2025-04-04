@@ -138,7 +138,7 @@ export const updateText = async (
     if (!transaction) return { error: "Falha na transação" };
   } else if (text.contentType == "text") {
     const transaction = await db.$transaction(async (prisma) => {
-      const existingImage = `profileImages/texts/${textData.id}.${textData.content.split(".").pop()}`;
+      const existingImage = `texts/${textData.id}.${textData.content.split(".").pop()}`;
       const updatedText = await prisma.text.update({
         where: { id: idText },
         data: {
@@ -174,7 +174,9 @@ export const deleteText = async (textId: string) => {
   if (!text) return { error: "Text not found" };
 
   const transaction = await db.$transaction(async (prisma) => {
-    const existingImage = `profileImages/texts/${text.id}.${text.content.split(".").pop()}`;
+    const existingImage = `texts/${text.id}.${text.content.split(".").pop()}`;
+    console.log(existingImage);
+
     const deletedText = await prisma.text.delete({
       where: {
         id: textId,

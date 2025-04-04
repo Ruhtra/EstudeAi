@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import type React from "react";
+
+import { useCallback } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import {
   FormControl,
@@ -18,31 +20,31 @@ interface ImageUploadFieldWithUrlProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<any>;
   name: string;
-  initialImageUrl?: string;
+  b: string;
   isPending: boolean;
+  previewUrl: string | null;
+  onImageChange: (file: File | null, url: string | null) => void;
 }
 
 export function ImageUploadFieldWithUrl({
   form,
   name,
-  initialImageUrl,
   isPending,
+  previewUrl,
+  onImageChange,
 }: ImageUploadFieldWithUrlProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
         const reader = new FileReader();
         reader.onloadend = () => {
-          setPreviewUrl(reader.result as string);
+          onImageChange(file, reader.result as string);
         };
-        form.setValue("content", file);
         reader.readAsDataURL(file);
       }
     },
-    [form]
+    [onImageChange]
   );
 
   const { getRootProps, isDragActive } = useDropzone({
@@ -50,29 +52,14 @@ export function ImageUploadFieldWithUrl({
     accept: { "image/*": [] },
     multiple: false,
   });
-  useEffect(() => {
-    if (initialImageUrl) {
-      fetch(initialImageUrl)
-        .then((res) => res.blob())
-        .then((blob) => {
-          const file = new File([blob], "image.jpg", { type: blob.type });
-          form.setValue(name, file);
-          setPreviewUrl(initialImageUrl);
-        })
-        .catch((error) =>
-          console.error("Error fetching initial image:", error)
-        );
-    }
-  }, [initialImageUrl, form, name]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
+        onImageChange(file, reader.result as string);
       };
-      form.setValue(name, file);
       reader.readAsDataURL(file);
     }
   };
@@ -92,11 +79,7 @@ export function ImageUploadFieldWithUrl({
                     isDragActive
                       ? "border-primary bg-primary/10"
                       : "border-gray-300 hover:border-primary"
-                  } ${
-                    isPending
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:border-primary"
-                  }`}
+                  } ${isPending ? "opacity-50 cursor-not-allowed" : "hover:border-primary"}`}
                 >
                   <Input
                     type="file"

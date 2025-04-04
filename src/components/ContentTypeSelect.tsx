@@ -16,7 +16,6 @@ import { ImageIcon, FileTextIcon } from "lucide-react";
 interface ContentTypeSelectProps {
   value: string;
   onChange: (value: "text" | "image") => void;
-  onTypeChange?: (value: "text" | "image") => void;
   label?: string;
   className?: string;
   isPending?: boolean; // New prop
@@ -25,7 +24,6 @@ interface ContentTypeSelectProps {
 export function ContentTypeSelect({
   value,
   onChange,
-  onTypeChange,
   label = "Tipo de conteúdo",
   className = "",
   isPending = false, // Default to false
@@ -40,9 +38,6 @@ export function ContentTypeSelect({
           console.log(vv);
           if (vv) {
             onChange(vv);
-            if (onTypeChange) {
-              onTypeChange(vv);
-            }
           }
         }}
         disabled={isPending} // Disable the select when isPending is true

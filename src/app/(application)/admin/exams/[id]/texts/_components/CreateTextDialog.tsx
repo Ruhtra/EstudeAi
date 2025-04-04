@@ -1,9 +1,9 @@
 "use client";
 
-import { useTransition, useEffect } from "react";
+import { useTransition, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import type * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,7 +26,7 @@ import {
 import { textSchema } from "../_actions/TextSchema";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { TextsDto } from "@/app/api/texts/route";
+import type { TextsDto } from "@/app/api/texts/route";
 import { ContentType } from "@prisma/client";
 import { ImageUploadFieldWithUrl } from "./Image-upload-field-url";
 import { queryClient } from "@/lib/queryCLient";
@@ -49,6 +49,10 @@ export function CreateTextDialog({
   open,
 }: CreateTextDialogProps) {
   const [isPending, startTransition] = useTransition();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Store text content and image content separately
+  const [textContent, setTextContent] = useState<string>("");
+  const [imageContent, setImageContent] = useState<File | string | null>(null);
 
   const { data: textData, isLoading } = useQuery({
     queryKey: ["text", idText],
@@ -59,7 +63,7 @@ export function CreateTextDialog({
 
   const defaultValues: Record<string, string> = {
     contentType: textData?.contentType || ContentType.text,
-    content: textData?.content || "",
+    content: "",
     reference: textData?.reference || "",
   };
 
@@ -68,25 +72,74 @@ export function CreateTextDialog({
     defaultValues,
   });
 
+  // Handle initial data loading
   useEffect(() => {
     if (textData) {
-      Object.entries(textData).forEach(([key, value]) => {
-        form.setValue(key as keyof FormValues, value);
-      });
+      const contentType = textData.contentType as "text" | "image";
 
-      form.setValue(
-        "contentType",
-        (textData.contentType as "text" | "image") ?? "text"
-      );
-      form.setValue("content", textData.content ?? "");
+      // Set form values
+      form.setValue("contentType", contentType ?? "text");
       form.setValue("reference", textData.reference ?? "");
+
+      // Store content based on type, but don't set form value yet
+      if (contentType === "text" && textData.content) {
+        setTextContent(textData.content);
+        form.setValue("content", textData.content);
+      } else if (contentType === "image" && textData.content) {
+        // For image type, check if it's a valid URL
+        if (
+          textData.content.startsWith("data:") ||
+          textData.content.startsWith("http")
+        ) {
+          setPreviewUrl(textData.content);
+          setImageContent(textData.content);
+          form.setValue("content", textData.content);
+        }
+      }
+
+      // Set other fields
+      Object.entries(textData).forEach(([key, value]) => {
+        if (key !== "content" && key !== "contentType") {
+          form.setValue(key as keyof FormValues, value);
+        }
+      });
     }
   }, [textData, form]);
 
+  // Update form content when content type changes
+  useEffect(() => {
+    const contentType = form.watch("contentType");
+
+    // Clear form content first
+    form.setValue("content", "");
+
+    // Set appropriate content based on type
+    if (contentType === "text") {
+      form.setValue("content", textContent);
+    } else if (contentType === "image" && imageContent) {
+      form.setValue("content", imageContent);
+    }
+  }, [form.watch("contentType"), textContent, imageContent, form]);
+
+  // Handle text content changes
+  const handleTextContentChange = (value: string) => {
+    setTextContent(value);
+    form.setValue("content", value);
+  };
+
+  // Handle image content changes
+  const handleImageContentChange = (file: File | null, url: string | null) => {
+    setImageContent(file);
+    setPreviewUrl(url);
+    if (file) {
+      form.setValue("content", file);
+    } else {
+      form.setValue("content", "");
+    }
+  };
+
   function onSubmit(values: z.infer<typeof textSchema>) {
     startTransition(async () => {
-      console.log(values);
-
       try {
         if (idText) {
           const data = await updateText(idText, values);
@@ -100,6 +153,9 @@ export function CreateTextDialog({
             });
             onOpenChange(false);
             form.reset();
+            setTextContent("");
+            setImageContent(null);
+            setPreviewUrl(null);
             toast("Texto atualizado com sucesso");
           }
         } else {
@@ -111,6 +167,9 @@ export function CreateTextDialog({
             });
             onOpenChange(false);
             form.reset();
+            setTextContent("");
+            setImageContent(null);
+            setPreviewUrl(null);
             toast("Texto criado com sucesso");
           }
         }
@@ -143,26 +202,6 @@ export function CreateTextDialog({
                   className="space-y-6"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                    {/* <FormField
-                      control={form.control}
-                      name="number"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">
-                            Nº do texto
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              className="text-sm"
-                              placeholder="Ex: 34"
-                              disabled={isPending}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-xs" />
-                        </FormItem>
-                      )}
-                    /> */}
                     <FormField
                       control={form.control}
                       name="contentType"
@@ -170,13 +209,11 @@ export function CreateTextDialog({
                         <FormItem>
                           <ContentTypeSelect
                             value={field.value}
-                            onChange={field.onChange}
-                            isPending={isPending}
-                            onTypeChange={() => {
-                              form.setValue("content", "");
-                              //TODO: Usuário está perdendo os dados ao trocar de aba
-                              //informar a ele que será limpo ao salvar estados separados para que fique salvo
+                            onChange={(value) => {
+                              // Just change the content type, the useEffect will handle content switching
+                              field.onChange(value);
                             }}
+                            isPending={isPending}
                           />
                         </FormItem>
                       )}
@@ -192,10 +229,10 @@ export function CreateTextDialog({
                           Conteúdo
                         </FormLabel>
                         <FormControl>
-                          {form.watch("contentType") == "text" ? (
+                          {form.watch("contentType") === "text" ? (
                             <TiptapEditor
-                              content={field.value as string}
-                              onChange={field.onChange}
+                              content={textContent}
+                              onChange={handleTextContentChange}
                               placeholder="Digite o conteúdo do texto aqui..."
                               isPending={isPending}
                             />
@@ -203,8 +240,10 @@ export function CreateTextDialog({
                             <ImageUploadFieldWithUrl
                               form={form}
                               name="content"
-                              initialImageUrl={textData?.content || undefined}
+                              b=""
                               isPending={isPending}
+                              previewUrl={previewUrl}
+                              onImageChange={handleImageContentChange}
                             />
                           )}
                         </FormControl>
