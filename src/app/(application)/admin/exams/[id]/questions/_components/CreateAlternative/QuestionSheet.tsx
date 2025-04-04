@@ -46,17 +46,20 @@ export function QuestionsSheet({
     refetchOnMount: true,
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const defaultValues: Record<any, any> = {
+    linkedTexts: [],
+    statement: "", // Pode ser removido também
+    discipline: "",
+    alternatives: [
+      { content: "", contentType: "text", isCorrect: false },
+      { content: "", contentType: "text", isCorrect: false },
+    ],
+  };
+
   const form = useForm<z.infer<typeof questionSchema>>({
     resolver: zodResolver(questionSchema),
-    defaultValues: {
-      linkedTexts: [],
-      statement: "", // Pode ser removido também
-      discipline: "",
-      alternatives: [
-        { content: "", contentType: "text", isCorrect: false },
-        { content: "", contentType: "text", isCorrect: false },
-      ],
-    },
+    defaultValues,
   });
 
   useEffect(() => {

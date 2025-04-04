@@ -58,7 +58,7 @@ export function CreateTextDialog({
   });
 
   const defaultValues: Record<string, string> = {
-    contentType: textData?.contentType || ContentType["text"],
+    contentType: textData?.contentType || ContentType.text,
     content: textData?.content || "",
     reference: textData?.reference || "",
   };
@@ -76,7 +76,7 @@ export function CreateTextDialog({
 
       form.setValue(
         "contentType",
-        (textData.contentType.toLowerCase() as "text" | "image") ?? "text"
+        (textData.contentType as "text" | "image") ?? "text"
       );
       form.setValue("content", textData.content ?? "");
       form.setValue("reference", textData.reference ?? "");
@@ -203,7 +203,7 @@ export function CreateTextDialog({
                             <ImageUploadFieldWithUrl
                               form={form}
                               name="content"
-                              initialImageUrl={textData?.content}
+                              initialImageUrl={textData?.content || undefined}
                               isPending={isPending}
                             />
                           )}

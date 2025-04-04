@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 
 interface ImageUploadFieldWithUrlProps {
+  //TO-DO: Rmover esse eslint e tipar corretamente
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<any>;
   name: string;
@@ -36,8 +37,8 @@ export function ImageUploadFieldWithUrl({
         const reader = new FileReader();
         reader.onloadend = () => {
           setPreviewUrl(reader.result as string);
-          form.setValue("content", reader.result as string);
         };
+        form.setValue("content", file);
         reader.readAsDataURL(file);
       }
     },
@@ -51,8 +52,16 @@ export function ImageUploadFieldWithUrl({
   });
   useEffect(() => {
     if (initialImageUrl) {
-      setPreviewUrl(initialImageUrl);
-      form.setValue(name, initialImageUrl);
+      fetch(initialImageUrl)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], "image.jpg", { type: blob.type });
+          form.setValue(name, file);
+          setPreviewUrl(initialImageUrl);
+        })
+        .catch((error) =>
+          console.error("Error fetching initial image:", error)
+        );
     }
   }, [initialImageUrl, form, name]);
 
@@ -62,22 +71,11 @@ export function ImageUploadFieldWithUrl({
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
-        form.setValue(name, reader.result as string);
       };
+      form.setValue(name, file);
       reader.readAsDataURL(file);
     }
   };
-
-  // const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const url = e.target.value;
-  //   setPreviewUrl(url);
-  //   form.setValue(name, url);
-  // };
-
-  // const removeImage = () => {
-  //   setPreviewUrl(null);
-  //   form.setValue(name, "");
-  // };
 
   return (
     <FormField
@@ -88,9 +86,6 @@ export function ImageUploadFieldWithUrl({
           <FormControl>
             <div className="flex items-center space-x-2">
               <div className="flex-grow">
-                <h2 className="bg-red-500">
-                  Atenção ainda não é possivel subir imagem aqui!
-                </h2>
                 <div
                   {...getRootProps()}
                   className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer transition-colors ${

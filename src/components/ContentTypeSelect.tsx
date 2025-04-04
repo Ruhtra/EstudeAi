@@ -35,10 +35,14 @@ export function ContentTypeSelect({
       {label && <FormLabel className="text-sm font-medium">{label}</FormLabel>}
       <Select
         value={value}
-        onValueChange={(value: "text" | "image") => {
-          onChange(value);
-          if (onTypeChange) {
-            onTypeChange(value);
+        onValueChange={(vv: "text" | "image") => {
+          console.log("----");
+          console.log(vv);
+          if (vv) {
+            onChange(vv);
+            if (onTypeChange) {
+              onTypeChange(vv);
+            }
           }
         }}
         disabled={isPending} // Disable the select when isPending is true
