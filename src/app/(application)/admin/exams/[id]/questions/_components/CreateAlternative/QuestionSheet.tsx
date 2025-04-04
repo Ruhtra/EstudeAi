@@ -20,8 +20,9 @@ import { useEffect, useTransition } from "react";
 import { queryClient } from "@/lib/queryCLient";
 import { useQuestionOptions } from "../../_queries/QuestionQueries";
 import { useQuery } from "@tanstack/react-query";
-import { QuestionsDto } from "@/app/api/questions/route";
+import type { QuestionsDto } from "@/app/api/questions/route";
 import { QuestionCreateSkeleton } from "./QuestionCreateSkeleton";
+
 interface QuestionsSheetProps {
   idExam: string;
   idQuestions?: string;
@@ -30,6 +31,21 @@ interface QuestionsSheetProps {
 }
 
 export type FormValues = z.infer<typeof questionSchema>;
+
+// Helper function to convert a URL to a File object
+async function urlToFile(
+  url: string,
+  filename = "image.jpg"
+): Promise<File | null> {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type });
+  } catch (error) {
+    console.error("Error converting URL to File:", error);
+    return null;
+  }
+}
 
 export function QuestionsSheet({
   idExam,
@@ -64,25 +80,65 @@ export function QuestionsSheet({
 
   useEffect(() => {
     if (questionData) {
-      Object.entries(questionData).forEach(([key, value]) => {
-        form.setValue(key as keyof FormValues, value);
-      });
-
+      // Set basic form values
       form.setValue(
         "linkedTexts",
         questionData.texts.map((e) => e.id)
       );
       form.setValue("statement", questionData.statement);
+      form.setValue("discipline", questionData.discipline);
 
-      form.setValue(
-        "alternatives",
-        questionData.alternatives.map((e) => ({
-          id: e.id,
-          content: e.content,
-          contentType: e.contentType,
-          isCorrect: e.isCorrect,
-        }))
-      );
+      // Process alternatives with async operations for image content
+      const processAlternatives = async () => {
+        const processedAlternatives = await Promise.all(
+          questionData.alternatives.map(async (alt) => {
+            const result = {
+              id: alt.id,
+              isCorrect: alt.isCorrect,
+              contentType: alt.contentType as "text" | "image",
+              content: alt.content,
+            };
+
+            // If it's an image, convert the URL to a File object
+            if (
+              alt.contentType === "image" &&
+              typeof alt.content === "string"
+            ) {
+              try {
+                // For data URLs, we can use them directly
+                if (alt.content.startsWith("data:")) {
+                  // Use type assertion to tell TypeScript this is valid
+                  return result as any;
+                }
+
+                // For HTTP URLs, convert to File
+                if (alt.content.startsWith("http")) {
+                  const file = await urlToFile(alt.content);
+                  if (file) {
+                    return {
+                      ...result,
+                      content: file,
+                    };
+                  }
+                }
+              } catch (error) {
+                console.error("Error processing image alternative:", error);
+              }
+            }
+
+            // Return the result with type assertion if needed
+            return result as any;
+          })
+        );
+
+        // Set the processed alternatives
+        form.setValue("alternatives", processedAlternatives);
+
+        // Force a re-render
+        form.trigger();
+      };
+
+      processAlternatives();
     }
   }, [questionData, form]);
 

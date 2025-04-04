@@ -33,12 +33,10 @@ export function Options({
         render={({ field }) => (
           <ContentTypeSelect
             value={field.value}
-            onChange={field.onChange}
-            onTypeChange={(value) => {
-              if (value === "text") {
-                setValue(`alternatives.${index}.content`, "");
-                setPreviewImage(null);
-              }
+            onChange={(value) => {
+              setValue(`alternatives.${index}.content`, "");
+              setPreviewImage(null);
+              field.onChange(value);
             }}
             label=""
             className="w-32"

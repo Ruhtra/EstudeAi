@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { questionSchema } from "./QuestionSchema";
 import { db } from "@/lib/db";
+import { supabase } from "@/lib/supabase";
 import cuid from "cuid";
 
 export const createQuestion = async (
@@ -36,16 +37,47 @@ export const createQuestion = async (
       id: cuid(),
       statement: question.statement,
       Alternative: {
-        create: question.alternatives.map((e) => {
-          return {
-            id: cuid(),
-            content: e.content,
-            updatedAt: new Date(),
-            createdAt: new Date(),
-            contentType: e.contentType,
-            isCorrect: e.isCorrect,
-          };
-        }),
+        create: await Promise.all(
+          question.alternatives.map(async (e) => {
+            let id = cuid();
+
+            if (e.contentType === "image" && e.content instanceof File) {
+              let imgUrl: string;
+              let imageName: string;
+              imageName = `alternatives/${id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
+              imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
+
+              const res = await supabase.storage
+                .from("profileImages")
+                .upload(imageName, e.content, {
+                  cacheControl: "3600",
+                  upsert: true,
+                });
+
+              if (res.error) throw res.error;
+
+              return {
+                id: id,
+                content: imgUrl,
+                updatedAt: new Date(),
+                createdAt: new Date(),
+                contentType: e.contentType,
+                isCorrect: e.isCorrect,
+              };
+            } else if (typeof e.content === "string") {
+              return {
+                id: id,
+                content: e.content,
+                updatedAt: new Date(),
+                createdAt: new Date(),
+                contentType: e.contentType,
+                isCorrect: e.isCorrect,
+              };
+            } else {
+              throw new Error("Invalid content type");
+            }
+          })
+        ),
       },
       Discipline: {
         connectOrCreate: {
@@ -122,34 +154,103 @@ export const updateQuestion = async (
   const alternativesToDelete = currentAlternativeIds.filter(
     (id) => !newAlternativeIds.includes(id)
   );
-  const update = () => {
+
+  const update = async () => {
     return db.question.update({
       where: { id: idQuestion },
       data: {
         statement: data.statement,
         Alternative: {
-          create: data.alternatives
-            .filter((e) => !e.id)
-            .map((e) => ({
-              id: cuid(),
-              content: e.content,
-              contentType: e.contentType,
-              isCorrect: e.isCorrect,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            })),
+          create: await Promise.all(
+            data.alternatives
+              .filter((e) => !e.id)
+              .map(async (e) => {
+                let id = cuid();
+
+                if (e.contentType === "image" && e.content instanceof File) {
+                  let imgUrl: string;
+                  let imageName: string;
+                  imageName = `alternatives/${id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
+                  imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
+
+                  const res = await supabase.storage
+                    .from("profileImages")
+                    .upload(imageName, e.content, {
+                      cacheControl: "3600",
+                      upsert: true,
+                    });
+
+                  if (res.error) throw res.error;
+
+                  return {
+                    id: id,
+                    content: imgUrl,
+                    updatedAt: new Date(),
+                    createdAt: new Date(),
+                    contentType: e.contentType,
+                    isCorrect: e.isCorrect,
+                  };
+                } else if (typeof e.content === "string") {
+                  return {
+                    id: id,
+                    content: e.content,
+                    updatedAt: new Date(),
+                    createdAt: new Date(),
+                    contentType: e.contentType,
+                    isCorrect: e.isCorrect,
+                  };
+                } else {
+                  throw new Error("Invalid content type");
+                }
+              })
+          ),
           // Atualizar as alternativas existentes
-          update: data.alternatives
-            .filter((e) => e.id)
-            .map((e) => ({
-              where: { id: e.id },
-              data: {
-                content: e.content,
-                contentType: e.contentType,
-                isCorrect: e.isCorrect,
-                updatedAt: new Date(),
-              },
-            })),
+          update: await Promise.all(
+            data.alternatives
+              .filter((e) => e.id)
+              .map(async (e) => {
+                console.log("----------------------");
+                console.log(e.contentType);
+
+                if (e.contentType === "image" && e.content instanceof File) {
+                  let imgUrl: string;
+                  let imageName: string;
+                  imageName = `alternatives/${e.id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
+                  imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
+
+                  const res = await supabase.storage
+                    .from("profileImages")
+                    .upload(imageName, e.content, {
+                      cacheControl: "3600",
+                      upsert: true,
+                    });
+
+                  if (res.error) throw res.error;
+
+                  return {
+                    where: { id: e.id },
+                    data: {
+                      content: imgUrl,
+                      contentType: e.contentType,
+                      isCorrect: e.isCorrect,
+                      updatedAt: new Date(),
+                    },
+                  };
+                } else if (typeof e.content === "string") {
+                  return {
+                    where: { id: e.id },
+                    data: {
+                      content: e.content,
+                      contentType: e.contentType,
+                      isCorrect: e.isCorrect,
+                      updatedAt: new Date(),
+                    },
+                  };
+                } else {
+                  throw new Error("Invalid content type");
+                }
+              })
+          ),
           // Deletar alternativas que não estão mais na lista
           delete: alternativesToDelete.map((id) => ({ id })),
         },
@@ -187,10 +288,12 @@ export const updateQuestion = async (
 
     if (questionCount === 1) {
       // Se for a última questão da disciplina atual, deletar a disciplina junto com o update da questão
-      await db.$transaction([
-        update(),
-        db.discipline.delete({ where: { id: question.disciplineId } }),
-      ]);
+      await db.$transaction(async (prisma) => {
+        await update(); // Chama a função async normalmente
+        await prisma.discipline.delete({
+          where: { id: question.disciplineId },
+        });
+      });
 
       return { success: "Question updated and discipline deleted!" };
     } else {
