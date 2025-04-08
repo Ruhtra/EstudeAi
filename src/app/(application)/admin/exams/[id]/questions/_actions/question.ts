@@ -39,13 +39,11 @@ export const createQuestion = async (
       Alternative: {
         create: await Promise.all(
           question.alternatives.map(async (e) => {
-            let id = cuid();
+            const id = cuid();
 
             if (e.contentType === "image" && e.content instanceof File) {
-              let imgUrl: string;
-              let imageName: string;
-              imageName = `alternatives/${id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
-              imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
+              const imageName = `alternatives/${id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
+              const imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
 
               const res = await supabase.storage
                 .from("profileImages")
@@ -165,13 +163,11 @@ export const updateQuestion = async (
             data.alternatives
               .filter((e) => !e.id)
               .map(async (e) => {
-                let id = cuid();
+                const id = cuid();
 
                 if (e.contentType === "image" && e.content instanceof File) {
-                  let imgUrl: string;
-                  let imageName: string;
-                  imageName = `alternatives/${id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
-                  imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
+                  const imageName = `alternatives/${id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
+                  const imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
 
                   const res = await supabase.storage
                     .from("profileImages")
@@ -213,10 +209,8 @@ export const updateQuestion = async (
                 console.log(e.contentType);
 
                 if (e.contentType === "image" && e.content instanceof File) {
-                  let imgUrl: string;
-                  let imageName: string;
-                  imageName = `alternatives/${e.id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
-                  imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
+                  const imageName = `alternatives/${e.id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
+                  const imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
 
                   const res = await supabase.storage
                     .from("profileImages")

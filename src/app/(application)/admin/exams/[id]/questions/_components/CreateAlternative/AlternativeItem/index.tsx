@@ -26,11 +26,13 @@ export function AlternativeItem({
   onRemove,
 }: AlternativeItemProps) {
   const form = useFormContext<QuestionFormValues>();
-  const { control, watch, setValue } = form;
+  const { control, watch } = form;
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   // Store text content and image content separately
-  const [textContent, setTextContent] = useState<string>("");
-  const [imageContent, setImageContent] = useState<File | string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_textContent, setTextContent] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_imageContent, setImageContent] = useState<File | string | null>(null);
 
   // Get the current content and contentType
   const contentType = watch(`alternatives.${index}.contentType`);
@@ -65,19 +67,6 @@ export function AlternativeItem({
     }
   }, [contentType, content, index]);
 
-  // Handle image content changes
-  const handleImageContentChange = (file: File | null, url: string | null) => {
-    setImageContent(file);
-    setPreviewUrl(url);
-    if (file) {
-      setValue(`alternatives.${index}.content`, file);
-    } else if (url) {
-      setValue(`alternatives.${index}.content`, url);
-    } else {
-      setValue(`alternatives.${index}.content`, "");
-    }
-  };
-
   return (
     <div className="space-y-2">
       <div className="flex items-center space-x-2">
@@ -106,10 +95,8 @@ export function AlternativeItem({
                   <ImageUploadFieldWithUrl
                     form={form}
                     name={`alternatives.${index}.content`}
-                    b=""
                     isPending={false}
-                    previewUrl={previewUrl}
-                    onImageChange={handleImageContentChange}
+                    initialUrl={previewUrl}
                   />
                 )}
               </div>

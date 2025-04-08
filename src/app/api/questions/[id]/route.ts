@@ -40,7 +40,9 @@ export async function GET(
         return {
           id: e.id,
           number: e.number,
+          contentType: e.contentType,
           content: e.content,
+          imageUrl: e.imageUrl,
         };
       }),
       discipline: question.Discipline.name,

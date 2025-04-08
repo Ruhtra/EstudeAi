@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import cuid from "cuid";
 import { z } from "zod";
 import { textSchema } from "./TextSchema";
+import { randomUUID } from "crypto";
 
 export const createText = async (
   data: z.infer<typeof textSchema>,
@@ -15,7 +16,6 @@ export const createText = async (
   if (!parseText.success) return { error: "Invalid data" };
   const text = parseText.data;
 
-  //validar se o examID existe no banco
   const exam = await db.exam.findUnique({
     where: { id: idExam },
   });
@@ -34,28 +34,36 @@ export const createText = async (
   const nextNumber = lastText ? lastText.number + 1 : 1;
 
   const id = cuid();
+  let s3Upload: { url: string; key: string } | null = null;
 
-  if (text.contentType === "image" && text.content) {
-    let imgUrl: string;
-    let imageName: string;
-    imageName = `texts/${id}.${text.content.name.split(".").pop()}`; // Tratamento do nome da imagem
-    imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
+  try {
+    if (text.contentType === "image") {
+      const fileName = `text-${randomUUID()}`;
 
-    const res = await supabase.storage
-      .from("profileImages")
-      .upload(imageName, text.content, {
-        cacheControl: "3600",
-        upsert: true,
-      });
+      const res = await supabase.storage
+        .from("profileImages")
+        .upload("texts/" + fileName, text.file, {
+          cacheControl: "3600",
+          upsert: true,
+          contentType: text.file.type,
+        });
 
-    if (res.error) throw res.error;
+      if (res.error) throw res.error;
+
+      s3Upload = {
+        url: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/texts/${fileName}`,
+        key: fileName,
+      };
+    }
 
     await db.text.create({
       data: {
         id: id,
         number: nextNumber,
         contentType: text.contentType,
-        content: imgUrl,
+        content: text.contentType === "text" ? text.content : null,
+        imageUrl: s3Upload?.url || null,
+        imageKey: s3Upload?.key || null,
         reference: text.reference,
         Exam: {
           connect: {
@@ -66,23 +74,13 @@ export const createText = async (
         updatedAt: new Date(), // Data de atualização
       },
     });
-  } else if (text.contentType == "text") {
-    await db.text.create({
-      data: {
-        id: id,
-        number: nextNumber,
-        contentType: text.contentType,
-        content: text.content,
-        reference: text.reference,
-        Exam: {
-          connect: {
-            id: idExam,
-          },
-        },
-        createdAt: new Date(), // Data de criação
-        updatedAt: new Date(), // Data de atualização
-      },
-    });
+  } catch {
+    if (s3Upload) {
+      await supabase.storage
+        .from("profileImages")
+        .remove(["texts/" + s3Upload.key]);
+    }
+    return { error: "Erro ao criar questão" };
   }
 
   return { success: "Text created!" };
@@ -107,62 +105,65 @@ export const updateText = async (
   });
   if (!exam) return { error: "Exam ID not found" };
 
-  //TO-do: validar se a imagem existe e deletar e inserir nova
-  if (text.contentType === "image" && text.content) {
-    let imageName = `texts/${idText}.${text.content.name.split(".").pop()}`; // Tratamento do nome da imagem
-    let imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
+  let newUpload: { url: string; key: string } | null = null;
+  let oldUpload: { url: string; key: string } | null = null;
 
-    const transaction = await db.$transaction(async (prisma) => {
-      const updatedText = await prisma.text.update({
-        where: { id: idText },
-        data: {
-          contentType: text.contentType,
-          content: imgUrl,
-          reference: text.reference,
-          updatedAt: new Date(),
-        },
-      });
+  if (textData.imageUrl && textData.imageKey) {
+    oldUpload = {
+      url: textData.imageUrl,
+      key: textData.imageKey,
+    };
+  }
+
+  try {
+    if (text.contentType === "image") {
+      const fileName = `text-${randomUUID()}`;
 
       const res = await supabase.storage
         .from("profileImages")
-        .upload(imageName, text.content, {
+        .upload("texts/" + fileName, text.file, {
           cacheControl: "3600",
           upsert: true,
+          contentType: text.file.type,
         });
 
       if (res.error) throw res.error;
+      newUpload = {
+        url: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/texts/${fileName}`,
+        key: fileName,
+      };
+    }
 
-      return updatedText;
+    await db.text.update({
+      where: { id: idText },
+      data: {
+        contentType: text.contentType,
+        content: text.contentType === "text" ? text.content : null,
+        imageUrl: newUpload?.url || null,
+        imageKey: newUpload?.key || null,
+        reference: text.reference,
+        updatedAt: new Date(),
+      },
     });
 
-    if (!transaction) return { error: "Falha na transação" };
-  } else if (text.contentType == "text") {
-    const transaction = await db.$transaction(async (prisma) => {
-      const existingImage = `texts/${textData.id}.${textData.content.split(".").pop()}`;
-      const updatedText = await prisma.text.update({
-        where: { id: idText },
-        data: {
-          contentType: text.contentType,
-          content: text.content,
-          reference: text.reference,
-          updatedAt: new Date(),
-        },
-      });
+    if (oldUpload) {
+      supabase.storage
+        .from("profileImages")
+        .remove(["texts/" + oldUpload.key])
+        .catch((err) => {
+          console.error("Error removing old image:", err);
+        });
+    }
 
-      if (textData.contentType == "image") {
-        const res = await supabase.storage
-          .from("profileImages")
-          .remove([existingImage]);
-        if (res.error) throw res.error;
-
-        return updatedText;
-      }
-    });
-
-    if (!transaction) return { error: "Falha na transação" };
+    return { success: "Texto atualizada com sucesso!" };
+  } catch {
+    if (newUpload) {
+      await supabase.storage
+        .from("profileImages")
+        .remove(["texts/" + newUpload.key]);
+    }
+    return { error: "Erro ao atualizar texto!" };
   }
-
-  return { success: "Text updated!" };
 };
 
 export const deleteText = async (textId: string) => {
@@ -171,30 +172,20 @@ export const deleteText = async (textId: string) => {
       id: textId,
     },
   });
-  if (!text) return { error: "Text not found" };
+  if (!text) return { error: "Texto não encontrado!" };
 
-  const transaction = await db.$transaction(async (prisma) => {
-    const existingImage = `texts/${text.id}.${text.content.split(".").pop()}`;
-    console.log(existingImage);
-
-    const deletedText = await prisma.text.delete({
-      where: {
-        id: textId,
-      },
-    });
-
-    if (text.contentType == "image") {
-      const res = await supabase.storage
-        .from("profileImages")
-        .remove([existingImage]);
-      if (res.error) throw res.error;
-
-      return deletedText;
-    }
+  await db.text.delete({
+    where: {
+      id: textId,
+    },
   });
 
-  if (!transaction) return { error: "Falha na transação" };
+  if (text.contentType == "image") {
+    const res = await supabase.storage
+      .from("profileImages")
+      .remove(["texts/" + text.imageKey]);
+    if (res.error) throw res.error;
+  }
 
-  // revalidatePath("/admin/users");
-  return { success: "Text deleted" };
+  return { success: "Texto deletado com sucesso!" };
 };

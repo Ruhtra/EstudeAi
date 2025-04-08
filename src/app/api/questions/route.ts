@@ -16,7 +16,9 @@ export interface QuestionsDto {
   texts: {
     id: string;
     number: number;
-    content: string;
+    contentType: ContentType;
+    content: string | null;
+    imageUrl: string | null;
   }[];
 }
 
@@ -52,8 +54,8 @@ export async function GET(request: Request) {
         alternatives: e.Alternative.map((a) => {
           return {
             id: a.id,
-            content: a.content,
             contentType: a.contentType,
+            content: a.content,
             isCorrect: a.isCorrect,
           };
         }),
@@ -61,7 +63,9 @@ export async function GET(request: Request) {
           return {
             id: e.id,
             number: e.number,
+            contentType: e.contentType,
             content: e.content,
+            imageUrl: e.imageUrl,
           };
         }),
         discipline: e.Discipline.name,

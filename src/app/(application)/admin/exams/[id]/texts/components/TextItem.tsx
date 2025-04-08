@@ -93,7 +93,7 @@ export function TextItem({
   };
 
   const rawText =
-    text.contentType == "text"
+    text.contentType == "text" && text.content
       ? extractRawText(MeGenerateHTML(text.content))
       : "";
 

@@ -63,7 +63,9 @@ model Text {
   id          String      @id
   number      Int
   contentType ContentType
-  content     String
+  content     String?
+  imageUrl    String?
+  imageKey    String?
   reference   String?
   examId      String
   Exam        Exam        @relation(fields: [examId], references: [id])

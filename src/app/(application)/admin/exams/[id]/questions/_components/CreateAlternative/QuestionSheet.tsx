@@ -108,7 +108,7 @@ export function QuestionsSheet({
                 // For data URLs, we can use them directly
                 if (alt.content.startsWith("data:")) {
                   // Use type assertion to tell TypeScript this is valid
-                  return result as any;
+                  return result as unknown;
                 }
 
                 // For HTTP URLs, convert to File
@@ -127,6 +127,7 @@ export function QuestionsSheet({
             }
 
             // Return the result with type assertion if needed
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return result as any;
           })
         );

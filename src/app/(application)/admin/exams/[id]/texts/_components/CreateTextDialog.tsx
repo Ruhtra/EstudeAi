@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useEffect, useState } from "react";
+import { useTransition, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type * as z from "zod";
@@ -49,10 +49,6 @@ export function CreateTextDialog({
   open,
 }: CreateTextDialogProps) {
   const [isPending, startTransition] = useTransition();
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  // Store text content and image content separately
-  const [textContent, setTextContent] = useState<string>("");
-  const [imageContent, setImageContent] = useState<File | string | null>(null);
 
   const { data: textData, isLoading } = useQuery({
     queryKey: ["text", idText],
@@ -80,63 +76,17 @@ export function CreateTextDialog({
       // Set form values
       form.setValue("contentType", contentType ?? "text");
       form.setValue("reference", textData.reference ?? "");
+      form.setValue("content", textData?.content ?? "");
 
-      // Store content based on type, but don't set form value yet
-      if (contentType === "text" && textData.content) {
-        setTextContent(textData.content);
-        form.setValue("content", textData.content);
-      } else if (contentType === "image" && textData.content) {
-        // For image type, check if it's a valid URL
-        if (
-          textData.content.startsWith("data:") ||
-          textData.content.startsWith("http")
-        ) {
-          setPreviewUrl(textData.content);
-          setImageContent(textData.content);
-          form.setValue("content", textData.content);
-        }
-      }
+      // if (textData && textData.imageUrl)
+      //   form.setValue("file", textData.imageUrl);
 
       // Set other fields
       Object.entries(textData).forEach(([key, value]) => {
-        if (key !== "content" && key !== "contentType") {
-          form.setValue(key as keyof FormValues, value);
-        }
+        form.setValue(key as keyof FormValues, value);
       });
     }
   }, [textData, form]);
-
-  // Update form content when content type changes
-  useEffect(() => {
-    const contentType = form.watch("contentType");
-
-    // Clear form content first
-    form.setValue("content", "");
-
-    // Set appropriate content based on type
-    if (contentType === "text") {
-      form.setValue("content", textContent);
-    } else if (contentType === "image" && imageContent) {
-      form.setValue("content", imageContent);
-    }
-  }, [form.watch("contentType"), textContent, imageContent, form]);
-
-  // Handle text content changes
-  const handleTextContentChange = (value: string) => {
-    setTextContent(value);
-    form.setValue("content", value);
-  };
-
-  // Handle image content changes
-  const handleImageContentChange = (file: File | null, url: string | null) => {
-    setImageContent(file);
-    setPreviewUrl(url);
-    if (file) {
-      form.setValue("content", file);
-    } else {
-      form.setValue("content", "");
-    }
-  };
 
   function onSubmit(values: z.infer<typeof textSchema>) {
     startTransition(async () => {
@@ -153,9 +103,6 @@ export function CreateTextDialog({
             });
             onOpenChange(false);
             form.reset();
-            setTextContent("");
-            setImageContent(null);
-            setPreviewUrl(null);
             toast("Texto atualizado com sucesso");
           }
         } else {
@@ -167,9 +114,6 @@ export function CreateTextDialog({
             });
             onOpenChange(false);
             form.reset();
-            setTextContent("");
-            setImageContent(null);
-            setPreviewUrl(null);
             toast("Texto criado com sucesso");
           }
         }
@@ -223,7 +167,7 @@ export function CreateTextDialog({
                   <FormField
                     control={form.control}
                     name="content"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium">
                           Conteúdo
@@ -231,19 +175,19 @@ export function CreateTextDialog({
                         <FormControl>
                           {form.watch("contentType") === "text" ? (
                             <TiptapEditor
-                              content={textContent}
-                              onChange={handleTextContentChange}
+                              content={textData?.content || ""}
+                              onChange={(value) =>
+                                form.setValue("content", value)
+                              }
                               placeholder="Digite o conteúdo do texto aqui..."
                               isPending={isPending}
                             />
                           ) : (
                             <ImageUploadFieldWithUrl
                               form={form}
-                              name="content"
-                              b=""
+                              name="file"
+                              initialUrl={textData?.imageUrl}
                               isPending={isPending}
-                              previewUrl={previewUrl}
-                              onImageChange={handleImageContentChange}
                             />
                           )}
                         </FormControl>

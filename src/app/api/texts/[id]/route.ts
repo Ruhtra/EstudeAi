@@ -23,9 +23,10 @@ export async function GET(
 
     const textDto: TextsDto = {
       id: text.id,
-      content: text.content,
       number: text.number,
       contentType: text.contentType,
+      content: text.content,
+      imageUrl: text.imageUrl,
       reference: text.reference,
       questionCount: text.Question.length,
     };

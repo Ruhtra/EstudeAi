@@ -5,8 +5,9 @@ import { ContentType } from "@prisma/client";
 export interface TextsDto {
   id: string;
   number: number;
-  content: string;
   contentType: ContentType;
+  content: string | null;
+  imageUrl: string | null;
   reference: string | null;
   questionCount: number;
 }
@@ -40,9 +41,10 @@ export async function GET(request: Request) {
     const textsDto: TextsDto[] = texts.map((e) => {
       return {
         id: e.id,
-        content: e.content,
         number: e.number,
         contentType: e.contentType,
+        content: e.content,
+        imageUrl: e.imageUrl,
         reference: e.reference,
         questionCount: e.Question.length,
       };
