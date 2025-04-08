@@ -1,10 +1,12 @@
+"use client";
+
 import type React from "react";
 import { FormControl, FormField, FormItem } from "@/components/ui/form";
 import { GripVertical, X } from "lucide-react";
 import type { QuestionFormValues } from "../QuestionForm";
 import { useFormContext } from "react-hook-form";
 import { ContentTypeSelect } from "@/components/ContentTypeSelect";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 
 interface OptionsProps {
@@ -20,7 +22,18 @@ export function Options({
   onRemove,
   setPreviewImage,
 }: OptionsProps) {
-  const { control, setValue } = useFormContext<QuestionFormValues>();
+  const { control, setValue, watch } = useFormContext<QuestionFormValues>();
+  const alternatives = watch("alternatives");
+  const isCorrect = watch(`alternatives.${index}.isCorrect`);
+
+  const handleRadioChange = () => {
+    // Uncheck all alternatives
+    alternatives.forEach((_, i) => {
+      setValue(`alternatives.${i}.isCorrect`, false);
+    });
+    // Check only this one
+    setValue(`alternatives.${index}.isCorrect`, true);
+  };
 
   return (
     <>
@@ -46,14 +59,19 @@ export function Options({
       <FormField
         control={control}
         name={`alternatives.${index}.isCorrect`}
-        render={({ field }) => (
+        render={() => (
           <FormItem>
             <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                id={`correct-${index}`}
-              />
+              <RadioGroup
+                value={isCorrect ? "true" : "false"}
+                onValueChange={(value) => {
+                  if (value === "true") {
+                    handleRadioChange();
+                  }
+                }}
+              >
+                <RadioGroupItem value="true" id={`correct-${index}`} />
+              </RadioGroup>
             </FormControl>
           </FormItem>
         )}
