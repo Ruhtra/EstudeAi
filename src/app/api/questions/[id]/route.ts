@@ -31,8 +31,9 @@ export async function GET(
       alternatives: question.Alternative.map((a) => {
         return {
           id: a.id,
-          content: a.content,
           contentType: a.contentType,
+          content: a.content,
+          imageUrl: a.imageUrl,
           isCorrect: a.isCorrect,
         };
       }),

@@ -9,8 +9,9 @@ export interface QuestionsDto {
   discipline: string;
   alternatives: {
     id: string;
-    content: string;
     contentType: ContentType;
+    content: string | null;
+    imageUrl: string | null;
     isCorrect: boolean;
   }[];
   texts: {
@@ -56,6 +57,7 @@ export async function GET(request: Request) {
             id: a.id,
             contentType: a.contentType,
             content: a.content,
+            imageUrl: a.imageUrl,
             isCorrect: a.isCorrect,
           };
         }),

@@ -9,7 +9,7 @@ export const alternativeSchema = z.discriminatedUnion("contentType", [
   }),
   z.object({
     contentType: z.literal("image"),
-    content: z
+    file: z
       .instanceof(File)
       .refine(
         (file) => file.size <= 5000000,

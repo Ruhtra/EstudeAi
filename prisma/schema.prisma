@@ -47,7 +47,9 @@ model Alternative {
   id          String      @id
   questionId  String
   contentType ContentType
-  content     String
+  content     String?
+  imageUrl    String?
+  imageKey    String?
   isCorrect   Boolean     @default(false)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime
