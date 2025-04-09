@@ -17,12 +17,17 @@ import { Button } from "@/components/ui/button";
 import { type Control, useFieldArray } from "react-hook-form";
 import type { QuestionFormValues } from "../QuestionForm";
 import { SortableAlternative } from "./SortableAlternative";
+import { QuestionsDto } from "@/app/api/questions/route";
 
 interface DraggableAlternativesProps {
   control: Control<QuestionFormValues>;
+  questions: QuestionsDto | null | undefined;
 }
 
-export function DraggableAlternatives({ control }: DraggableAlternativesProps) {
+export function DraggableAlternatives({
+  control,
+  questions,
+}: DraggableAlternativesProps) {
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: "alternatives",
@@ -46,6 +51,8 @@ export function DraggableAlternatives({ control }: DraggableAlternativesProps) {
     }
   };
 
+  console.log(questions);
+
   return (
     <DndContext
       sensors={sensors}
@@ -60,6 +67,8 @@ export function DraggableAlternatives({ control }: DraggableAlternativesProps) {
               id={field.id}
               index={index}
               onRemove={() => remove(index)}
+              content={questions?.alternatives[index]?.content ?? null}
+              initualUrl={questions?.alternatives[index]?.imageUrl ?? null}
             />
           ))}
         </SortableContext>

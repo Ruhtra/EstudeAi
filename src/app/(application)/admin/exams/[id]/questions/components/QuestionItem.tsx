@@ -47,8 +47,12 @@ export function QuestionItem({
           toast(data.error);
         } else if (data.success) {
           await queryClient.refetchQueries({
+            queryKey: ["disciplines"],
+          });
+          await queryClient.refetchQueries({
             queryKey: ["questions"],
           });
+
           toast(data.success);
         }
       } catch {
@@ -114,7 +118,7 @@ export function QuestionItem({
                     ? "bg-green-100 dark:bg-green-900"
                     : "bg-gray-100 dark:bg-gray-800"
                 }`}
-                dangerouslySetInnerHTML={{ __html: alt.content }}
+                dangerouslySetInnerHTML={{ __html: alt.content ?? "" }}
               />
             ))}
           </ItemMobileContentData>

@@ -3,8 +3,9 @@
 import { z } from "zod";
 import { questionSchema } from "./QuestionSchema";
 import { db } from "@/lib/db";
-// import { supabase } from "@/lib/supabase";
-// import cuid from "cuid";
+import cuid from "cuid";
+import { supabase } from "@/lib/supabase";
+import { randomUUID } from "crypto";
 
 export const createQuestion = async (
   idExam: string,
@@ -12,6 +13,7 @@ export const createQuestion = async (
 ) => {
   const parseQuestion = questionSchema.safeParse(data);
   if (!parseQuestion.success) return { error: "Invalid data" };
+  const question = parseQuestion.data;
 
   const textsExist = await db.text.findMany({
     where: {
@@ -30,7 +32,115 @@ export const createQuestion = async (
   });
   if (!examExists) return { error: "Exam does not exist" };
 
-  const question = parseQuestion.data;
+  const uploadedImages: { key: string }[] = [];
+  let alternativesData;
+  try {
+    alternativesData = await Promise.all(
+      question.alternatives.map(async (alt) => {
+        const id = cuid();
+
+        if (alt.contentType === "image") {
+          const fileName = `alternative-${randomUUID()}`;
+
+          const res = await supabase.storage
+            .from("profileImages")
+            .upload("alternatives/" + fileName, alt.file, {
+              cacheControl: "3600",
+              upsert: true,
+              contentType: alt.file.type,
+            });
+
+          if (res.error) throw res.error;
+          uploadedImages.push({ key: fileName });
+
+          return {
+            id: id,
+            contentType: alt.contentType,
+            content: null,
+            imageUrl: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/alternatives/${fileName}`,
+            imageKey: fileName,
+            updatedAt: new Date(),
+            createdAt: new Date(),
+            isCorrect: alt.isCorrect,
+          };
+        } else {
+          return {
+            id: id,
+            contentType: alt.contentType,
+            content: alt.content,
+            imageUrl: null,
+            imageKey: null,
+            updatedAt: new Date(),
+            createdAt: new Date(),
+            isCorrect: alt.isCorrect,
+          };
+        }
+      })
+    );
+  } catch {
+    for (const img of uploadedImages) {
+      await supabase.storage
+        .from("profileImages")
+        .remove(["alternatives/" + img.key]);
+    }
+
+    return { error: "Error uploading images" };
+  }
+
+  try {
+    await db.$transaction(
+      async (tx) => {
+        await tx.question.create({
+          data: {
+            id: cuid(),
+            statement: question.statement,
+            Alternative: {
+              create: alternativesData.map((alt) => ({
+                ...alt,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              })),
+            },
+            Discipline: {
+              connectOrCreate: {
+                create: {
+                  id: cuid(),
+                  name: question.discipline,
+                },
+                where: {
+                  name: question.discipline,
+                },
+              },
+            },
+            Exam: {
+              connect: {
+                id: idExam,
+              },
+            },
+            Text: {
+              connect: question.linkedTexts.map((e) => ({
+                id: e,
+              })),
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        });
+      },
+      {
+        timeout: 10000,
+      }
+    );
+
+    return { success: "Questão criada com sucesso!" };
+  } catch {
+    for (const img of uploadedImages) {
+      await supabase.storage
+        .from("profileImages")
+        .remove(["alternatives/" + img.key]);
+    }
+    return { error: "Erro ao criar questão!" };
+  }
 
   // await db.question.create({
   //   data: {
@@ -40,40 +150,36 @@ export const createQuestion = async (
   //       create: await Promise.all(
   //         question.alternatives.map(async (e) => {
   //           const id = cuid();
+  //           let s3Upload: { url: string; key: string } | null = null;
 
-  //           if (e.contentType === "image" && e.content instanceof File) {
-  //             const imageName = `alternatives/${id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
-  //             const imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
+  //           if (e.contentType === "image") {
+  //             const fileName = `text-${randomUUID()}`;
 
   //             const res = await supabase.storage
   //               .from("profileImages")
-  //               .upload(imageName, e.content, {
+  //               .upload("alternatives/" + fileName, e.file, {
   //                 cacheControl: "3600",
   //                 upsert: true,
+  //                 contentType: e.file.type,
   //               });
 
-  //             if (res.error) throw res.error;
-
-  //             return {
-  //               id: id,
-  //               content: imgUrl,
-  //               updatedAt: new Date(),
-  //               createdAt: new Date(),
-  //               contentType: e.contentType,
-  //               isCorrect: e.isCorrect,
-  //             };
-  //           } else if (typeof e.content === "string") {
-  //             return {
-  //               id: id,
-  //               content: e.content,
-  //               updatedAt: new Date(),
-  //               createdAt: new Date(),
-  //               contentType: e.contentType,
-  //               isCorrect: e.isCorrect,
-  //             };
-  //           } else {
-  //             throw new Error("Invalid content type");
+  //             if (res.error)
+  //               // Em caso de erro haja de acordo
+  //               s3Upload = {
+  //                 url: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/texts/${fileName}`,
+  //                 key: fileName,
+  //               };
   //           }
+  //           return {
+  //             id: id,
+  //             contentType: e.contentType,
+  //             content: null,
+  //             imageUrl: null,
+  //             imageKey: null,
+  //             updatedAt: new Date(),
+  //             createdAt: new Date(),
+  //             isCorrect: e.isCorrect,
+  //           };
   //         })
   //       ),
   //     },
@@ -103,7 +209,7 @@ export const createQuestion = async (
   //   },
   // });
 
-  return { success: "Question create!" };
+  // return { success: "Question create!" };
 };
 
 export const updateQuestion = async (
@@ -306,38 +412,57 @@ export const updateQuestion = async (
 };
 
 export const deleteQuestion = async (questionId: string) => {
-  const question = db.question.findUnique({
+  const question = await db.question.findUnique({
     where: {
       id: questionId,
     },
     include: {
       Discipline: true,
+      Alternative: true,
     },
   });
 
   if (!question) return { error: "Question does not exist" };
 
-  // // Contar o número de questões associadas à mesma disciplina
-  // const questionCount = await db.question.count({
-  //   where: {
-  //     Discipline: {
-  //       name: question.Discipline.name,
-  //     },
-  //   },
-  // });
+  const questionCount = await db.question.count({
+    where: {
+      Discipline: {
+        name: question.Discipline.name,
+      },
+    },
+  });
 
-  // if (questionCount > 1) {
-  //   // Deletar apenas a questão
-  //   await db.question.delete({
-  //     where: { id: questionId },
-  //   });
-  // } else {
-  //   // Se for a última questão, deletar a questão e a disciplina
-  //   await db.$transaction([
-  //     db.question.delete({ where: { id: questionId } }),
-  //     db.discipline.delete({ where: { name: question.Discipline.name } }),
-  //   ]);
-  // }
+  const imageKeys: string[] = question.Alternative.filter(
+    (alt) => alt.contentType == "image" && alt.imageKey
+  ).map((alt) => alt.imageKey!);
 
+  try {
+    await db.$transaction(
+      async (tx) => {
+        await tx.alternative.deleteMany({
+          where: { questionId: questionId },
+        });
+        await tx.question.delete({
+          where: { id: questionId },
+        });
+        // Deletar as imagens associadas às alternativas
+        if (imageKeys.length > 0)
+          await supabase.storage
+            .from("profileImages")
+            .remove(imageKeys.map((e) => "alternatives/" + e));
+
+        if (questionCount == 1) {
+          await tx.discipline.delete({
+            where: { name: question.Discipline.name },
+          });
+        }
+      },
+      {
+        timeout: 10000,
+      }
+    );
+  } catch {
+    return { error: "Erro ao remover questão" };
+  }
   return { success: "Question deleted" };
 };

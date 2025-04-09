@@ -13,15 +13,9 @@ interface OptionsProps {
   index: number;
   dragHandleProps: React.HTMLAttributes<HTMLDivElement>;
   onRemove: () => void;
-  setPreviewImage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-export function Options({
-  index,
-  dragHandleProps,
-  onRemove,
-  setPreviewImage,
-}: OptionsProps) {
+export function Options({ index, dragHandleProps, onRemove }: OptionsProps) {
   const { control, setValue, watch } = useFormContext<QuestionFormValues>();
   const alternatives = watch("alternatives");
   const isCorrect = watch(`alternatives.${index}.isCorrect`);
@@ -48,7 +42,6 @@ export function Options({
             value={field.value}
             onChange={(value) => {
               setValue(`alternatives.${index}.content`, "");
-              setPreviewImage(null);
               field.onChange(value);
             }}
             label=""

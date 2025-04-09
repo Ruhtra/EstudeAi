@@ -7,12 +7,17 @@ interface SortableAlternativeProps {
   id: string;
   index: number;
   onRemove: () => void;
+
+  content: string | null;
+  initualUrl: string | null;
 }
 
 export function SortableAlternative({
   id,
   index,
   onRemove,
+  content,
+  initualUrl,
 }: SortableAlternativeProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
@@ -32,6 +37,8 @@ export function SortableAlternative({
         index={index}
         dragHandleProps={{ ...attributes, ...listeners }}
         onRemove={onRemove}
+        content={content}
+        initualUrl={initualUrl}
       />
     </Card>
   );

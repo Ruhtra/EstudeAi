@@ -12,6 +12,7 @@ import { ComboboxSelect } from "@/components/comboxSelect";
 import { ComboboxCreate } from "@/components/comboboxCreate";
 import { Editor } from "@/components/Editor";
 import { questionSchema } from "../../_actions/QuestionSchema";
+import { QuestionsDto } from "@/app/api/questions/route";
 
 export type QuestionFormValues = z.infer<typeof questionSchema>;
 
@@ -24,6 +25,8 @@ interface QuestionFormProps {
     id: string;
     label: string;
   }[];
+
+  questions: QuestionsDto | null | undefined;
 }
 
 export function QuestionForm({
@@ -31,6 +34,7 @@ export function QuestionForm({
   disciplines,
   texts,
   errors,
+  questions,
 }: QuestionFormProps) {
   return (
     <div className="space-y-8">
@@ -98,7 +102,7 @@ export function QuestionForm({
 
       <FormItem>
         <FormLabel className="text-sm font-medium">Alternativas</FormLabel>
-        <DraggableAlternatives control={control} />
+        <DraggableAlternatives control={control} questions={questions} />
         <FormMessage className="text-xs" />
       </FormItem>
 

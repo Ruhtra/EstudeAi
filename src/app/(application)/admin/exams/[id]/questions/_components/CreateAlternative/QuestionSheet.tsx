@@ -33,19 +33,19 @@ interface QuestionsSheetProps {
 export type FormValues = z.infer<typeof questionSchema>;
 
 // Helper function to convert a URL to a File object
-async function urlToFile(
-  url: string,
-  filename = "image.jpg"
-): Promise<File | null> {
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new File([blob], filename, { type: blob.type });
-  } catch (error) {
-    console.error("Error converting URL to File:", error);
-    return null;
-  }
-}
+// async function urlToFile(
+//   url: string,
+//   filename = "image.jpg"
+// ): Promise<File | null> {
+//   try {
+//     const response = await fetch(url);
+//     const blob = await response.blob();
+//     return new File([blob], filename, { type: blob.type });
+//   } catch (error) {
+//     console.error("Error converting URL to File:", error);
+//     return null;
+//   }
+// }
 
 export function QuestionsSheet({
   idExam,
@@ -77,6 +77,7 @@ export function QuestionsSheet({
     resolver: zodResolver(questionSchema),
     defaultValues,
   });
+  console.log(form.formState.errors);
 
   useEffect(() => {
     if (questionData) {
@@ -88,58 +89,63 @@ export function QuestionsSheet({
       form.setValue("statement", questionData.statement);
       form.setValue("discipline", questionData.discipline);
 
+      Object.entries(questionData).forEach(([key, value]) => {
+        form.setValue(key as keyof FormValues, value);
+      });
+
       // Process alternatives with async operations for image content
-      const processAlternatives = async () => {
-        const processedAlternatives = await Promise.all(
-          questionData.alternatives.map(async (alt) => {
-            const result = {
-              id: alt.id,
-              isCorrect: alt.isCorrect,
-              contentType: alt.contentType as "text" | "image",
-              content: alt.content,
-            };
+      // const processAlternatives = async () => {
+      //   const processedAlternatives = await Promise.all(
+      //     questionData.alternatives.map(async (alt) => {
+      //       const result = {
+      //         id: alt.id,
+      //         isCorrect: alt.isCorrect,
+      //         contentType: alt.contentType as "text" | "image",
+      //         content: alt.content,
 
-            // If it's an image, convert the URL to a File object
-            if (
-              alt.contentType === "image" &&
-              typeof alt.content === "string"
-            ) {
-              try {
-                // For data URLs, we can use them directly
-                if (alt.content.startsWith("data:")) {
-                  // Use type assertion to tell TypeScript this is valid
-                  return result as unknown;
-                }
+      //       };
 
-                // For HTTP URLs, convert to File
-                if (alt.content.startsWith("http")) {
-                  const file = await urlToFile(alt.content);
-                  if (file) {
-                    return {
-                      ...result,
-                      content: file,
-                    };
-                  }
-                }
-              } catch (error) {
-                console.error("Error processing image alternative:", error);
-              }
-            }
+      //       // If it's an image, convert the URL to a File object
+      //       // if (
+      //       //   alt.contentType === "image" &&
+      //       //   typeof alt.content === "string"
+      //       // ) {
+      //       //   try {
+      //       //     // For data URLs, we can use them directly
+      //       //     if (alt.content.startsWith("data:")) {
+      //       //       // Use type assertion to tell TypeScript this is valid
+      //       //       return result as unknown;
+      //       //     }
 
-            // Return the result with type assertion if needed
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return result as any;
-          })
-        );
+      //       //     // For HTTP URLs, convert to File
+      //       //     if (alt.content.startsWith("http")) {
+      //       //       const file = await urlToFile(alt.content);
+      //       //       if (file) {
+      //       //         return {
+      //       //           ...result,
+      //       //           content: file,
+      //       //         };
+      //       //       }
+      //       //     }
+      //       //   } catch (error) {
+      //       //     console.error("Error processing image alternative:", error);
+      //       //   }
+      //       // }
 
-        // Set the processed alternatives
-        form.setValue("alternatives", processedAlternatives);
+      //       // Return the result with type assertion if needed
+      //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      //       return result as any;
+      //     })
+      //   );
 
-        // Force a re-render
-        form.trigger();
-      };
+      // Set the processed alternatives
+      // form.setValue("alternatives", processedAlternatives);
 
-      processAlternatives();
+      // Force a re-render
+      // form.trigger();
+      // };
+
+      // processAlternatives();
     }
   }, [questionData, form]);
 
@@ -165,6 +171,9 @@ export function QuestionsSheet({
           }
           if (data.success) {
             await queryClient.refetchQueries({
+              queryKey: ["disciplines"],
+            });
+            await queryClient.refetchQueries({
               queryKey: ["questions", idExam],
             });
             queryClient.removeQueries({
@@ -180,7 +189,10 @@ export function QuestionsSheet({
           if (data.success) {
             onOpenChange(false);
             form.reset();
-            toast("Questions criado com sucesso");
+            toast("Questão criado com sucesso");
+            await queryClient.refetchQueries({
+              queryKey: ["disciplines"],
+            });
             queryClient.refetchQueries({
               queryKey: ["questions", idExam],
             });
@@ -214,6 +226,7 @@ export function QuestionsSheet({
                   }))}
                   control={form.control}
                   errors={form.formState.errors}
+                  questions={questionData}
                 />
               </div>
               <SheetFooter>

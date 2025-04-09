@@ -78,9 +78,6 @@ export function CreateTextDialog({
       form.setValue("reference", textData.reference ?? "");
       form.setValue("content", textData?.content ?? "");
 
-      // if (textData && textData.imageUrl)
-      //   form.setValue("file", textData.imageUrl);
-
       // Set other fields
       Object.entries(textData).forEach(([key, value]) => {
         form.setValue(key as keyof FormValues, value);
@@ -164,16 +161,16 @@ export function CreateTextDialog({
                     />
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Conteúdo
-                        </FormLabel>
-                        <FormControl>
-                          {form.watch("contentType") === "text" ? (
+                  {form.watch("contentType") === "text" ? (
+                    <FormField
+                      control={form.control}
+                      name="content"
+                      render={() => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">
+                            Conteúdo
+                          </FormLabel>
+                          <FormControl>
                             <TiptapEditor
                               content={textData?.content || ""}
                               onChange={(value) =>
@@ -182,19 +179,33 @@ export function CreateTextDialog({
                               placeholder="Digite o conteúdo do texto aqui..."
                               isPending={isPending}
                             />
-                          ) : (
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="file"
+                      render={() => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">
+                            Imagem
+                          </FormLabel>
+                          <FormControl>
                             <ImageUploadFieldWithUrl
                               form={form}
                               name="file"
                               initialUrl={textData?.imageUrl}
                               isPending={isPending}
                             />
-                          )}
-                        </FormControl>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <FormField
                     control={form.control}
