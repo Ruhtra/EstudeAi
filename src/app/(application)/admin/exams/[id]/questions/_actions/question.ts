@@ -1,3 +1,5 @@
+"use server";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import cuid from "cuid";
@@ -158,6 +160,16 @@ export const updateQuestion = async (
 
   const newUploadedImages: { key: string }[] = [];
 
+  // Verificar se a disciplina foi alterada no update
+  const isDisciplineChanged =
+    data.discipline && data.discipline !== existingQuestion.Discipline.name;
+  let questionCount: number;
+  if (isDisciplineChanged) {
+    questionCount = await db.question.count({
+      where: { disciplineId: existingQuestion.disciplineId },
+    });
+  }
+
   // Processar alternativas: para alternativas sem id, fará create; para as com id, fará update
   let createAlternatives;
   let updateAlternatives;
@@ -168,7 +180,7 @@ export const updateQuestion = async (
         .filter((e) => !e.id)
         .map(async (e) => {
           const newId = cuid();
-          if (e.contentType === "image" && e.file instanceof File) {
+          if (e.contentType === "image") {
             // Upload de imagem para nova alternativa
             const imageName = `alternative-${randomUUID()}`;
             const res = await supabase.storage
@@ -227,32 +239,22 @@ export const updateQuestion = async (
             return {
               where: { id: e.id },
               data: {
-                content: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/alternatives/${imageName}`,
+                content: null,
                 contentType: e.contentType,
+                imageUrl: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/alternatives/${imageName}`,
+                imageKey: imageName,
                 isCorrect: e.isCorrect,
                 updatedAt: new Date(),
               },
             };
-            // } else if (typeof e.content === "string") {
-            //   // Se não for enviado novo arquivo, mantém a imagem atual
-            //   return {
-            //     where: { id: e.id },
-            //     data: {
-            //       content: e.content,
-            //       contentType: e.contentType,
-            //       isCorrect: e.isCorrect,
-            //       updatedAt: new Date(),
-            //     },
-            //   };
-            // } else {
-            //   throw new Error("Invalid image alternative");
-            // }
           } else if (e.contentType === "text") {
             return {
               where: { id: e.id },
               data: {
-                content: e.content,
                 contentType: e.contentType,
+                content: e.content,
+                imageUrl: null,
+                imageKey: null,
                 isCorrect: e.isCorrect,
                 updatedAt: new Date(),
               },
@@ -306,6 +308,7 @@ export const updateQuestion = async (
             updatedAt: new Date(),
           },
         });
+
         // Executa os nested writes para create e update de alternativas
         if (createAlternatives.length > 0) {
           await tx.alternative.createMany({
@@ -323,8 +326,15 @@ export const updateQuestion = async (
             });
           }
         }
+
+        // Se o nome da disciplina foi alterado, desconecta a antiga e conecta a nova
+        if (questionCount === 1) {
+          await tx.discipline.delete({
+            where: { name: existingQuestion.Discipline.name },
+          });
+        }
       },
-      { timeout: 10000 }
+      { timeout: 20000 }
     );
     // Após a transação, remove todas as imagens antigas
     if (oldImageKeys.length > 0) {

@@ -164,7 +164,7 @@ export function QuestionsSheet({
     startTransition(async () => {
       try {
         if (idQuestions) {
-          const data = await updateQuestion(idQuestions, values);
+          const data = await updateQuestion(idQuestions, idExam, values);
           if (data.error) {
             toast(data.error);
             return;
