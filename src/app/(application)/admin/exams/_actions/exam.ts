@@ -87,34 +87,34 @@ export const updateExam = async (
 
   return { success: "Exam updated!" };
 };
-
 export const deleteExam = async (examId: string) => {
   const exam = await db.exam.findUnique({
-    where: {
-      id: examId,
+    where: { id: examId },
+    include: {
+      Question: true,
+      Text: true,
     },
   });
 
   if (!exam) return { error: "Exam not found" };
 
-  // if (user.imageName) {
-  //   try {
-  //     const existingImage = `profileImages/${user.imageName}`;
-  //     await supabase.storage.from("profileImages").remove([existingImage]);
-  //   } catch (error) {
-  //     console.error("Erro ao deletar imagem existente:", error);
-  //     return { error: "Erro ao deletar imagem existente" };
-  //   }
-  // }
+  try {
+    await db.$transaction([
+      db.question.deleteMany({
+        where: { examId },
+      }),
+      db.text.deleteMany({
+        where: { examId },
+      }),
+      db.exam.delete({
+        where: { id: examId },
+      }),
+    ]);
 
-  await db.exam.delete({
-    where: {
-      id: examId,
-    },
-  });
-
-  // revalidatePath("/admin/users");
-  return { success: "Exam deleted" };
+    return { success: "Exam deleted" };
+  } catch {
+    return { error: "Erro ao deletar o exame" };
+  }
 };
 
 export const publishExam = async (examId: string) => {

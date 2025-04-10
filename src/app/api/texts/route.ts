@@ -28,6 +28,9 @@ export async function GET(request: Request) {
         where: {
           examId: examId,
         },
+        orderBy: {
+          number: "asc",
+        },
       });
     } else {
       texts = await db.text.findMany({
