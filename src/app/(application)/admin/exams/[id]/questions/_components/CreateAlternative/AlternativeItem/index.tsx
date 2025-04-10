@@ -51,7 +51,7 @@ export function AlternativeItem({
               <FormControl>
                 <div className="relative">
                   <Editor
-                    placeholder={`Digite a alternativa ${String.fromCharCode(65 + index)}`}
+                    placeholder={`Digite a alternativa`}
                     isPending={false} // TO-DO: add pending
                     content={content || ""}
                     onChange={(value) => {
