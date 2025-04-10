@@ -70,6 +70,8 @@ export function QuestionsSheet({
     alternatives: [
       { content: "", contentType: "text", isCorrect: false },
       { content: "", contentType: "text", isCorrect: false },
+      { content: "", contentType: "text", isCorrect: false },
+      { content: "", contentType: "text", isCorrect: false },
     ],
   };
 
@@ -92,60 +94,6 @@ export function QuestionsSheet({
       Object.entries(questionData).forEach(([key, value]) => {
         form.setValue(key as keyof FormValues, value);
       });
-
-      // Process alternatives with async operations for image content
-      // const processAlternatives = async () => {
-      //   const processedAlternatives = await Promise.all(
-      //     questionData.alternatives.map(async (alt) => {
-      //       const result = {
-      //         id: alt.id,
-      //         isCorrect: alt.isCorrect,
-      //         contentType: alt.contentType as "text" | "image",
-      //         content: alt.content,
-
-      //       };
-
-      //       // If it's an image, convert the URL to a File object
-      //       // if (
-      //       //   alt.contentType === "image" &&
-      //       //   typeof alt.content === "string"
-      //       // ) {
-      //       //   try {
-      //       //     // For data URLs, we can use them directly
-      //       //     if (alt.content.startsWith("data:")) {
-      //       //       // Use type assertion to tell TypeScript this is valid
-      //       //       return result as unknown;
-      //       //     }
-
-      //       //     // For HTTP URLs, convert to File
-      //       //     if (alt.content.startsWith("http")) {
-      //       //       const file = await urlToFile(alt.content);
-      //       //       if (file) {
-      //       //         return {
-      //       //           ...result,
-      //       //           content: file,
-      //       //         };
-      //       //       }
-      //       //     }
-      //       //   } catch (error) {
-      //       //     console.error("Error processing image alternative:", error);
-      //       //   }
-      //       // }
-
-      //       // Return the result with type assertion if needed
-      //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      //       return result as any;
-      //     })
-      //   );
-
-      // Set the processed alternatives
-      // form.setValue("alternatives", processedAlternatives);
-
-      // Force a re-render
-      // form.trigger();
-      // };
-
-      // processAlternatives();
     }
   }, [questionData, form]);
 

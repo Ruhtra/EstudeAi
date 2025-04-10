@@ -82,7 +82,7 @@ export function DraggableAlternatives({
         }
         className="w-full text-sm mt-4"
       >
-        Digite alternativa
+        Incluir alternativa
       </Button>
     </DndContext>
   );
