@@ -125,179 +125,150 @@ export const updateQuestion = async (
   idExam: string,
   data: z.infer<typeof questionSchema>
 ) => {
-  const parseQuestion = questionSchema.safeParse(data);
-  if (!parseQuestion.success) return { error: "Invalid data" };
-  const question = parseQuestion.data;
+  const parseResult = questionSchema.safeParse(data);
+  if (!parseResult.success) return { error: "Invalid data" };
+  const question = parseResult.data;
 
-  // Validação dos textos vinculados e do exame
-  const textsExist = await db.text.findMany({
-    where: { id: { in: question.linkedTexts } },
-  });
+  // 1) Buscas iniciais em paralelo: textos vinculados, exame e questão existente
+  const [textsExist, examExists, existingQuestion] = await Promise.all([
+    db.text.findMany({ where: { id: { in: question.linkedTexts } } }),
+    db.exam.findUnique({ where: { id: idExam } }),
+    db.question.findUnique({
+      where: { id: idQuestion },
+      include: { Alternative: true, Discipline: true, Text: true },
+    }),
+  ]);
+
   if (textsExist.length !== question.linkedTexts.length)
     return { error: "Some linked texts do not exist" };
-  const examExists = await db.exam.findUnique({
-    where: { id: idExam },
-  });
   if (!examExists) return { error: "Exam does not exist" };
-
-  const existingQuestion = await db.question.findUnique({
-    where: { id: idQuestion },
-    include: { Alternative: true, Discipline: true, Text: true },
-  });
   if (!existingQuestion) return { error: "Question not found" };
 
-  // Determinar quais textos precisam ser desconectados
+  // 2) Determina textos a desconectar
   const currentTextIds = existingQuestion.Text.map((t) => t.id);
   const textsToDisconnect = currentTextIds.filter(
     (textId) => !question.linkedTexts.includes(textId)
   );
 
-  // No update, todas as alternativas passam por parâmetro. Antes de fazer os uploads,
-  // capturamos as chaves de todas as imagens atuais para remoção após a transação.
-  const oldImageKeys: string[] = existingQuestion.Alternative.filter(
+  // 3) Prepara remoção de imagens antigas e array para novas uploads
+  const oldImageKeys = existingQuestion.Alternative.filter(
     (alt) => alt.contentType === "image" && alt.imageKey
-  ).map((alt) => alt.imageKey!);
+  ).map((alt) => alt.imageKey!) as string[];
+  const newUploadedImages: string[] = [];
 
-  const newUploadedImages: { key: string }[] = [];
-
-  // Verificar se a disciplina foi alterada no update
+  // 4) Verifica mudança de disciplina e conta questões (se necessário)
   const isDisciplineChanged =
     data.discipline && data.discipline !== existingQuestion.Discipline.name;
-  let questionCount: number;
-  if (isDisciplineChanged) {
-    questionCount = await db.question.count({
-      where: { disciplineId: existingQuestion.disciplineId },
-    });
-  }
+  const questionCountPromise = isDisciplineChanged
+    ? db.question.count({
+        where: { disciplineId: existingQuestion.disciplineId },
+      })
+    : Promise.resolve(0);
 
-  // Processar alternativas: para alternativas sem id, fará create; para as com id, fará update
-  let createAlternatives;
-  let updateAlternatives;
+  // 5) Prepara alternativas de create e update em paralelo
+  const createAlternatives: any = [];
+  const updateAlternatives: Array<{ where: any; data: any }> = [];
+
   try {
-    // Alternativas para criar (novas, sem id)
-    createAlternatives = await Promise.all(
-      question.alternatives
-        .filter((e) => !e.id)
-        .map(async (e) => {
-          const newId = cuid();
-          if (e.contentType === "image") {
-            // Upload de imagem para nova alternativa
-            const imageName = `alternative-${randomUUID()}`;
-            const res = await supabase.storage
-              .from("profileImages")
-              .upload("alternatives/" + imageName, e.file, {
-                cacheControl: "3600",
-                upsert: true,
-                contentType: e.file.type,
-              });
-            if (res.error) throw res.error;
-            newUploadedImages.push({ key: imageName });
-            return {
-              id: newId,
-              contentType: e.contentType,
-              content: null,
-              imageUrl: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/alternatives/${imageName}`,
-              imageKey: imageName,
-              isCorrect: e.isCorrect,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
-          } else if (e.contentType === "text") {
-            return {
-              id: newId,
-              contentType: e.contentType,
-              content: e.content,
-              imageUrl: null,
-              imageKey: null,
-              isCorrect: e.isCorrect,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
-          } else {
-            throw new Error("Invalid alternative content");
-          }
-        })
-    );
-    // Alternativas para atualizar (já existentes)
-    updateAlternatives = await Promise.all(
-      question.alternatives
-        .filter((e) => e.id)
-        .map(async (e) => {
-          // Se o alternative for do tipo image e for enviado novo arquivo, faz upload e atualiza
-          if (e.contentType === "image") {
-            // if (e.file instanceof File) {
-            const imageName = `alternative-${randomUUID()}`;
-            const res = await supabase.storage
-              .from("profileImages")
-              .upload("alternatives/" + imageName, e.file, {
-                cacheControl: "3600",
-                upsert: true,
-                contentType: e.file.type,
-              });
-            if (res.error) throw res.error;
-            newUploadedImages.push({ key: imageName });
-            return {
-              where: { id: e.id },
-              data: {
-                content: null,
-                contentType: e.contentType,
-                imageUrl: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/alternatives/${imageName}`,
-                imageKey: imageName,
-                isCorrect: e.isCorrect,
-                updatedAt: new Date(),
-              },
-            };
-          } else if (e.contentType === "text") {
-            return {
-              where: { id: e.id },
-              data: {
-                contentType: e.contentType,
-                content: e.content,
-                imageUrl: null,
-                imageKey: null,
-                isCorrect: e.isCorrect,
-                updatedAt: new Date(),
-              },
-            };
-          } else {
-            throw new Error("Invalid alternative type");
-          }
-        })
-    );
+    // cria todas as promises de processamento de alternativa
+    const altOps = question.alternatives.map(async (e) => {
+      // cria novo ID para cada alternativa
+      const id = e.id ?? cuid();
+
+      if (e.contentType === "image") {
+        // upload de imagem (novo ou substituição)
+        const imageName = `alternative-${randomUUID()}`;
+        const { error: uploadError } = await supabase.storage
+          .from("profileImages")
+          .upload(`alternatives/${imageName}`, e.file, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType: e.file.type,
+          });
+        if (uploadError) throw uploadError;
+
+        newUploadedImages.push(imageName);
+        const record = {
+          id,
+          contentType: "image",
+          content: null,
+          imageUrl: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/alternatives/${imageName}`,
+          imageKey: imageName,
+          isCorrect: e.isCorrect,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        if (e.id) {
+          updateAlternatives.push({
+            where: { id: e.id },
+            data: { ...record, updatedAt: new Date() },
+          });
+        } else {
+          createAlternatives.push(record);
+        }
+      } else if (e.contentType === "text") {
+        const record = {
+          id,
+          contentType: "text",
+          content: e.content,
+          imageUrl: null,
+          imageKey: null,
+          isCorrect: e.isCorrect,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        if (e.id) {
+          updateAlternatives.push({
+            where: { id: e.id },
+            data: { ...record, updatedAt: new Date() },
+          });
+        } else {
+          createAlternatives.push(record);
+        }
+      } else {
+        throw new Error("Invalid alternative content");
+      }
+    });
+
+    await Promise.all(altOps);
   } catch {
-    for (const img of newUploadedImages) {
-      await supabase.storage
-        .from("profileImages")
-        .remove(["alternatives/" + img.key]);
-    }
+    // em caso de falha no upload, remove todas as imagens já enviadas em paralelo
+    await Promise.all(
+      newUploadedImages.map((key) =>
+        supabase.storage.from("profileImages").remove([`alternatives/${key}`])
+      )
+    );
     return { error: "Error uploading images" };
   }
 
+  // 6) Aguarda contagem de questões (se mudou disciplina)
+  const questionCount = await questionCountPromise;
+
+  // 7) Executa a transação principal
   try {
     await db.$transaction(
       async (tx) => {
-        // Deleta alternativas que não estão na nova lista
+        // 7.1) Deleta alternativas removidas
         const currentAltIds = existingQuestion.Alternative.map((a) => a.id);
         const newAltIds = question.alternatives
           .filter((e) => e.id)
-          .map((e) => e.id);
-        const alternativesToDelete = currentAltIds.filter(
-          (id) => !newAltIds.includes(id)
-        );
-        if (alternativesToDelete.length > 0) {
-          await tx.alternative.deleteMany({
-            where: { id: { in: alternativesToDelete } },
-          });
+          .map((e) => e.id!);
+        const toDelete = currentAltIds.filter((id) => !newAltIds.includes(id));
+        if (toDelete.length) {
+          await tx.alternative.deleteMany({ where: { id: { in: toDelete } } });
         }
-        // Atualiza a questão e suas relações
+
+        // 7.2) Atualiza questão e relações
         await tx.question.update({
           where: { id: idQuestion },
           data: {
             statement: question.statement,
             Discipline: {
               connectOrCreate: {
-                create: { id: cuid(), name: question.discipline },
                 where: { name: question.discipline },
+                create: { id: cuid(), name: question.discipline },
               },
             },
             Exam: { connect: { id: idExam } },
@@ -309,26 +280,26 @@ export const updateQuestion = async (
           },
         });
 
-        // Executa os nested writes para create e update de alternativas
-        if (createAlternatives.length > 0) {
+        // 7.3) Cria e atualiza alternativas em paralelo
+        if (createAlternatives.length) {
           await tx.alternative.createMany({
-            data: createAlternatives.map((alt) => ({
+            data: createAlternatives.map((alt: any) => ({
               ...alt,
               questionId: idQuestion,
             })),
           });
         }
-        if (updateAlternatives.length > 0) {
-          for (const updateOp of updateAlternatives) {
-            await tx.alternative.update({
-              where: updateOp.where,
-              data: updateOp.data,
-            });
-          }
-        }
+        await Promise.all(
+          updateAlternatives.map((op) =>
+            tx.alternative.update({
+              where: op.where,
+              data: op.data,
+            })
+          )
+        );
 
-        // Se o nome da disciplina foi alterado, desconecta a antiga e conecta a nova
-        if (questionCount === 1) {
+        // 7.4) Se mudou disciplina e era a única questão, remove disciplina antiga
+        if (isDisciplineChanged && questionCount === 1) {
           await tx.discipline.delete({
             where: { name: existingQuestion.Discipline.name },
           });
@@ -336,19 +307,24 @@ export const updateQuestion = async (
       },
       { timeout: 20000 }
     );
-    // Após a transação, remove todas as imagens antigas
-    if (oldImageKeys.length > 0) {
-      await supabase.storage
-        .from("profileImages")
-        .remove(oldImageKeys.map((key) => "alternatives/" + key));
+
+    // 8) Remove imagens antigas em paralelo
+    if (oldImageKeys.length) {
+      await Promise.all(
+        oldImageKeys.map((key) =>
+          supabase.storage.from("profileImages").remove([`alternatives/${key}`])
+        )
+      );
     }
+
     return { success: "Question updated successfully" };
   } catch {
-    for (const img of newUploadedImages) {
-      await supabase.storage
-        .from("profileImages")
-        .remove(["alternatives/" + img.key]);
-    }
+    // em caso de falha na transação, remove novas imagens
+    await Promise.all(
+      newUploadedImages.map((key) =>
+        supabase.storage.from("profileImages").remove([`alternatives/${key}`])
+      )
+    );
     return { error: "Erro ao atualizar questão" };
   }
 };
