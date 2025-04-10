@@ -67,6 +67,7 @@ export function QuestionsSheet({
     linkedTexts: [],
     statement: "", // Pode ser removido também
     discipline: "",
+    isAnnulled: false,
     alternatives: [
       { content: "", contentType: "text", isCorrect: false },
       { content: "", contentType: "text", isCorrect: false },

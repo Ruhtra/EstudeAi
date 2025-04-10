@@ -38,7 +38,7 @@ export function QuestionForm({
 }: QuestionFormProps) {
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <FormField
           control={control}
           name="discipline"
@@ -73,6 +73,33 @@ export function QuestionForm({
                   selectedTexts={field.value}
                   onChange={field.onChange}
                 />
+              </FormControl>
+              <FormMessage className="text-xs" />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="isAnnulled"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel className="text-sm font-medium">Anulado</FormLabel>
+              <FormControl>
+                <div className="flex h-10 items-center space-x-2 border rounded-md px-3 bg-background">
+                  <input
+                    type="checkbox"
+                    checked={field.value}
+                    onChange={field.onChange}
+                    id="canceled-checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <label
+                    htmlFor="canceled-checkbox"
+                    className="text-sm text-muted-foreground cursor-pointer"
+                  >
+                    Questão anulada
+                  </label>
+                </div>
               </FormControl>
               <FormMessage className="text-xs" />
             </FormItem>

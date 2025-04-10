@@ -86,6 +86,7 @@ export const createQuestion = async (
           data: {
             id: cuid(),
             statement: question.statement,
+            isAnnulled: question.isAnnulled,
             Alternative: {
               create: alternativesData.map((alt: any) => ({
                 ...alt,
@@ -265,6 +266,7 @@ export const updateQuestion = async (
           where: { id: idQuestion },
           data: {
             statement: question.statement,
+            isAnnulled: question.isAnnulled,
             Discipline: {
               connectOrCreate: {
                 where: { name: question.discipline },

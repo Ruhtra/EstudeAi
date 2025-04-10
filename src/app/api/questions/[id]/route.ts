@@ -28,6 +28,7 @@ export async function GET(
       id: question.id,
       number: question.number,
       statement: question.statement,
+      isAnnulled: question.isAnnulled,
       alternatives: question.Alternative.map((a) => {
         return {
           id: a.id,

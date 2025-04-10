@@ -6,6 +6,7 @@ export interface QuestionsDto {
   id: string;
   number: number;
   statement: string;
+  isAnnulled: boolean;
   discipline: string;
   alternatives: {
     id: string;
@@ -55,6 +56,7 @@ export async function GET(request: Request) {
         id: e.id,
         number: e.number,
         statement: e.statement,
+        isAnnulled: e.isAnnulled,
         alternatives: e.Alternative.map((a) => {
           return {
             id: a.id,
