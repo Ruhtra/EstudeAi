@@ -1,12 +1,12 @@
-"use server";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
-import { questionSchema } from "./QuestionSchema";
-import { db } from "@/lib/db";
 import cuid from "cuid";
-import { supabase } from "@/lib/supabase";
 import { randomUUID } from "crypto";
+import { db } from "@/lib/db";
+import { supabase } from "@/lib/supabase";
+import { questionSchema } from "./QuestionSchema";
 
+/* CREATE QUESTION */
 export const createQuestion = async (
   idExam: string,
   data: z.infer<typeof questionSchema>
@@ -15,20 +15,15 @@ export const createQuestion = async (
   if (!parseQuestion.success) return { error: "Invalid data" };
   const question = parseQuestion.data;
 
+  // Validação de textos vinculados e existência do exame
   const textsExist = await db.text.findMany({
-    where: {
-      id: {
-        in: data.linkedTexts,
-      },
-    },
+    where: { id: { in: question.linkedTexts } },
   });
-  if (textsExist.length !== data.linkedTexts.length)
+  if (textsExist.length !== question.linkedTexts.length)
     return { error: "Some linked texts do not exist" };
 
   const examExists = await db.exam.findUnique({
-    where: {
-      id: idExam,
-    },
+    where: { id: idExam },
   });
   if (!examExists) return { error: "Exam does not exist" };
 
@@ -38,10 +33,8 @@ export const createQuestion = async (
     alternativesData = await Promise.all(
       question.alternatives.map(async (alt) => {
         const id = cuid();
-
         if (alt.contentType === "image") {
           const fileName = `alternative-${randomUUID()}`;
-
           const res = await supabase.storage
             .from("profileImages")
             .upload("alternatives/" + fileName, alt.file, {
@@ -49,29 +42,27 @@ export const createQuestion = async (
               upsert: true,
               contentType: alt.file.type,
             });
-
           if (res.error) throw res.error;
           uploadedImages.push({ key: fileName });
-
           return {
-            id: id,
+            id,
             contentType: alt.contentType,
             content: null,
             imageUrl: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/alternatives/${fileName}`,
             imageKey: fileName,
-            updatedAt: new Date(),
             createdAt: new Date(),
+            updatedAt: new Date(),
             isCorrect: alt.isCorrect,
           };
         } else {
           return {
-            id: id,
+            id,
             contentType: alt.contentType,
             content: alt.content,
             imageUrl: null,
             imageKey: null,
-            updatedAt: new Date(),
             createdAt: new Date(),
+            updatedAt: new Date(),
             isCorrect: alt.isCorrect,
           };
         }
@@ -83,7 +74,6 @@ export const createQuestion = async (
         .from("profileImages")
         .remove(["alternatives/" + img.key]);
     }
-
     return { error: "Error uploading images" };
   }
 
@@ -95,7 +85,7 @@ export const createQuestion = async (
             id: cuid(),
             statement: question.statement,
             Alternative: {
-              create: alternativesData.map((alt) => ({
+              create: alternativesData.map((alt: any) => ({
                 ...alt,
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -103,35 +93,19 @@ export const createQuestion = async (
             },
             Discipline: {
               connectOrCreate: {
-                create: {
-                  id: cuid(),
-                  name: question.discipline,
-                },
-                where: {
-                  name: question.discipline,
-                },
+                create: { id: cuid(), name: question.discipline },
+                where: { name: question.discipline },
               },
             },
-            Exam: {
-              connect: {
-                id: idExam,
-              },
-            },
-            Text: {
-              connect: question.linkedTexts.map((e) => ({
-                id: e,
-              })),
-            },
+            Exam: { connect: { id: idExam } },
+            Text: { connect: question.linkedTexts.map((e) => ({ id: e })) },
             createdAt: new Date(),
             updatedAt: new Date(),
           },
         });
       },
-      {
-        timeout: 10000,
-      }
+      { timeout: 10000 }
     );
-
     return { success: "Questão criada com sucesso!" };
   } catch {
     for (const img of uploadedImages) {
@@ -141,287 +115,240 @@ export const createQuestion = async (
     }
     return { error: "Erro ao criar questão!" };
   }
-
-  // await db.question.create({
-  //   data: {
-  //     id: cuid(),
-  //     statement: question.statement,
-  //     Alternative: {
-  //       create: await Promise.all(
-  //         question.alternatives.map(async (e) => {
-  //           const id = cuid();
-  //           let s3Upload: { url: string; key: string } | null = null;
-
-  //           if (e.contentType === "image") {
-  //             const fileName = `text-${randomUUID()}`;
-
-  //             const res = await supabase.storage
-  //               .from("profileImages")
-  //               .upload("alternatives/" + fileName, e.file, {
-  //                 cacheControl: "3600",
-  //                 upsert: true,
-  //                 contentType: e.file.type,
-  //               });
-
-  //             if (res.error)
-  //               // Em caso de erro haja de acordo
-  //               s3Upload = {
-  //                 url: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/texts/${fileName}`,
-  //                 key: fileName,
-  //               };
-  //           }
-  //           return {
-  //             id: id,
-  //             contentType: e.contentType,
-  //             content: null,
-  //             imageUrl: null,
-  //             imageKey: null,
-  //             updatedAt: new Date(),
-  //             createdAt: new Date(),
-  //             isCorrect: e.isCorrect,
-  //           };
-  //         })
-  //       ),
-  //     },
-  //     Discipline: {
-  //       connectOrCreate: {
-  //         create: {
-  //           id: cuid(),
-  //           name: question.discipline,
-  //         },
-  //         where: {
-  //           name: question.discipline,
-  //         },
-  //       },
-  //     },
-  //     Exam: {
-  //       connect: {
-  //         id: idExam,
-  //       },
-  //     },
-  //     Text: {
-  //       connect: question.linkedTexts.map((e) => ({
-  //         id: e,
-  //       })),
-  //     },
-  //     createdAt: new Date(),
-  //     updatedAt: new Date(),
-  //   },
-  // });
-
-  // return { success: "Question create!" };
 };
 
+/* UPDATE QUESTION */
 export const updateQuestion = async (
   idQuestion: string,
+  idExam: string,
   data: z.infer<typeof questionSchema>
 ) => {
-  // Validar os dados da questão
   const parseQuestion = questionSchema.safeParse(data);
   if (!parseQuestion.success) return { error: "Invalid data" };
+  const question = parseQuestion.data;
 
-  // Procurar a questão atual e incluir a disciplina relacionada
-  const question = await db.question.findUnique({
-    where: { id: idQuestion },
-    include: { Discipline: true, Text: true, Alternative: true },
+  // Validação dos textos vinculados e do exame
+  const textsExist = await db.text.findMany({
+    where: { id: { in: question.linkedTexts } },
   });
+  if (textsExist.length !== question.linkedTexts.length)
+    return { error: "Some linked texts do not exist" };
+  const examExists = await db.exam.findUnique({
+    where: { id: idExam },
+  });
+  if (!examExists) return { error: "Exam does not exist" };
 
-  if (!question) return { error: "Question not found" };
-  return { success: "Question updated!" };
+  const existingQuestion = await db.question.findUnique({
+    where: { id: idQuestion },
+    include: { Alternative: true, Discipline: true, Text: true },
+  });
+  if (!existingQuestion) return { error: "Question not found" };
 
-  // Verificar se a disciplina foi alterada no update
-  // const isDisciplineChanged =
-  //   data.discipline && data.discipline !== question.Discipline.name;
+  // Determinar quais textos precisam ser desconectados
+  const currentTextIds = existingQuestion.Text.map((t) => t.id);
+  const textsToDisconnect = currentTextIds.filter(
+    (textId) => !question.linkedTexts.includes(textId)
+  );
 
-  // const textsExist = await db.text.findMany({
-  //   where: {
-  //     id: {
-  //       in: data.linkedTexts,
-  //     },
-  //   },
-  // });
-  // if (textsExist.length !== data.linkedTexts.length)
-  //   return { error: "Some linked texts do not exist" };
+  // No update, todas as alternativas passam por parâmetro. Antes de fazer os uploads,
+  // capturamos as chaves de todas as imagens atuais para remoção após a transação.
+  const oldImageKeys: string[] = existingQuestion.Alternative.filter(
+    (alt) => alt.contentType === "image" && alt.imageKey
+  ).map((alt) => alt.imageKey!);
 
-  // Encontrar os textos que foram deselecionados
-  // const currentTextIds = question.Text.map((t) => t.id); // Pegamos os números dos textos atuais
-  // const textsToDisconnect = currentTextIds.filter(
-  //   (textId) => !data.linkedTexts.includes(textId)
-  // );
+  const newUploadedImages: { key: string }[] = [];
 
-  // --- Tratamento para Alternatives ---
-  // const currentAlternativeIds = question.Alternative.map((a) => a.id); // IDs das alternativas atuais
-  // const newAlternativeIds = data.alternatives
-  //   .map((e) => e.id)
-  //   .filter((id) => id); // IDs das novas alternativas
+  // Processar alternativas: para alternativas sem id, fará create; para as com id, fará update
+  let createAlternatives;
+  let updateAlternatives;
+  try {
+    // Alternativas para criar (novas, sem id)
+    createAlternatives = await Promise.all(
+      question.alternatives
+        .filter((e) => !e.id)
+        .map(async (e) => {
+          const newId = cuid();
+          if (e.contentType === "image" && e.file instanceof File) {
+            // Upload de imagem para nova alternativa
+            const imageName = `alternative-${randomUUID()}`;
+            const res = await supabase.storage
+              .from("profileImages")
+              .upload("alternatives/" + imageName, e.file, {
+                cacheControl: "3600",
+                upsert: true,
+                contentType: e.file.type,
+              });
+            if (res.error) throw res.error;
+            newUploadedImages.push({ key: imageName });
+            return {
+              id: newId,
+              contentType: e.contentType,
+              content: null,
+              imageUrl: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/alternatives/${imageName}`,
+              imageKey: imageName,
+              isCorrect: e.isCorrect,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+          } else if (e.contentType === "text") {
+            return {
+              id: newId,
+              contentType: e.contentType,
+              content: e.content,
+              imageUrl: null,
+              imageKey: null,
+              isCorrect: e.isCorrect,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+          } else {
+            throw new Error("Invalid alternative content");
+          }
+        })
+    );
+    // Alternativas para atualizar (já existentes)
+    updateAlternatives = await Promise.all(
+      question.alternatives
+        .filter((e) => e.id)
+        .map(async (e) => {
+          // Se o alternative for do tipo image e for enviado novo arquivo, faz upload e atualiza
+          if (e.contentType === "image") {
+            // if (e.file instanceof File) {
+            const imageName = `alternative-${randomUUID()}`;
+            const res = await supabase.storage
+              .from("profileImages")
+              .upload("alternatives/" + imageName, e.file, {
+                cacheControl: "3600",
+                upsert: true,
+                contentType: e.file.type,
+              });
+            if (res.error) throw res.error;
+            newUploadedImages.push({ key: imageName });
+            return {
+              where: { id: e.id },
+              data: {
+                content: `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/alternatives/${imageName}`,
+                contentType: e.contentType,
+                isCorrect: e.isCorrect,
+                updatedAt: new Date(),
+              },
+            };
+            // } else if (typeof e.content === "string") {
+            //   // Se não for enviado novo arquivo, mantém a imagem atual
+            //   return {
+            //     where: { id: e.id },
+            //     data: {
+            //       content: e.content,
+            //       contentType: e.contentType,
+            //       isCorrect: e.isCorrect,
+            //       updatedAt: new Date(),
+            //     },
+            //   };
+            // } else {
+            //   throw new Error("Invalid image alternative");
+            // }
+          } else if (e.contentType === "text") {
+            return {
+              where: { id: e.id },
+              data: {
+                content: e.content,
+                contentType: e.contentType,
+                isCorrect: e.isCorrect,
+                updatedAt: new Date(),
+              },
+            };
+          } else {
+            throw new Error("Invalid alternative type");
+          }
+        })
+    );
+  } catch {
+    for (const img of newUploadedImages) {
+      await supabase.storage
+        .from("profileImages")
+        .remove(["alternatives/" + img.key]);
+    }
+    return { error: "Error uploading images" };
+  }
 
-  // // Identificar quais alternativas precisam ser deletadas
-  // const alternativesToDelete = currentAlternativeIds.filter(
-  //   (id) => !newAlternativeIds.includes(id)
-  // );
-
-  // const update = async () => {
-  //   return db.question.update({
-  //     where: { id: idQuestion },
-  //     data: {
-  //       statement: data.statement,
-  //       Alternative: {
-  //         create: await Promise.all(
-  //           data.alternatives
-  //             .filter((e) => !e.id)
-  //             .map(async (e) => {
-  //               const id = cuid();
-
-  //               if (e.contentType === "image" && e.content instanceof File) {
-  //                 const imageName = `alternatives/${id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
-  //                 const imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
-
-  //                 const res = await supabase.storage
-  //                   .from("profileImages")
-  //                   .upload(imageName, e.content, {
-  //                     cacheControl: "3600",
-  //                     upsert: true,
-  //                   });
-
-  //                 if (res.error) throw res.error;
-
-  //                 return {
-  //                   id: id,
-  //                   content: imgUrl,
-  //                   updatedAt: new Date(),
-  //                   createdAt: new Date(),
-  //                   contentType: e.contentType,
-  //                   isCorrect: e.isCorrect,
-  //                 };
-  //               } else if (typeof e.content === "string") {
-  //                 return {
-  //                   id: id,
-  //                   content: e.content,
-  //                   updatedAt: new Date(),
-  //                   createdAt: new Date(),
-  //                   contentType: e.contentType,
-  //                   isCorrect: e.isCorrect,
-  //                 };
-  //               } else {
-  //                 throw new Error("Invalid content type");
-  //               }
-  //             })
-  //         ),
-  //         // Atualizar as alternativas existentes
-  //         update: await Promise.all(
-  //           data.alternatives
-  //             .filter((e) => e.id)
-  //             .map(async (e) => {
-  //               console.log("----------------------");
-  //               console.log(e.contentType);
-
-  //               if (e.contentType === "image" && e.content instanceof File) {
-  //                 const imageName = `alternatives/${e.id}.${e.content.name.split(".").pop()}`; // Tratamento do nome da imagem
-  //                 const imgUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profileImages/${imageName}`;
-
-  //                 const res = await supabase.storage
-  //                   .from("profileImages")
-  //                   .upload(imageName, e.content, {
-  //                     cacheControl: "3600",
-  //                     upsert: true,
-  //                   });
-
-  //                 if (res.error) throw res.error;
-
-  //                 return {
-  //                   where: { id: e.id },
-  //                   data: {
-  //                     content: imgUrl,
-  //                     contentType: e.contentType,
-  //                     isCorrect: e.isCorrect,
-  //                     updatedAt: new Date(),
-  //                   },
-  //                 };
-  //               } else if (typeof e.content === "string") {
-  //                 return {
-  //                   where: { id: e.id },
-  //                   data: {
-  //                     content: e.content,
-  //                     contentType: e.contentType,
-  //                     isCorrect: e.isCorrect,
-  //                     updatedAt: new Date(),
-  //                   },
-  //                 };
-  //               } else {
-  //                 throw new Error("Invalid content type");
-  //               }
-  //             })
-  //         ),
-  //         // Deletar alternativas que não estão mais na lista
-  //         delete: alternativesToDelete.map((id) => ({ id })),
-  //       },
-  //       Discipline: {
-  //         connectOrCreate: {
-  //           create: {
-  //             id: cuid(),
-  //             name: data.discipline,
-  //           },
-  //           where: {
-  //             name: data.discipline,
-  //           },
-  //         },
-  //       },
-  //       Text: {
-  //         connect: data.linkedTexts.map((e) => ({
-  //           id: e,
-  //         })),
-  //         // Desconectar textos deselecionados
-  //         disconnect: textsToDisconnect.map((textId) => ({
-  //           id: textId,
-  //         })),
-  //       },
-
-  //       updatedAt: new Date(),
-  //     },
-  //   });
-  // };
-
-  // if (isDisciplineChanged) {
-  //   // Contar o número de questões associadas à disciplina atual da questão
-  //   const questionCount = await db.question.count({
-  //     where: { disciplineId: question.disciplineId },
-  //   });
-
-  //   if (questionCount === 1) {
-  //     // Se for a última questão da disciplina atual, deletar a disciplina junto com o update da questão
-  //     await db.$transaction(async (prisma) => {
-  //       await update(); // Chama a função async normalmente
-  //       await prisma.discipline.delete({
-  //         where: { id: question.disciplineId },
-  //       });
-  //     });
-
-  //     return { success: "Question updated and discipline deleted!" };
-  //   } else {
-  //     // Apenas atualizar a questão
-  //     await update();
-
-  //     return { success: "Question updated and discipline retained!" };
-  //   }
-  // } else {
-  //   // Caso a disciplina não tenha mudado, atualizar normalmente
-  //   await update();
-
-  //   return { success: "Question updated!" };
-  // }
+  try {
+    await db.$transaction(
+      async (tx) => {
+        // Deleta alternativas que não estão na nova lista
+        const currentAltIds = existingQuestion.Alternative.map((a) => a.id);
+        const newAltIds = question.alternatives
+          .filter((e) => e.id)
+          .map((e) => e.id);
+        const alternativesToDelete = currentAltIds.filter(
+          (id) => !newAltIds.includes(id)
+        );
+        if (alternativesToDelete.length > 0) {
+          await tx.alternative.deleteMany({
+            where: { id: { in: alternativesToDelete } },
+          });
+        }
+        // Atualiza a questão e suas relações
+        await tx.question.update({
+          where: { id: idQuestion },
+          data: {
+            statement: question.statement,
+            Discipline: {
+              connectOrCreate: {
+                create: { id: cuid(), name: question.discipline },
+                where: { name: question.discipline },
+              },
+            },
+            Exam: { connect: { id: idExam } },
+            Text: {
+              connect: question.linkedTexts.map((id) => ({ id })),
+              disconnect: textsToDisconnect.map((id) => ({ id })),
+            },
+            updatedAt: new Date(),
+          },
+        });
+        // Executa os nested writes para create e update de alternativas
+        if (createAlternatives.length > 0) {
+          await tx.alternative.createMany({
+            data: createAlternatives.map((alt) => ({
+              ...alt,
+              questionId: idQuestion,
+            })),
+          });
+        }
+        if (updateAlternatives.length > 0) {
+          for (const updateOp of updateAlternatives) {
+            await tx.alternative.update({
+              where: updateOp.where,
+              data: updateOp.data,
+            });
+          }
+        }
+      },
+      { timeout: 10000 }
+    );
+    // Após a transação, remove todas as imagens antigas
+    if (oldImageKeys.length > 0) {
+      await supabase.storage
+        .from("profileImages")
+        .remove(oldImageKeys.map((key) => "alternatives/" + key));
+    }
+    return { success: "Question updated successfully" };
+  } catch {
+    for (const img of newUploadedImages) {
+      await supabase.storage
+        .from("profileImages")
+        .remove(["alternatives/" + img.key]);
+    }
+    return { error: "Erro ao atualizar questão" };
+  }
 };
 
+/* DELETE QUESTION */
 export const deleteQuestion = async (questionId: string) => {
   const question = await db.question.findUnique({
-    where: {
-      id: questionId,
-    },
-    include: {
-      Discipline: true,
-      Alternative: true,
-    },
+    where: { id: questionId },
+    include: { Discipline: true, Alternative: true },
   });
-
   if (!question) return { error: "Question does not exist" };
 
   const questionCount = await db.question.count({
@@ -431,38 +358,30 @@ export const deleteQuestion = async (questionId: string) => {
       },
     },
   });
-
-  const imageKeys: string[] = question.Alternative.filter(
-    (alt) => alt.contentType == "image" && alt.imageKey
+  const imageKeys = question.Alternative.filter(
+    (alt) => alt.contentType === "image" && alt.imageKey
   ).map((alt) => alt.imageKey!);
 
   try {
     await db.$transaction(
       async (tx) => {
-        await tx.alternative.deleteMany({
-          where: { questionId: questionId },
-        });
-        await tx.question.delete({
-          where: { id: questionId },
-        });
-        // Deletar as imagens associadas às alternativas
-        if (imageKeys.length > 0)
+        await tx.alternative.deleteMany({ where: { questionId } });
+        await tx.question.delete({ where: { id: questionId } });
+        if (imageKeys.length > 0) {
           await supabase.storage
             .from("profileImages")
-            .remove(imageKeys.map((e) => "alternatives/" + e));
-
-        if (questionCount == 1) {
-          await tx.discipline.delete({
-            where: { name: question.Discipline.name },
-          });
+            .remove(imageKeys.map((key) => "alternatives/" + key));
+          if (questionCount == 1) {
+            await tx.discipline.delete({
+              where: { name: question.Discipline.name },
+            });
+          }
         }
       },
-      {
-        timeout: 10000,
-      }
+      { timeout: 10000 }
     );
+    return { success: "Question deleted" };
   } catch {
     return { error: "Erro ao remover questão" };
   }
-  return { success: "Question deleted" };
 };
