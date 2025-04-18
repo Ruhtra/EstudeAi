@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EstudeAi
 
-## Getting Started
+EstudeAi is a mobile application designed to prepare students for the IF. It provides an interactive platform where users can create, edit, and delete texts, exams, and questions. Additionally, it features an administrative dashboard for viewing revenue and other important data.
 
-First, run the development server:
+## Technologies Used
+
+The main technologies adopted in this project are:
+
+- **Next.js** – React framework for server-side rendering and scalable application development.
+- **Node.js** – JavaScript runtime environment for the backend.
+- **TypeScript** – A language that adds static typing to JavaScript, enhancing code robustness.
+- **shadcn** – Component library for building modern and responsive interfaces.
+- **Prisma** – ORM that facilitates database interactions.
+- **PostgreSQL** – Robust and widely used relational database.
+- **Supabase** – Platform providing authentication, database, and other real-time backend functionalities.
+
+## Demo
+
+Below are some screens showcasing the main features of the application:
+
+- **Dashboard Screen**  
+  <img src="https://github.com/user-attachments/assets/300dd820-4423-4301-b44b-821d9623cf35" width="608" height="342">
+  
+- **User Registration Screen**  
+  <img src="https://github.com/user-attachments/assets/9a7f76ed-fe9f-48ba-b30b-06629df1679b" width="608" height="342">
+  
+- **Text Creation Screen**  
+  <img src="https://github.com/user-attachments/assets/1a63ea3b-106a-456f-bb90-f6c4b1dbcaab" width="608" height="342">
+  
+- **Question Creation Screen**  
+  <img src="https://github.com/user-attachments/assets/2f9f45ac-a003-4a3c-bfbb-48bc8faa7645" width="608" height="342">
+
+
+> *Note:* The images above illustrate the main workflows of the application, clearly demonstrating the essential features already implemented.
+
+## How to Run the Project
+
+To run the project in a development environment, follow the standard Next.js project commands:
 
 ```bash
+# Install dependencies
+npm install
+
+# Run the project in development mode
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+For production, ensure that the project is configured to run via HTTPS and use the following commands:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Build for production
+npm run build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Start the application in production mode
+npm run start
+```
 
-## Learn More
+## Contact
 
-To learn more about Next.js, take a look at the following resources:
+For more information, visit the website:  
+[estudeai.ruhtra.work](https://estudeai.ruhtra.work) or access [Ruhtra.work](https://Ruhtra.work)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
