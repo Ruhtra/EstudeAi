@@ -1,7 +1,7 @@
 'use client';
 
-import { Header } from './_components/Header';
 import { Content } from './_components/Content';
+import { Header } from './_components/Header';
 import { useQuery } from '@tanstack/react-query';
 
 // Simulação de dados
@@ -11,14 +11,12 @@ const fakeUsers = [
 ];
 
 export default function UsersPage() {
-  // Substitua por sua Transpac/React Query: exemplo simplificado
   const { data: users = fakeUsers } = useQuery({
     queryKey: ['user'],
     queryFn: async () => fakeUsers
   });
 
-  // Você pode trocar esta variável por um hook que detecte o tamanho da tela
-  const isMobile = true; // ou true para simular mobile
+  const isMobile = true;
 
   return (
     <>
@@ -30,7 +28,6 @@ export default function UsersPage() {
       <Content.Root>
         <Content.Layout isMobile={isMobile}>
           {isMobile ? (
-            // Visualização mobile (cards) com toggle de expansão
             users.map((user) => (
               <Content.Item.Mobile
                 key={user.id}
@@ -46,7 +43,6 @@ export default function UsersPage() {
               </Content.Item.Mobile>
             ))
           ) : (
-            // Visualização desktop (tabela com padrão shadcn)
             <>
               <Content.Table.Root>
                 <Content.Table.Header headers={['Nome', 'Telefone', 'Endereço', 'Ações']} />
