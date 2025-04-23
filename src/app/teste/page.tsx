@@ -1,8 +1,10 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { Content } from './_components/Content';
 import { Header } from './_components/Header';
 import { useQuery } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
 
 // Simulação de dados
 const fakeUsers = [
@@ -22,7 +24,13 @@ export default function UsersPage() {
     <>
       <Header.Root>
         <Header.Title>Usuários</Header.Title>
-        <Header.BackButton show />
+        <Header.Content >
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+            <Button onClick={() => { }}>
+              <Plus className="mr-2 h-4 w-4" /> Adicionar Usuário
+            </Button>
+          </div>
+        </Header.Content>
       </Header.Root>
 
       <Content.Root>
