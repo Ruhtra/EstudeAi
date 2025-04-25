@@ -7,22 +7,30 @@ import { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
 export type GenericContextProps<
   TDto,
   TCreateDto = any,
-  TUpdateDto = any
+  TCreateReturn = TDto | void,
+  TUpdateDto = any,
+  TUpdateReturn = TDto | void,
+  TDeleteDto = any,
+  TDeleteReturn = TDto | void
 > = {
   query: UseQueryResult<TDto[]>
-  createMutation?: UseMutationResult<TDto, unknown, TCreateDto>
-  updateMutation?: UseMutationResult<TDto, unknown, TUpdateDto>
-  deleteMutation?: UseMutationResult<void, unknown, string>
+  createMutation?: UseMutationResult<TCreateReturn, unknown, TCreateDto>
+  updateMutation?: UseMutationResult<TUpdateReturn, unknown, TUpdateDto>
+  deleteMutation?: UseMutationResult<TDeleteReturn, unknown, TDeleteDto>
 }
 
 export function createGenericContext<
   TDto,
   TCreateDto = any,
-  TUpdateDto = any
+  TCreateReturn = TDto | void,
+  TUpdateDto = any,
+  TUpdateReturn = TDto | void,
+  TDeleteDto = any,
+  TDeleteReturn = TDto | void
 >() {
-  const Context = createContext<GenericContextProps<TDto, TCreateDto, TUpdateDto> | undefined>(
-    undefined
-  )
+  const Context = createContext<
+    GenericContextProps<TDto, TCreateDto, TCreateReturn, TUpdateDto, TUpdateReturn, TDeleteDto, TDeleteReturn> | undefined
+  >(undefined)
 
   const useGenericContext = () => {
     const context = useContext(Context)
@@ -35,7 +43,7 @@ export function createGenericContext<
     value
   }: {
     children: ReactNode
-    value: GenericContextProps<TDto, TCreateDto, TUpdateDto>
+    value: GenericContextProps<TDto, TCreateDto, TCreateReturn, TUpdateDto, TUpdateReturn, TDeleteDto, TDeleteReturn>
   }) => {
     return <Context.Provider value={value}>{children}</Context.Provider>
   }

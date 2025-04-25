@@ -21,13 +21,16 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { useContentContext } from "../../ComponentContext";
 
 interface ExamActionsProps {
-  isPending: boolean;
   children: ReactNode;
 }
 
-function Actions({ isPending, children }: ExamActionsProps) {
+function Actions({ children }: ExamActionsProps) {
+  const { deleteMutation } = useContentContext()
+  const isPending = (deleteMutation?.isPending) || false;
+
   return (
     <>
       <DropdownMenu>
@@ -44,14 +47,15 @@ function Actions({ isPending, children }: ExamActionsProps) {
 
 interface ActionsDeleteProps {
   handleDelete: () => void;
-  isPending: boolean;
   message?: string;
 }
 function ActionsDelete({
   handleDelete,
-  isPending,
   message = "Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.",
 }: ActionsDeleteProps) {
+  const { deleteMutation } = useContentContext()
+  const isPending = (deleteMutation?.isPending) || false;
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -88,14 +92,16 @@ function ActionsDelete({
 
 interface ActionsPublishProps {
   handlePublish: () => void;
-  isPending: boolean;
   isComplete: boolean;
 }
 function ActionsPublish({
   handlePublish,
-  isPending,
   isComplete,
 }: ActionsPublishProps) {
+  const { deleteMutation } = useContentContext()
+  const isPending = (deleteMutation?.isPending) || false;
+
+
   return (
     <DropdownMenuItem
       onSelect={(e) => {
@@ -121,9 +127,12 @@ function ActionsPublish({
 
 interface ActionsEditProps {
   handleEdit: () => void;
-  isPending: boolean;
 }
-function ActionsEdit({ handleEdit, isPending }: ActionsEditProps) {
+function ActionsEdit({ handleEdit }: ActionsEditProps) {
+
+  const { deleteMutation } = useContentContext()
+  const isPending = (deleteMutation?.isPending) || false;
+
   return (
     <DropdownMenuItem
       onSelect={(e) => {

@@ -242,21 +242,21 @@ export const deleteUser = async (userId: string) => {
 
   if (!user) return { error: "User not found" };
 
-  if (user.imageName) {
-    try {
-      const existingImage = `profileImages/${user.imageName}`;
-      await supabase.storage.from("profileImages").remove([existingImage]);
-    } catch (error) {
-      console.error("Erro ao deletar imagem existente:", error);
-      return { error: "Erro ao deletar imagem existente" };
-    }
-  }
+  // if (user.imageName) {
+  //   try {
+  //     const existingImage = `profileImages/${user.imageName}`;
+  //     await supabase.storage.from("profileImages").remove([existingImage]);
+  //   } catch (error) {
+  //     console.error("Erro ao deletar imagem existente:", error);
+  //     return { error: "Erro ao deletar imagem existente" };
+  //   }
+  // }
 
-  await db.user.delete({
-    where: {
-      id: userId,
-    },
-  });
+  // await db.user.delete({
+  //   where: {
+  //     id: userId,
+  //   },
+  // });
 
   // revalidatePath("/admin/users");
   return { success: "User deleted" };
