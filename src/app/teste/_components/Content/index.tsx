@@ -1,21 +1,15 @@
-import { ContentTable } from '../Table';
-import { ContentActions, ContentActionsDelete, ContentActionsEdit, ContentActionsPublish } from './ContentActions';
-import { ContentItemDesktop } from './ContentItemDesktop';
-import { ContentItemMobile } from './ContentItemMobile';
+import { ContentMobile } from './Mobile';
+import { ContentTable } from './Table';
+
 import { ContentLayout } from './ContentLayout';
 import { ContentRoot } from './ContentRoot';
+import { ContentActions } from './Actions';
 
 
 export const Content = {
   Root: ContentRoot,
   Layout: ContentLayout,
-  Item: {
-    Mobile: ContentItemMobile,
-    Desktop: ContentItemDesktop,
-  },
   Table: ContentTable,
-  Actions: ContentActions,
-  ActionsEdit: ContentActionsEdit,
-  ActionsDelete: ContentActionsDelete,
-  ActionsPublish: ContentActionsPublish,
+  Card: ContentMobile,
+  Actions: ContentActions
 };

@@ -100,7 +100,7 @@ export const ItemMobileHeaderTitle = ({
   children,
 }: {
   name: string;
-  children: ReactNode;
+  children?: ReactNode;
 }) => {
   return (
     <div className="space-y-1">

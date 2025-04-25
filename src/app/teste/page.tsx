@@ -3,25 +3,15 @@
 import { Button } from '@/components/ui/button';
 import { Content } from './_components/Content';
 import { Header } from './_components/Header';
-import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
+import { UserProvider, useUserContext } from './UsersContext';
 
-// Simulação de dados
-const fakeUsers = [
-  { id: 1, nome: 'João', telefone: '1234', endereco: 'Rua A' },
-  { id: 2, nome: 'Maria', telefone: '5678', endereco: 'Rua B' },
-];
+
+
 
 export default function UsersPage() {
-  const { data: users = fakeUsers } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => fakeUsers
-  });
-
-  const isMobile = true;
-
   return (
-    <>
+    <UserProvider>
       <Header.Root>
         <Header.Title>Usuários</Header.Title>
         <Header.Content >
@@ -32,49 +22,72 @@ export default function UsersPage() {
           </div>
         </Header.Content>
       </Header.Root>
+      <PageContent />
+    </UserProvider>
+  )
+}
 
-      <Content.Root>
-        <Content.Layout isMobile={isMobile}>
-          {isMobile ? (
-            users.map((user) => (
-              <Content.Item.Mobile
-                key={user.id}
-                expandable
-                header={<span>{user.nome}</span>}
-              >
-                <div>Telefone: {user.telefone}</div>
-                <div>Endereço: {user.endereco}</div>
-                <Content.Actions>
-                  <Content.ActionsEdit />
-                  <Content.ActionsPublish />
-                </Content.Actions>
-              </Content.Item.Mobile>
-            ))
-          ) : (
-            <>
-              <Content.Table.Root>
-                <Content.Table.Header headers={['Nome', 'Telefone', 'Endereço', 'Ações']} />
-                <Content.Table.Body>
-                  {users.map((user) => (
-                    <Content.Item.Desktop
-                      key={user.id}
-                      cells={[
-                        <span>{user.nome}</span>,
-                        <span>{user.telefone}</span>,
-                        <span>{user.endereco}</span>,
-                        <Content.Actions>
-                          <Content.ActionsEdit />
-                          <Content.ActionsPublish />
-                        </Content.Actions>,
-                      ]}
-                    />
-                  ))}
-                </Content.Table.Body>
-              </Content.Table.Root>
-            </>
-          )}
-        </Content.Layout>
-      </Content.Root>
-    </>
+function PageContent() {
+  const userContext = useUserContext()
+  const isMobile = true;
+
+  return (
+    <Content.Root context={userContext}>
+      <Content.Layout isMobile={isMobile}>
+        {isMobile ? (
+          userContext.query.data?.map((user) => (
+            <Content.Card.ItemMobile key={user.id} expandable={false}>
+              <Content.Card.ItemMobileHeader>
+                <div>
+                  <Content.Card.ItemMobileHeaderTitle title={'thatsok'} />
+                </div>
+                <Content.Card.ItemMobileHeaderOptions>
+                  <Content.Actions.Root isPending={false}>
+                    <Content.Actions.Delete handleDelete={() => { }} isPending={false} />
+                  </Content.Actions.Root>
+                </Content.Card.ItemMobileHeaderOptions>
+              </Content.Card.ItemMobileHeader>
+              <Content.Card.ItemMobileContent>
+                <Content.Card.ItemMobileContentData>
+                  <span className="text-muted-foreground">Email:</span>
+                  aaaaaaa
+                </Content.Card.ItemMobileContentData>
+              </Content.Card.ItemMobileContent>
+            </Content.Card.ItemMobile>
+          ))
+        ) : (
+          <Content.Table.Root>
+            <Content.Table.Header>
+              <Content.Table.Row>
+                <Content.Table.Head>Nome</Content.Table.Head>
+                <Content.Table.Head>Telefone</Content.Table.Head>
+                {/* <Content.Table.Head>Endereço</Content.Table.Head> */}
+                <Content.Table.Head className='w-[60px]'>Ações</Content.Table.Head>
+              </Content.Table.Row>
+            </Content.Table.Header>
+            <Content.Table.Body>
+              {userContext.query.data?.map((user) => (
+                <Content.Table.Row key={user.id}>
+                  <Content.Table.Cell>
+                    <span>{user.name}</span>
+                  </Content.Table.Cell>
+                  <Content.Table.Cell>
+                    <span>{user.email}</span>
+                  </Content.Table.Cell>
+                  {/* <Content.Table.Cell>
+                    <span>{user.endereco}</span>
+                  </Content.Table.Cell> */}
+                  <Content.Table.Cell>
+                    <Content.Actions.Root isPending={false}>
+                      <Content.Actions.Delete handleDelete={() => { }} isPending={false} />
+                    </Content.Actions.Root>
+                  </Content.Table.Cell>
+                </Content.Table.Row>
+              ))}
+            </Content.Table.Body>
+          </Content.Table.Root>
+        )}
+      </Content.Layout>
+    </Content.Root>
   );
 }
