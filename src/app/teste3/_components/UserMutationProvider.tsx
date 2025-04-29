@@ -1,12 +1,9 @@
-
-
-'use client';
+"use client";
 import { createGenericContext } from "./Content/GenericMutationContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-
 type UserDto = {
-  id: string
+  id: string;
   name: string;
 };
 
@@ -17,60 +14,64 @@ type UpdateUserDto = {
   name: string;
 };
 
-type DeleteUserDto = {
-  userId: string;
-};
+// type DeleteUserDto = {
+//   userId: string;
+// };
 
-const {
-  Provider: UserProviderRaw,
-  useGenericContext: useUserContext
-} = createGenericContext<
-  void,
-  UserDto[],
-  UpdateUserDto,
-  void,
-  CreateUserDto,
-  void,
-  DeleteUserDto,
-  void
->()
-
+const { Provider: UserProviderRaw, useGenericContext: useUserContext } =
+  createGenericContext<
+    void,
+    UserDto[],
+    UpdateUserDto,
+    void,
+    CreateUserDto,
+    void,
+    void,
+    void
+  >();
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const useFetchUsers = useQuery<UserDto[]>({
-    queryKey: ['users'],
+    queryKey: ["users"],
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const response = await fetch('/api/users', { method: 'GET' });
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/users", { method: "GET" });
       return response.json();
-    }
-  })
-
-  const useCreateMutation = () => useMutation({
-    mutationKey: ['createUser'],
-    mutationFn: async (data: CreateUserDto) => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await fetch('/api/users', { method: 'POST', body: JSON.stringify(data) })
-    }
+    },
   });
 
-  const getDeleteMutation = () => useMutation({
-    mutationKey: ['deleteUser'],
-    mutationFn: async ({ userId : b }: DeleteUserDto) => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // await fetch(`/api/users/${userId}`, { method: 'DELETE' })
-    }
-  });
+  const useCreateMutation = () =>
+    useMutation({
+      mutationKey: ["user", "create"],
+      mutationFn: async (data: CreateUserDto) => {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await fetch("/api/users", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+      },
+    });
 
-  const useUpdateMutation = () => useMutation({
-    mutationFn: async (data: UpdateUserDto) => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await fetch(`/api/users/${data.name}`, {
-        method: 'PUT',
-        body: JSON.stringify({ name: data.name })
-      });
-    }
-  });
+  const useDeleteMutation = (id: string) =>
+    useMutation({
+      mutationKey: ["user", "delete", id],
+      mutationFn: async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await fetch(`/api/users/${id}`, { method: "DELETE" });
+      },
+    });
+
+  const useUpdateMutation = (id: string) =>
+    useMutation({
+      mutationKey: ["user", "update", id],
+      mutationFn: async (data: UpdateUserDto) => {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await fetch(`/api/users/${data.name}`, {
+          method: "PUT",
+          body: JSON.stringify({ name: data.name }),
+        });
+      },
+    });
 
   return (
     <UserProviderRaw
@@ -78,15 +79,12 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
         useFetchQuery: useFetchUsers,
         useUpdateMutation: useUpdateMutation,
         useCreateMutation: useCreateMutation,
-        useDeleteMutation: getDeleteMutation,
+        useDeleteMutation: useDeleteMutation,
       }}
     >
       {children}
     </UserProviderRaw>
-  )
-}
+  );
+};
 
-export {
-  UserProvider,
-  useUserContext,
-}
+export { UserProvider, useUserContext };
