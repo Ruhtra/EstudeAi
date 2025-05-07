@@ -80,7 +80,7 @@ export function createGenericContext<
   };
 }
 
-type seilaOnome<TDeleteInput, TDeleteOutput> = {
+export type seilaOnome<TDeleteInput, TDeleteOutput> = {
   id: string;
   deleteMutate: UseMutationResult<TDeleteOutput, Error, TDeleteInput, unknown>;
 };

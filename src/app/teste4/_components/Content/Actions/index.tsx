@@ -21,12 +21,11 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { useContentContext } from "../../ComponentContext";
-import { useIsMutating } from "@tanstack/react-query";
 import {
-  useUserContext,
-  useUserItemContext,
-} from "@/app/teste4/UserMutationProvider";
+  useContentContext,
+  useContentItemContext,
+} from "../../ComponentContext";
+import { useIsMutating } from "@tanstack/react-query";
 
 interface ExamActionsProps {
   children: ReactNode;
@@ -35,7 +34,7 @@ interface ExamActionsProps {
 function Actions({ children }: ExamActionsProps) {
   const {
     deleteMutate: { isPending },
-  } = useUserItemContext();
+  } = useContentItemContext();
 
   return (
     <>
@@ -59,7 +58,7 @@ function ActionsDelete({
 }: ActionsDeleteProps) {
   const {
     deleteMutate: { isPending, mutate },
-  } = useUserItemContext();
+  } = useContentItemContext();
 
   // const userContext = useUserContext();
   // const { mutate, isPending } = userContext.useDeleteMutation(id);
@@ -94,7 +93,7 @@ function ActionsDelete({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => mutate()}
+            onClick={() => mutate(undefined)}
             disabled={isPending}
             className="bg-red-600 hover:bg-red-700 text-white"
           >

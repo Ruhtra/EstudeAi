@@ -10,10 +10,12 @@ import {
   UserItemProvider,
   UserProvider,
   useUserContext,
+  useUserItemContext,
 } from "./UserMutationProvider";
 import { UserDto } from "./UserMutationProvider";
 import { UseMutationResult } from "@tanstack/react-query";
 import { createGenericItemContext } from "./_components/GenericMutationContext";
+import { ContentItemContext } from "./_components/ComponentContext";
 
 export default function UsersPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -78,41 +80,57 @@ function Item({ isMobile, user }: { isMobile: boolean; user: UserDto }) {
   return (
     <>
       <UserItemProvider id={user.id} useDeleteMutation={useDeleteMutation}>
-        {isMobile ? (
-          <Content.Card.ItemMobile key={user.id} expandable={false}>
-            <Content.Card.ItemMobileHeader>
-              <div>
-                <Content.Card.ItemMobileHeaderTitle title={user.name} />
-              </div>
-              <Content.Card.ItemMobileHeaderOptions>
-                <Content.Actions.Root>
-                  <Content.Actions.Delete />
-                </Content.Actions.Root>
-              </Content.Card.ItemMobileHeaderOptions>
-            </Content.Card.ItemMobileHeader>
-            <Content.Card.ItemMobileContent>
-              <Content.Card.ItemMobileContentData>
-                <span className="text-muted-foreground">Email:</span>
-                {user.email}
-              </Content.Card.ItemMobileContentData>
-            </Content.Card.ItemMobileContent>
-          </Content.Card.ItemMobile>
-        ) : (
-          <Content.Table.Row key={user.id}>
-            <Content.Table.Cell>
-              <span>{user.name}</span>
-            </Content.Table.Cell>
-            <Content.Table.Cell>
-              <span>{user.email}</span>
-            </Content.Table.Cell>
-            <Content.Table.Cell>
+        <ItemSubGroup isMobile={isMobile} user={user} />
+      </UserItemProvider>
+    </>
+  );
+}
+
+function ItemSubGroup({
+  isMobile,
+  user,
+}: {
+  isMobile: boolean;
+  user: UserDto;
+}) {
+  const userItemContext = useUserItemContext();
+
+  return (
+    <ContentItemContext.Provider value={userItemContext}>
+      {isMobile ? (
+        <Content.Card.ItemMobile key={user.id} expandable={false}>
+          <Content.Card.ItemMobileHeader>
+            <div>
+              <Content.Card.ItemMobileHeaderTitle title={user.name} />
+            </div>
+            <Content.Card.ItemMobileHeaderOptions>
               <Content.Actions.Root>
                 <Content.Actions.Delete />
               </Content.Actions.Root>
-            </Content.Table.Cell>
-          </Content.Table.Row>
-        )}
-      </UserItemProvider>
-    </>
+            </Content.Card.ItemMobileHeaderOptions>
+          </Content.Card.ItemMobileHeader>
+          <Content.Card.ItemMobileContent>
+            <Content.Card.ItemMobileContentData>
+              <span className="text-muted-foreground">Email:</span>
+              {user.email}
+            </Content.Card.ItemMobileContentData>
+          </Content.Card.ItemMobileContent>
+        </Content.Card.ItemMobile>
+      ) : (
+        <Content.Table.Row key={user.id}>
+          <Content.Table.Cell>
+            <span>{user.name}</span>
+          </Content.Table.Cell>
+          <Content.Table.Cell>
+            <span>{user.email}</span>
+          </Content.Table.Cell>
+          <Content.Table.Cell>
+            <Content.Actions.Root>
+              <Content.Actions.Delete />
+            </Content.Actions.Root>
+          </Content.Table.Cell>
+        </Content.Table.Row>
+      )}
+    </ContentItemContext.Provider>
   );
 }
