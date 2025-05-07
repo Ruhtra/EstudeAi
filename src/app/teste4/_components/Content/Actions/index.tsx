@@ -23,19 +23,19 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useContentContext } from "../../ComponentContext";
 import { useIsMutating } from "@tanstack/react-query";
-import { useUserContext } from "@/app/teste4/UserMutationProvider";
+import {
+  useUserContext,
+  useUserItemContext,
+} from "@/app/teste4/UserMutationProvider";
 
 interface ExamActionsProps {
   children: ReactNode;
 }
 
 function Actions({ children }: ExamActionsProps) {
-  const a = useIsMutating({
-    mutationKey: ["delete", "user", "1"],
-  });
-  let isPending = a > 0;
-  // const { useDeleteMutation } = useContentContext()
-  // const isPending = (deleteMutation?.isPending) || false;
+  const {
+    deleteMutate: { isPending },
+  } = useUserItemContext();
 
   return (
     <>
@@ -57,8 +57,12 @@ interface ActionsDeleteProps {
 function ActionsDelete({
   message = "Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.",
 }: ActionsDeleteProps) {
-  const userContext = useUserContext();
-  const { mutate, isPending } = userContext.useDeleteMutation("1");
+  const {
+    deleteMutate: { isPending, mutate },
+  } = useUserItemContext();
+
+  // const userContext = useUserContext();
+  // const { mutate, isPending } = userContext.useDeleteMutation(id);
 
   // const a = useIsMutating({
   //   mutationKey: ["delete", "user", "1"],

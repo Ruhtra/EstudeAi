@@ -1,8 +1,15 @@
 "use client";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createGenericContext } from "./_components/GenericMutationContext";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+} from "@tanstack/react-query";
+import {
+  createGenericContext,
+  createGenericItemContext,
+} from "./_components/GenericMutationContext";
 
-type UserDto = {
+export type UserDto = {
   id: string;
   name: string;
   email: string;
@@ -18,6 +25,19 @@ type UpdateUserDto = {
 // type DeleteUserDto = {
 //   userId: string;
 // };
+
+const db = [
+  {
+    id: "1",
+    name: "John Doe",
+    email: "johndoe@example.com",
+  },
+  {
+    id: "2",
+    name: "John Doe",
+    email: "johndoe@example.com",
+  },
+];
 
 const { Provider: UserProviderRaw, useGenericContext: useUserContext } =
   createGenericContext<
@@ -37,13 +57,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
     queryFn: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       // Example data for UserDto
-      return [
-        {
-          id: "1",
-          name: "John Doe",
-          email: "johndoe@example.com",
-        },
-      ];
+      return db;
     },
   });
 
@@ -64,7 +78,8 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
       mutationKey: ["user", "delete", id],
       mutationFn: async () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        await fetch(`/api/users/${id}`, { method: "DELETE" });
+        db.filter((user) => user.id !== id);
+        // await fetch(`/api/users/${id}`, { method: "DELETE" });
       },
     });
 
@@ -94,4 +109,32 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export { UserProvider, useUserContext };
+const {
+  Provider: UserItemProviderRaw,
+  useGenericItemContext: useUserItemContext,
+} = createGenericItemContext<void, void>();
+
+const UserItemProvider = ({
+  id,
+  useDeleteMutation,
+  children,
+}: {
+  id: string;
+  useDeleteMutation: (
+    id: string
+  ) => UseMutationResult<void, Error, void, unknown>;
+  children: React.ReactNode;
+}) => {
+  return (
+    <UserItemProviderRaw
+      value={{
+        id: id,
+        deleteMutate: useDeleteMutation(id),
+      }}
+    >
+      {children}
+    </UserItemProviderRaw>
+  );
+};
+
+export { UserProvider, useUserContext, UserItemProvider, useUserItemContext };

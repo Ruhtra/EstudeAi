@@ -1,7 +1,8 @@
-import { ReactNode } from "react";
+import { ReactNode, createContext, useContext } from "react";
 import * as T from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { useContentContext } from "../../ComponentContext";
+import { useIsMutating } from "@tanstack/react-query";
+import { useUserItemContext } from "@/app/teste4/UserMutationProvider";
 
 // Root Table Component
 export function Table({ children }: { children: ReactNode }) {
@@ -19,12 +20,13 @@ export function TableBody({ children }: { children: ReactNode }) {
 
 // Table Cell Component
 export function TableCell({ children }: { children: ReactNode }) {
-  // const { useDeleteMutation } = useContentContext();
+  const {
+    deleteMutate: { isPending },
+  } = useUserItemContext();
 
   const itemClasses = cn(
-    "transition-opacity duration-200"
-    //TO-DO - PARAMETOR NÃO PASSADO
-    // useDeleteMutation("1")?.isPending && "opacity-50 pointer-events-none"
+    "transition-opacity duration-200",
+    isPending && "bg-red-500 opacity-50 pointer-events-none"
   );
 
   return <T.TableCell className={itemClasses}>{children}</T.TableCell>;
