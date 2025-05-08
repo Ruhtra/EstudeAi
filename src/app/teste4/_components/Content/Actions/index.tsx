@@ -60,17 +60,6 @@ function ActionsDelete({
     deleteMutate: { isPending, mutate },
   } = useContentItemContext();
 
-  // const userContext = useUserContext();
-  // const { mutate, isPending } = userContext.useDeleteMutation(id);
-
-  // const a = useIsMutating({
-  //   mutationKey: ["delete", "user", "1"],
-  // });
-  // let isPending = a > 0;
-
-  // const { useDeleteMutation } = useContentContext();
-  // const isPending = useDeleteMutation?.isPending || false;
-
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -110,12 +99,9 @@ interface ActionsPublishProps {
   isComplete: boolean;
 }
 function ActionsPublish({ handlePublish, isComplete }: ActionsPublishProps) {
-  const a = useIsMutating({
-    mutationKey: ["delete", "user", "1"],
-  });
-  let isPending = a > 0;
-  // const { deleteMutation } = useContentContext()
-  // const isPending = (deleteMutation?.isPending) || false;
+  const {
+    deleteMutate: { isPending },
+  } = useContentItemContext();
 
   return (
     <DropdownMenuItem
@@ -144,10 +130,9 @@ interface ActionsEditProps {
   handleEdit: () => void;
 }
 function ActionsEdit({ handleEdit }: ActionsEditProps) {
-  const a = useIsMutating({
-    mutationKey: ["delete", "user", "1"],
-  });
-  let isPending = a > 0;
+  const {
+    deleteMutate: { isPending },
+  } = useContentItemContext();
 
   // const { deleteMutation } = useContentContext()
   // const isPending = (deleteMutation?.isPending) || false;

@@ -40,16 +40,7 @@ const db = [
 ];
 
 const { Provider: UserProviderRaw, useGenericContext: useUserContext } =
-  createGenericContext<
-    void,
-    UserDto[],
-    UpdateUserDto,
-    void,
-    CreateUserDto,
-    void,
-    void,
-    void
-  >();
+  createGenericContext();
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const useFetchUsers = useQuery<UserDto[]>({
@@ -95,6 +86,16 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
       },
     });
 
+  const useDeleteMultipleMutation = (id: string[]) =>
+    useMutation({
+      mutationKey: ["user", "delete", "multiple"],
+      mutationFn: async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // db.filter((user) => user.id !== id);
+        // await fetch(`/api/users/${id}`, { method: "DELETE" });
+      },
+    });
+
   return (
     <UserProviderRaw
       value={{
@@ -102,6 +103,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
         useUpdateMutation: useUpdateMutation,
         useCreateMutation: useCreateMutation,
         useDeleteMutation: useDeleteMutation,
+        // useDeleteMultipleMutation: useDeleteMultipleMutation:
       }}
     >
       {children}

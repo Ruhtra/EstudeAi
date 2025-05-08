@@ -42,6 +42,7 @@ export default function UsersPage() {
 
 function PageContent() {
   const userContext = useUserContext();
+  // const {isPending, mutate} = userContext.useDeleteMultipleMutation()
   const isMobile = false;
 
   return (
@@ -55,7 +56,14 @@ function PageContent() {
           <Content.Table.Root>
             <Content.Table.Header>
               <Content.Table.Row>
-                <Content.Table.Head>Nome</Content.Table.Head>
+                <Content.Table.Head>
+                  Nome
+                  {/* <Button disabled={isPending} onClick={() => {
+                    mutate()
+                  }}>
+                    <Plus className="mr-2 h-4 w-4" /> Deletaar vários usuários
+                  </Button> */}
+                </Content.Table.Head>
                 <Content.Table.Head>Email</Content.Table.Head>
                 <Content.Table.Head className="w-[60px]">
                   Ações

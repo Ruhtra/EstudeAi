@@ -12,7 +12,7 @@ import { GenericMutationContextType } from "../GenericMutationContext";
 
 type ContentRootProps = {
   children: React.ReactNode;
-  context: GenericMutationContextType<any, any, any, any, any, any, any, any>;
+  context: GenericMutationContextType;
 };
 
 export function ContentRoot({ children, context }: ContentRootProps) {

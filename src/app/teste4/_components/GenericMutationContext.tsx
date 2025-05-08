@@ -3,51 +3,19 @@
 import { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import React, { Children, createContext, useContext } from "react";
 
-export type GenericMutationContextType<
-  TFetchInput,
-  TFetchOutput,
-  TCreateInput,
-  TCreateOutput,
-  TUpdateInput,
-  TUpdateOutput,
-  TDeleteInput,
-  TDeleteOutput,
-> = {
-  useFetchQuery: UseQueryResult<TFetchOutput, Error>;
-  useCreateMutation: () => UseMutationResult<
-    TCreateOutput,
-    Error,
-    TCreateInput,
-    unknown
-  >;
+export type GenericMutationContextType<TQueryResult> = {
+  useFetchQuery: UseQueryResult<TQueryResult, Error>;
+  useCreateMutation: () => UseMutationResult<any, Error, any, unknown>;
   useUpdateMutation: (
     id: string
-  ) => UseMutationResult<TUpdateOutput, Error, TUpdateInput, unknown>;
+  ) => UseMutationResult<any, Error, any, unknown>;
   useDeleteMutation: (
     id: string
-  ) => UseMutationResult<TDeleteOutput, Error, TDeleteInput, unknown>;
+  ) => UseMutationResult<any, Error, any, unknown>;
 };
 
-export function createGenericContext<
-  TFetchInput,
-  TFetchOutput,
-  TCreateInput,
-  TCreateOutput,
-  TUpdateInput,
-  TUpdateOutput,
-  TDeleteInput,
-  TDeleteOutput,
->() {
-  const Context = createContext<GenericMutationContextType<
-    TFetchInput,
-    TFetchOutput,
-    TCreateInput,
-    TCreateOutput,
-    TUpdateInput,
-    TUpdateOutput,
-    TDeleteInput,
-    TDeleteOutput
-  > | null>(null);
+export function createGenericContext() {
+  const Context = createContext<GenericMutationContextType | null>(null);
 
   const useGenericContext = () => {
     const context = useContext(Context);
@@ -60,16 +28,7 @@ export function createGenericContext<
     value,
   }: {
     children: React.ReactNode;
-    value: GenericMutationContextType<
-      TFetchInput,
-      TFetchOutput,
-      TCreateInput,
-      TCreateOutput,
-      TUpdateInput,
-      TUpdateOutput,
-      TDeleteInput,
-      TDeleteOutput
-    >;
+    value: GenericMutationContextType;
   }) => {
     return <Context.Provider value={value}>{children}</Context.Provider>;
   };

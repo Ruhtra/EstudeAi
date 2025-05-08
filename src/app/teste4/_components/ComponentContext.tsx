@@ -7,16 +7,9 @@ import {
   seilaOnome,
 } from "./GenericMutationContext";
 
-export const ContentContext = createContext<GenericMutationContextType<
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any
-> | null>(null);
+export const ContentContext = createContext<GenericMutationContextType | null>(
+  null
+);
 
 export const useContentContext = () => {
   const ctx = useContext(ContentContext);
