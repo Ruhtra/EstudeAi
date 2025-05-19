@@ -1,3 +1,140 @@
+// {
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "name": "Next.js: debug server-side",
+//       "type": "node-terminal",
+//       "request": "launch",
+//       "port": 3000,
+//       "command": "npm run dev:debug"
+//     },
+//     {
+//       "name": "Next.js: debug client-side",
+//       "type": "chrome",
+//       "request": "launch",
+//       "url": "http://localhost:3000"
+//     },
+//     {
+//       "name": "Next.js: debug client-side (Firefox)",
+//       "type": "firefox",
+//       "request": "launch",
+//       "url": "https://localhost:3000",
+//       "reAttach": true,
+//       "pathMappings": [
+//         {
+//           "url": "webpack://_N_E",
+//           "path": "${workspaceFolder}"
+//         }
+//       ]
+//     },
+//     {
+//       "name": "Website",
+//       "type": "node",
+//       "request": "launch",
+//       "runtimeExecutable": "npm",
+//       "runtimeArgs": ["run", "dev:https"],
+//       "console": "integratedTerminal",
+//       "port": 3000,
+//       "internalConsoleOptions": "neverOpen",
+//       "restart": false,
+//       "serverReadyAction": {
+//         "pattern": "- Local:.+(https?://.+)",
+//         "uriFormat": "%s",
+//         "action": "debugWithEdge",
+//         "killOnServerStop": true,
+//         "webRoot": "${workspaceFolder}/apps/web/src"
+//       }
+//     },
+//     {
+//       "name": "Next.js: debug server-side attach",
+//       "type": "node",
+//       "request": "attach",
+//       "port": 9230,
+//       "sourceMaps": true,
+//       "sourceMapPathOverrides": {
+//         "webpack://_N_E/*": "${webRoot}/*"
+//       }
+//     },
+//     {
+//       "command": "npm run dev",
+//       "name": "Debug (All)",
+//       "request": "launch",
+//       "serverReadyAction": {
+//         "action": "debugWithEdge",
+//         "killOnServerStop": true,
+//         "pattern": "- Local:.+(https?://.+)",
+//         "uriFormat": "%s",
+//         "webRoot": "${workspaceFolder}/apps/web/src"
+//       },
+//       "type": "node-terminal"
+//     }
+
+// {
+//   "name": "Next.js: debug full stack",
+//   "type": "node",
+//   "request": "launch",
+//   "program": "${workspaceFolder}/node_modules/next/dist/bin/next",
+//   "runtimeArgs": ["--experimental-https"],
+//   // "skipFiles": ["<node_internals>/**"],
+//   "serverReadyAction": {
+//     "action": "debugWithEdge",
+//     "killOnServerStop": true,
+//     "pattern": "- Local:.+(https?://.+)",
+//     "uriFormat": "%s",
+//     "webRoot": "${workspaceFolder}"
+//   }
+// }
+//   ]
+// }
+
+////////////////////////////////
+// {
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "name": "Next.js: debug server-side",
+//       "type": "node-terminal",
+//       "request": "launch",
+//       "command": "npx cross-env NODE_OPTIONS='--inspect' next dev"
+//     },
+//     {
+//       "name": "Next.js: debug client-side",
+//       "type": "chrome",
+//       "request": "launch",
+//       "url": "http://localhost:3000"
+//     },
+//     {
+//       "name": "Next.js: debug client-side (Firefox)",
+//       "type": "firefox",
+//       "request": "launch",
+//       "url": "http://localhost:3000",
+//       "reAttach": true,
+//       "pathMappings": [
+//         {
+//           "url": "webpack://_N_E",
+//           "path": "${workspaceFolder}"
+//         }
+//       ]
+//     },
+//     {
+//       "name": "Next.js: debug full stack",
+//       "type": "node",
+//       "request": "launch",
+//       "program": "${workspaceFolder}/node_modules/.bin/next",
+//       "runtimeArgs": ["--inspect"],
+//       "skipFiles": ["<node_internals>/**"],
+//       "serverReadyAction": {
+//         "action": "debugWithEdge",
+//         "killOnServerStop": true,
+//         "pattern": "- Local:.+(https?://.+)",
+//         "uriFormat": "%s",
+//         "webRoot": "${workspaceFolder}"
+//       }
+//     }
+//   ]
+// }
+//////////////////////////////////////
+
 {
   "version": "0.2.0",
   "configurations": [
@@ -5,7 +142,7 @@
       "name": "Next.js: debug server-side",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npx next dev --experimental-https"
+      "command": "npm run dev"
     },
     {
       "name": "Next.js: debug client-side",
@@ -26,12 +163,27 @@
         }
       ]
     },
+
+    //     {
+    //       "command": "npm run dev",
+    //       "name": "Debug (All)",
+    //       "request": "launch",
+    //       "serverReadyAction": {
+    //         "action": "debugWithEdge",
+    //         "killOnServerStop": true,
+    //         "pattern": "- Local:.+(https?://.+)",
+    //         "uriFormat": "%s",
+    //         "webRoot": "${workspaceFolder}/apps/web/src"
+    //       },
+    //       "type": "node-terminal"
+    //     }
     {
       "name": "Next.js: debug full stack",
-      "type": "node",
+      "type": "node-terminal",
       "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/next",
-      "runtimeArgs": ["--inspect"],
+      "command": "node --inspect ${workspaceFolder}/node_modules/next/dist/bin/next --experimental-https",
+      // "program": "${workspaceFolder}/node_modules/next/dist/bin/next",
+      // "runtimeArgs": ["--inspect"],
       "skipFiles": ["<node_internals>/**"],
       "serverReadyAction": {
         "action": "debugWithEdge",

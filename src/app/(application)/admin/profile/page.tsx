@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useEffect, useState } from "react";
+import { useTransition, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -106,7 +106,7 @@ export default function ProfilePage() {
 
   const { update } = useSession();
 
-  const [originalValues, setOriginalValues] = useState<FormValues | null>(null);
+  // const [originalValues, setOriginalValues] = useState<FormValues | null>(null);
 
   const defaultValues: Record<string, string | boolean> = {
     role: UserRole.student,
@@ -126,33 +126,33 @@ export default function ProfilePage() {
     defaultValues,
   });
 
-  const { dirtyFields } = form.formState;
+  // const { dirtyFields } = form.formState;
 
   useEffect(() => {
     if (userData) {
-      Object.entries(userData).forEach(([key, value]) => {
-        form.setValue(key as keyof FormValues, value);
-      });
+      // Object.entries(userData).forEach(([key, value]) => {
+      //   form.setValue(key as keyof FormValues, value);
+      // });
 
-      form.setValue(
-        "role",
-        (userData.role.toLowerCase() as
-          | "admin"
-          | "teacher"
-          | "student"
-          | "sup") ?? "student"
-      );
-      form.setValue("email", userData.email ?? "");
-      form.setValue("phone", userData.phone ?? "");
-      form.setValue("city", userData.city ?? "");
-      form.setValue("firstName", userData.name.split(" ")[0] ?? "");
-      form.setValue("lastName", userData.name.split(" ")[1] ?? "");
-      form.setValue("fullName", userData.name ?? "");
-      form.setValue("cpf", userData.cpf ?? "");
-      form.setValue("state", userData.state ?? "");
-      form.setValue("isTwoFactorEnabled", userData.isTwoFactorEnabled ?? false);
+      // form.setValue(
+      //   "role",
+      //   (userData.role.toLowerCase() as
+      //     | "admin"
+      //     | "teacher"
+      //     | "student"
+      //     | "sup") ?? "student"
+      // );
+      // form.setValue("email", userData.email ?? "");
+      // form.setValue("phone", userData.phone ?? "");
+      // form.setValue("city", userData.city ?? "");
+      // form.setValue("firstName", userData.name.split(" ")[0] ?? "");
+      // form.setValue("lastName", userData.name.split(" ")[1] ?? "");
+      // form.setValue("fullName", userData.name ?? "");
+      // form.setValue("cpf", userData.cpf ?? "");
+      // form.setValue("state", userData.state ?? "");
+      // form.setValue("isTwoFactorEnabled", userData.isTwoFactorEnabled ?? false);
 
-      const values: FormValues = {
+      const values: Partial<FormValues> = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         role: userData.role as any,
         email: userData.email ?? "",
@@ -164,14 +164,15 @@ export default function ProfilePage() {
         fullName: userData.name ?? "",
         cpf: userData.cpf ?? "",
         isTwoFactorEnabled: userData.isTwoFactorEnabled ?? false,
-        photo: undefined,
-
-        // imageUrl: userData.imageUrl || undefined,
-        // isTwoFactorEnabled: userData.isTwoFactorEnabled,
       };
 
-      form.reset(values);
-      setOriginalValues(values);
+      Object.entries(values).forEach(([key, value]) => {
+        if (value !== undefined) {
+          form.setValue(key as keyof FormValues, value);
+        }
+      });
+
+      // setOriginalValues(form.getValues());
     }
   }, [userData, form]);
 
@@ -192,8 +193,8 @@ export default function ProfilePage() {
           update();
 
           toast.success("Perfil atualizado com sucesso!");
-          setOriginalValues(values);
-          form.reset(values);
+          // setOriginalValues(values);
+          // form.reset(values);
         }
       } catch {
         toast.error("Erro ao atualizar o perfil. Por favor, tente novamente.");
@@ -201,13 +202,13 @@ export default function ProfilePage() {
     });
   }
 
-  function handleCancel() {
-    if (originalValues) {
-      form.reset(originalValues);
-    }
-  }
+  // function handleCancel() {
+  //   if (originalValues) {
+  //     form.reset(originalValues);
+  //   }
+  // }
 
-  const hasChanges = Object.keys(dirtyFields).length > 0;
+  // const hasChanges = Object.keys(dirtyFields).length > 0;
 
   return (
     <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
@@ -431,17 +432,17 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="flex justify-end space-x-4">
-                  <Button
+                  {/* <Button
                     type="button"
                     variant="outline"
-                    onClick={handleCancel}
-                    disabled={!hasChanges}
+                    // onClick={handleCancel}
+                    // disabled={!hasChanges}
                   >
                     Cancelar
-                  </Button>
+                  </Button> */}
                   <Button
                     type="submit"
-                    disabled={isPending || !hasChanges}
+                    disabled={isPending /*|| !hasChanges*/}
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     {isPending ? "Atualizando..." : "Atualizar Perfil"}
