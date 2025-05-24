@@ -97,6 +97,9 @@ model User {
   imageurl  String?
   imageName String?
 
+  hasPayment Boolean @default(false)
+  stripeCustomerId String?  @unique
+
   passwordHash String? // Adicionando o campo passwordHash
   accounts     Account[]
   role         UserRole  @default(student)

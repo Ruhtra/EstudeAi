@@ -7,6 +7,8 @@ declare module "next-auth" {
     id?: string | undefined;
     // imageurl?: string | undefined;
     role: UserRole;
+    hasPayment?: boolean | undefined;
+
   }
   /**
    * The shape of the account object returned in the OAuth providers' `account` callback,

@@ -40,6 +40,7 @@ export default {
             id: user.id,
             image: user.imageurl,
             name: user.name,
+            hasPayment: user.hasPayment,
           };
         }
 
@@ -94,6 +95,7 @@ export default {
         session.user.name = token.name;
         session.user.imageurl = token.picture;
         session.user.email = token.email;
+        session.user.hasPayment = token.hasPayment;
       }
 
       return session;
@@ -107,7 +109,7 @@ export default {
       let userr;
       try {
         userr = await getUserById(token.sub!);
-      } catch {}
+      } catch { }
 
       if (!userr) return token;
       // if (!user) return token;
@@ -118,6 +120,7 @@ export default {
       token.picture = userr.imageurl;
       token.email = userr.email;
       token.role = userr.role;
+      token.hasPayment = userr.hasPayment;
 
       return token;
     },
