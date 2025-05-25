@@ -81,9 +81,10 @@ export async function POST(req: NextRequest) {
         line_items: [{ price: prices.data[0].id, quantity: 1 }],
         subscription_data: {
             //   trial_period_days: user.trialUsed ? undefined : 7,
-            trial_period_days: false ? undefined : 7,
+            trial_period_days: user.trialUsed ? undefined : 7,
         },
-        success_url: `${YOUR_DOMAIN}/plans?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        // success_url: `${YOUR_DOMAIN}/plans?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${YOUR_DOMAIN}/plans/success`,
         cancel_url: `${YOUR_DOMAIN}/plans?canceled=true`,
     });
 

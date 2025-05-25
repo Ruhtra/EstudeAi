@@ -11,7 +11,7 @@ export const authRoutes = [
 ];
 export const adminRoutes = ["/admin/dashboard", "/admin/exams", "/admin/users"];
 
-export const planRoutes = ["/plans", "/plans/succes"];
+export const planRoutes = ["/plans", "/plans/success"];
 
 export const apiSubscriptionRoutes = [
   "/api/subscription/create-checkout-session",

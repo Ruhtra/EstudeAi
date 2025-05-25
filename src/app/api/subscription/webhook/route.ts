@@ -15,6 +15,7 @@ export const config = {
   },
 };
 
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 
 // Atualizar o tipo de plano do usuário
@@ -84,24 +85,23 @@ async function limpasUsuario(userId: string) {
 
 
 // Utilitário para transformar ReadableStream em Buffer
-async function buffer(readable: ReadableStream<Uint8Array>) {
-  const reader = readable.getReader();
-  const chunks: Uint8Array[] = [];
-  let done = false;
+// async function buffer(readable: ReadableStream<Uint8Array>) {
+//   const reader = readable.getReader();
+//   const chunks: Uint8Array[] = [];
+//   let done = false;
 
-  while (!done) {
-    const { value, done: isDone } = await reader.read();
-    if (value) chunks.push(value);
-    done = isDone;
-  }
+//   while (!done) {
+//     const { value, done: isDone } = await reader.read();
+//     if (value) chunks.push(value);
+//     done = isDone;
+//   }
 
-  return Buffer.concat(chunks);
-}
+//   return Buffer.concat(chunks);
+// }
 
 export async function POST(req: NextRequest) {
-  const endpointSecret = 'whsec_a3cf7677e792b63f811961af1aca7158589e48b837746f912387a66f7bfcbde6';
-
-  const rawBody = await buffer(req.body!);
+  const rawBody = await req.text(); // ⚠️ captura o body cru como string
+  
   const sig = req.headers.get('stripe-signature')!;
 
   let event: Stripe.Event;
