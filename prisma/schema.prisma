@@ -97,8 +97,10 @@ model User {
   imageurl  String?
   imageName String?
 
-  hasPayment Boolean @default(false)
-  stripeCustomerId String?  @unique
+  hasPayment       Boolean   @default(false)
+  planType         PlanType?
+  stripeCustomerId String?   @unique
+  trialUsed        Boolean   @default(false)
 
   passwordHash String? // Adicionando o campo passwordHash
   accounts     Account[]
@@ -116,6 +118,11 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum PlanType {
+  MONTHLY
+  ANNUAL
 }
 
 model Account {

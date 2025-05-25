@@ -25,6 +25,20 @@ export default function StudentAreaPage() {
               <p>
                 <strong>Email:</strong> {user.email}
               </p>
+
+              <Button
+                onClick={async () => {
+                  const res = await fetch("/api/subscription/create-portal-session", { method: "POST" });
+                  const data = await res.json();
+                  if (data.url) {
+                    window.location.href = data.url;
+                  }
+                }}
+                className="mt-4"
+                variant="outline"
+              >
+                Visualizar Plano
+              </Button>
             </div>
           )}
           <Button variant="destructive" className="w-full" onClick={logout}>

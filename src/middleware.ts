@@ -6,7 +6,10 @@ import {
   DEFAULT_LOGIN_REDIRECT,
   adminRoutes,
   apiAuthPrefix,
+  apiSubscriptionRoutes,
+  apiSubscriptionWebhookRoutes,
   authRoutes,
+  planRoutes,
   publicRoutes,
 } from "@/../routes";
 import { UserRole } from "@prisma/client";
@@ -31,6 +34,11 @@ export default auth(async (req) => {
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
   const isAdminRoute = adminRoutes.includes(nextUrl.pathname);
+  const isPlanRoute = planRoutes.includes(nextUrl.pathname);
+  const isApiSubscriptionRoute = apiSubscriptionRoutes.includes(nextUrl.pathname)
+  const isApiSubscriptionWebhookRoute = apiSubscriptionWebhookRoutes.includes(nextUrl.pathname);
+
+  if (isApiSubscriptionWebhookRoute) return;
 
   if (isApiAuthRoute) return;
   if (isAuthRoute) {
@@ -48,13 +56,19 @@ export default auth(async (req) => {
   if (isAdminRoute && !["admin", "sup", "teacher"].includes(role))
     return Response.redirect(new URL("/404", nextUrl));
 
-  // Redireciona para pagamentos se o usuário é estudante e não possui pagamento ativo
-  if (role === "student" && !hasPayment && nextUrl.pathname !== "/payments") {
-    return Response.redirect(new URL("/payments", nextUrl));
-  }
-  // Redireciona para default se o usuário acessar /payments
-  if (role === "student" && hasPayment && nextUrl.pathname === "/payments") {
-    return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT[role], nextUrl));
+  // Libera todas as rotas que começam com /api/subscription apenas para estudantes
+  if (role === "student") {
+    if (isApiSubscriptionRoute) return;
+
+    // Redireciona para pagamentos se o usuário é estudante e não possui pagamento ativo
+    if (!hasPayment && !isPlanRoute) {
+      return Response.redirect(new URL("/plans", nextUrl));
+    }
+
+    // Redireciona para default se o usuário acessar /plans
+    if (hasPayment && isPlanRoute) {
+      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT[role], nextUrl));
+    }
   }
 
   return;

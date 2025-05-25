@@ -11,6 +11,16 @@ export const authRoutes = [
 ];
 export const adminRoutes = ["/admin/dashboard", "/admin/exams", "/admin/users"];
 
+export const planRoutes = ["/plans", "/plans/succes"];
+
+export const apiSubscriptionRoutes = [
+  "/api/subscription/create-checkout-session",
+]
+
+export const apiSubscriptionWebhookRoutes = [
+  "/api/subscription/webhook",
+]
+
 export const apiAuthPrefix = "/api/auth";
 
 export const DEFAULT_LOGIN_REDIRECT: Record<UserRole, string> = {
